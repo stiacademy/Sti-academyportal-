@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>STI Academy Login</title>
+
+    <!-- FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            background: #000;
+            color: #fff;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+        }
+
+
+        .container {
+            width: 100%;
+            max-width: 430px;
+        }
+
+
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+
+        .brand h1 {
+            margin: 0;
+
+            color: #1683ff;
+
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+
+        .brand p {
+            margin: 7px 0 0;
+
+            color: #aaa;
+
+            font-size: 14px;
+        }
+
+
+        .login-card {
+            background: #111;
+
+            border: 1px solid #252525;
+
+            border-radius: 18px;
+
+            padding: 28px 22px;
+
+            box-shadow:
+                0 15px 40px
+                rgba(0, 0, 0, 0.45);
+        }
+
+
+        .login-card h2 {
+            margin: 0 0 7px;
+
+            font-size: 24px;
+        }
+
+
+        .subtitle {
+            color: #999;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+
+            margin-bottom: 25px;
+        }
+
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+
+        .field label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-size: 14px;
+
+            color: #ddd;
+        }
+
+
+        .input-wrapper {
+            position: relative;
+        }
+
+
+        input {
+            width: 100%;
+
+            height: 50px;
+
+            border: 1px solid #333;
+
+            border-radius: 10px;
+
+            background: #080808;
+
+            color: #fff;
+
+            padding: 0 14px;
+
+            font-size: 15px;
+
+            outline: none;
+        }
+
+
+        input:focus {
+            border-color: #1683ff;
+
+            box-shadow:
+                0 0 0 2px
+                rgba(22, 131, 255, 0.12);
+        }
+
+
+        .password-input {
+            padding-right: 55px;
+        }
+
+
+        .show-password {
+            position: absolute;
+
+            right: 8px;
+            top: 7px;
+
+            height: 36px;
+
+            padding: 0 10px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background: #222;
+
+            color: #bbb;
+
+            cursor: pointer;
+
+            font-size: 12px;
+        }
+
+
+        .show-password:hover {
+            color: #fff;
+        }
+
+
+        .forgot {
+            text-align: right;
+
+            margin-top: -7px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .forgot button {
+            background: none;
+
+            border: none;
+
+            color: #1683ff;
+
+            cursor: pointer;
+
+            font-size: 13px;
+
+            padding: 5px 0;
+        }
+
+
+        .forgot button:hover {
+            text-decoration: underline;
+        }
+
+
+        .login-button {
+            width: 100%;
+
+            height: 52px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #1683ff;
+
+            color: #fff;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+
+        .login-button:hover {
+            background: #0875ef;
+        }
+
+
+        .login-button:disabled {
+            opacity: 0.6;
+
+            cursor: not-allowed;
+        }
+
+
+        .message {
+            display: none;
+
+            margin-top: 18px;
+
+            padding: 13px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        .message.error {
+            display: block;
+
+            background:
+                rgba(255, 60, 60, 0.08);
+
+            border:
+                1px solid
+                rgba(255, 60, 60, 0.3);
+
+            color: #ff8585;
+        }
+
+
+        .message.success {
+            display: block;
+
+            background:
+                rgba(40, 200, 100, 0.08);
+
+            border:
+                1px solid
+                rgba(40, 200, 100, 0.3);
+
+            color: #6ee7a0;
+        }
+
+
+        .message.info {
+            display: block;
+
+            background:
+                rgba(22, 131, 255, 0.08);
+
+            border:
+                1px solid
+                rgba(22, 131, 255, 0.3);
+
+            color: #75b8ff;
+        }
+
+
+        .debug {
+            display: none;
+
+            margin-top: 15px;
+
+            padding: 12px;
+
+            background: #080808;
+
+            border: 1px solid #242424;
+
+            border-radius: 10px;
+
+            color: #888;
+
+            font-size: 11px;
+
+            line-height: 1.6;
+
+            word-break: break-word;
+        }
+
+
+        .footer {
+            text-align: center;
+
+            color: #666;
+
+            font-size: 12px;
+
+            margin-top: 20px;
+        }
+
+
+        @media (max-width: 480px) {
+
+            .login-card {
+                padding: 24px 18px;
+            }
+
+            .brand h1 {
+                font-size: 27px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <div class="brand">
+
+        <h1>STI Academy</h1>
+
+        <p>
+            School of Technology and Innovation
+        </p>
+
+    </div>
+
+
+    <div class="login-card">
+
+
+        <h2>Welcome Back</h2>
+
+        <div class="subtitle">
+
+            Sign in to access your STI Academy portal.
+
+        </div>
+
+
+        <form id="loginForm">
+
+
+            <div class="field">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="password">
+                    Password
+                </label>
+
+
+                <div class="input-wrapper">
+
+                    <input
+                        type="password"
+                        id="password"
+                        class="password-input"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        id="showPassword"
+                    >
+                        Show
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="forgot">
+
+                <button
+                    type="button"
+                    id="forgotPassword"
+                >
+                    Forgot password?
+                </button>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button"
+                id="loginButton"
+            >
+                Sign In
+            </button>
+
+
+        </form>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+        <div
+            id="debug"
+            class="debug"
+        ></div>
+
+
+    </div>
+
+
+    <div class="footer">
+
+        STI Academy Portal
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================================================
+   FIREBASE CONFIGURATION
+========================================================= */
+
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840641262",
+
+    appId:
+        "1:709840641262:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+
+/* =========================================================
+   INITIALIZE FIREBASE
+========================================================= */
+
+
+let auth = null;
+
+let db = null;
+
+
+try {
+
+    if (!firebase.apps.length) {
+
+        firebase.initializeApp(firebaseConfig);
+
+    }
+
+
+    auth =
+        firebase.auth();
+
+
+    db =
+        firebase.firestore();
+
+
+    console.log(
+        "Firebase initialized successfully."
+    );
+
+
+    console.log(
+        "Project:",
+        firebase.app().options.projectId
+    );
+
+
+} catch (error) {
+
+    console.error(
+        "Firebase initialization error:",
+        error
+    );
+
+}
+
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+
+const loginForm =
+    document.getElementById("loginForm");
+
+
+const emailInput =
+    document.getElementById("email");
+
+
+const passwordInput =
+    document.getElementById("password");
+
+
+const loginButton =
+    document.getElementById("loginButton");
+
+
+const showPasswordButton =
+    document.getElementById("showPassword");
+
+
+const forgotPasswordButton =
+    document.getElementById("forgotPassword");
+
+
+const messageBox =
+    document.getElementById("message");
+
+
+const debugBox =
+    document.getElementById("debug");
+
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+
+function showMessage(
+    message,
+    type = "info"
+) {
+
+    messageBox.textContent =
+        message;
+
+    messageBox.className =
+        "message " + type;
+
+}
+
+
+function clearMessage() {
+
+    messageBox.textContent =
+        "";
+
+    messageBox.className =
+        "message";
+
+}
+
+
+
+/* =========================================================
+   DEBUG
+========================================================= */
+
+
+function showDebug(text) {
+
+    debugBox.style.display =
+        "block";
+
+    debugBox.textContent =
+        text;
+
+}
+
+
+function hideDebug() {
+
+    debugBox.style.display =
+        "none";
+
+    debugBox.textContent =
+        "";
+
+}
+
+
+
+/* =========================================================
+   SHOW / HIDE PASSWORD
+========================================================= */
+
+
+showPasswordButton.addEventListener(
+    "click",
+    function () {
+
+        if (
+            passwordInput.type ===
+            "password"
+        ) {
+
+            passwordInput.type =
+                "text";
+
+            showPasswordButton.textContent =
+                "Hide";
+
+        } else {
+
+            passwordInput.type =
+                "password";
+
+            showPasswordButton.textContent =
+                "Show";
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   FIREBASE ERROR MESSAGE
+========================================================= */
+
+
+function getErrorMessage(error) {
+
+    if (!error) {
+
+        return "Something went wrong. Please try again.";
+
+    }
+
+
+    switch (error.code) {
+
+
+        case "auth/api-key-not-valid":
+
+            return (
+                "Firebase rejected the API key. " +
+                "Please check the Firebase configuration."
+            );
+
+
+        case "auth/invalid-api-key":
+
+            return (
+                "Firebase rejected the API key."
+            );
+
+
+        case "auth/invalid-credential":
+
+            return (
+                "The email or password is incorrect."
+            );
+
+
+        case "auth/user-not-found":
+
+            return (
+                "No Firebase account exists with this email."
+            );
+
+
+        case "auth/wrong-password":
+
+            return (
+                "The password is incorrect."
+            );
+
+
+        case "auth/invalid-email":
+
+            return (
+                "Please enter a valid email address."
+            );
+
+
+        case "auth/too-many-requests":
+
+            return (
+                "Too many unsuccessful attempts. Please wait and try again."
+            );
+
+
+        case "auth/network-request-failed":
+
+            return (
+                "Network error. Please check your internet connection."
+            );
+
+
+        case "auth/user-disabled":
+
+            return (
+                "This account has been disabled."
+            );
+
+
+        case "auth/operation-not-allowed":
+
+            return (
+                "Email and password login is not enabled."
+            );
+
+
+        case "permission-denied":
+
+            return (
+                "Your account was authenticated, but Firestore denied access to your portal account."
+            );
+
+
+        default:
+
+            return (
+                error.message ||
+                "Unable to sign in."
+            );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   GET USER PORTAL
+========================================================= */
+
+
+function getPortalUrl(role) {
+
+
+    role =
+        String(role || "")
+        .trim()
+        .toLowerCase();
+
+
+    if (role === "admin") {
+
+        return "admin/dashboard.html";
+
+    }
+
+
+    if (role === "tutor") {
+
+        return "tutor/dashboard.html";
+
+    }
+
+
+    if (role === "student") {
+
+        return "student/dashboard.html";
+
+    }
+
+
+    return null;
+
+}
+
+
+
+/* =========================================================
+   CHECK USER ACCOUNT
+========================================================= */
+
+
+async function getUserAccount(user) {
+
+
+    if (!user) {
+
+        throw new Error(
+            "No authenticated Firebase user was found."
+        );
+
+    }
+
+
+    const uid =
+        user.uid;
+
+
+    console.log(
+        "Authenticated UID:",
+        uid
+    );
+
+
+    let userDoc;
+
+
+    try {
+
+        userDoc =
+            await db
+                .collection("users")
+                .doc(uid)
+                .get();
+
+    } catch (error) {
+
+        console.error(
+            "Firestore user read failed:",
+            error
+        );
+
+
+        showDebug(
+
+            "Firebase Authentication: SUCCESS\n\n" +
+
+            "Email:\n" +
+            (user.email || "Unknown") +
+
+            "\n\nUID:\n" +
+            uid +
+
+            "\n\nFirestore error:\n" +
+            (error.code || "Unknown") +
+
+            "\n\n" +
+            (error.message || "")
+
+        );
+
+
+        throw error;
+
+    }
+
+
+    if (!userDoc.exists) {
+
+        showDebug(
+
+            "Firebase Authentication succeeded.\n\n" +
+
+            "Email:\n" +
+            (user.email || "Unknown") +
+
+            "\n\nUID:\n" +
+            uid +
+
+            "\n\nNo Firestore document exists at:\n" +
+
+            "/users/" +
+            uid
+
+        );
+
+
+        throw new Error(
+            "Your login is valid, but your STI Academy portal account has not been created yet."
+        );
+
+    }
+
+
+    const data =
+        userDoc.data() || {};
+
+
+    console.log(
+        "Portal account:",
+        data
+    );
+
+
+    return data;
+
+}
+
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+
+loginForm.addEventListener(
+    "submit",
+    async function (event) {
+
+
+        event.preventDefault();
+
+
+        clearMessage();
+
+        hideDebug();
+
+
+        if (!auth || !db) {
+
+            showMessage(
+                "Firebase is not ready. Please refresh the page.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const email =
+            emailInput.value.trim();
+
+
+        const password =
+            passwordInput.value;
+
+
+        if (!email || !password) {
+
+            showMessage(
+                "Please enter your email and password.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        loginButton.disabled =
+            true;
+
+
+        loginButton.textContent =
+            "Signing In...";
+
+
+        try {
+
+
+            /* -----------------------------------------
+               KEEP USER LOGGED IN
+            ----------------------------------------- */
+
+
+            await auth.setPersistence(
+                firebase.auth.Auth.Persistence.LOCAL
+            );
+
+
+            /* -----------------------------------------
+               FIREBASE AUTHENTICATION
+            ----------------------------------------- */
+
+
+            showMessage(
+                "Signing you in...",
+                "info"
+            );
+
+
+            const result =
+                await auth
+                    .signInWithEmailAndPassword(
+                        email,
+                        password
+                    );
+
+
+            const user =
+                result.user;
+
+
+            if (!user) {
+
+                throw new Error(
+                    "Firebase did not return a user."
+                );
+
+            }
+
+
+            console.log(
+                "Authentication successful."
+            );
+
+
+            console.log(
+                "Email:",
+                user.email
+            );
+
+
+            console.log(
+                "UID:",
+                user.uid
+            );
+
+
+            /* -----------------------------------------
+               FIRESTORE PORTAL ACCOUNT
+            ----------------------------------------- */
+
+
+            showMessage(
+                "Checking your STI Academy account...",
+                "info"
+            );
+
+
+            const account =
+                await getUserAccount(user);
+
+
+            const role =
+                String(
+                    account.role || ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const status =
+                String(
+                    account.status || ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            console.log(
+                "Role:",
+                role
+            );
+
+
+            console.log(
+                "Status:",
+                status
+            );
+
+
+            /* -----------------------------------------
+               CHECK ACCOUNT STATUS
+            ----------------------------------------- */
+
+
+            if (status !== "active") {
+
+                await auth.signOut();
+
+
+                throw new Error(
+                    "Your STI Academy account is currently not active."
+                );
+
+            }
+
+
+            /* -----------------------------------------
+               FIND PORTAL
+            ----------------------------------------- */
+
+
+            const portal =
+                getPortalUrl(role);
+
+
+            if (!portal) {
+
+                await auth.signOut();
+
+
+                showDebug(
+
+                    "Firebase UID:\n" +
+                    user.uid +
+
+                    "\n\nRole found:\n" +
+                    (account.role || "missing") +
+
+                    "\n\nStatus:\n" +
+                    (account.status || "missing")
+
+                );
+
+
+                throw new Error(
+                    "Your account role has not been configured correctly."
+                );
+
+            }
+
+
+            /* -----------------------------------------
+               SUCCESS
+            ----------------------------------------- */
+
+
+            let roleName =
+                role.charAt(0).toUpperCase() +
+                role.slice(1);
+
+
+            showMessage(
+                "Login successful. Opening your " +
+                roleName +
+                " Portal...",
+                "success"
+            );
+
+
+            /* -----------------------------------------
+               REDIRECT
+            ----------------------------------------- */
+
+
+            setTimeout(
+                function () {
+
+                    window.location.href =
+                        portal;
+
+                },
+                500
+            );
+
+
+        } catch (error) {
+
+
+            console.error(
+                "LOGIN ERROR:",
+                error
+            );
+
+
+            showMessage(
+                getErrorMessage(error),
+                "error"
+            );
+
+
+            loginButton.disabled =
+                false;
+
+
+            loginButton.textContent =
+                "Sign In";
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+
+
+forgotPasswordButton.addEventListener(
+    "click",
+    async function () {
+
+
+        clearMessage();
+
+        hideDebug();
+
+
+        if (!auth) {
+
+            showMessage(
+                "Firebase is not ready. Please refresh the page.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const email =
+            emailInput.value.trim();
+
+
+        if (!email) {
+
+            showMessage(
+                "Enter your email address first.",
+                "error"
+            );
+
+            emailInput.focus();
+
+            return;
+
+        }
+
+
+        try {
+
+
+            await auth
+                .sendPasswordResetEmail(
+                    email
+                );
+
+
+            showMessage(
+                "Password reset email sent. Check your inbox.",
+                "success"
+            );
+
+
+        } catch (error) {
+
+
+            console.error(
+                "Password reset error:",
+                error
+            );
+
+
+            showMessage(
+                getErrorMessage(error),
+                "error"
+            );
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   FIREBASE SESSION MONITOR
+========================================================= */
+
+
+if (auth) {
+
+
+    auth.onAuthStateChanged(
+        function (user) {
+
+
+            if (user) {
+
+                console.log(
+                    "Firebase session detected:",
+                    user.email,
+                    user.uid
+                );
+
+            } else {
+
+                console.log(
+                    "No Firebase session detected."
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1056 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Create Account | STI Academy Portal</title><style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #050505;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+}
+
+.container {
+    width: 100%;
+    max-width: 430px;
+}
+
+.brand {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.brand h1 {
+    color: #1683ff;
+    font-size: 28px;
+    margin-bottom: 7px;
+}
+
+.brand p {
+    color: #999;
+    font-size: 14px;
+}
+
+.card {
+    background: #101010;
+    border: 1px solid #242424;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+}
+
+.card h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.description {
+    color: #999;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    background: #080808;
+    color: white;
+    border: 1px solid #303030;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.2s;
+}
+
+input:focus {
+    border-color: #1683ff;
+    box-shadow: 0 0 0 3px rgba(22, 131, 255, 0.12);
+}
+
+input::placeholder {
+    color: #666;
+}
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    padding-right: 55px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: transparent;
+    color: #888;
+    border: none;
+    border-radius: 8px;
+    font-size: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.toggle-password:hover {
+    background: #181818;
+    color: #1683ff;
+}
+
+.toggle-password:focus {
+    outline: 2px solid #1683ff;
+    outline-offset: 1px;
+}
+
+.hint {
+    color: #666;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #1683ff;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button[type="submit"]:hover {
+    background: #006fe6;
+}
+
+button[type="submit"]:disabled {
+    background: #315b83;
+    cursor: not-allowed;
+}
+
+#message {
+    margin-top: 18px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.4;
+    display: none;
+}
+
+.success {
+    display: block !important;
+    background: rgba(0, 180, 90, 0.12);
+    border: 1px solid rgba(0, 180, 90, 0.3);
+    color: #48df91;
+}
+
+.error {
+    display: block !important;
+    background: rgba(255, 70, 70, 0.1);
+    border: 1px solid rgba(255, 70, 70, 0.25);
+    color: #ff7777;
+}
+
+.login {
+    text-align: center;
+    margin-top: 22px;
+    color: #888;
+    font-size: 14px;
+}
+
+.login a {
+    color: #1683ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login a:hover {
+    text-decoration: underline;
+}
+
+.security-note {
+    margin-top: 20px;
+    padding: 12px;
+    background: #080808;
+    border-radius: 10px;
+    color: #777;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+
+    body {
+        padding: 18px;
+    }
+
+    .card {
+        padding: 22px;
+    }
+
+    .brand h1 {
+        font-size: 25px;
+    }
+
+    .card h2 {
+        font-size: 22px;
+    }
+
+}
+
+</style><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script></head><body><div class="container"><div class="brand">
+
+    <h1>STI Academy</h1>
+
+    <p>School of Technology and Innovation</p>
+
+</div>
+
+
+<div class="card">
+
+    <h2>Create Your Portal Account</h2>
+
+    <p class="description">
+        Activate your STI Academy student portal account
+        using the Student ID and email registered by the Academy.
+    </p>
+
+
+    <form id="createAccountForm">
+
+
+        <div class="form-group">
+
+            <label for="studentId">
+                Student ID
+            </label>
+
+            <input
+                type="text"
+                id="studentId"
+                placeholder="STIA-WD-0001"
+                autocomplete="off"
+                required
+            >
+
+            <p class="hint">
+                Enter the Student ID provided by STI Academy.
+            </p>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="email">
+                Registered Email
+            </label>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter your registered email"
+                autocomplete="email"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="password">
+                Password
+            </label>
+
+            <div class="password-wrapper">
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Create a password"
+                    minlength="6"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="toggle-password"
+                    data-target="password"
+                    aria-label="Show password"
+                    title="Show password"
+                >
+                    👁️
+                </button>
+
+            </div>
+
+            <p class="hint">
+                Password must contain at least 6 characters.
+            </p>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="confirmPassword">
+                Confirm Password
+            </label>
+
+            <div class="password-wrapper">
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    placeholder="Confirm your password"
+                    minlength="6"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="toggle-password"
+                    data-target="confirmPassword"
+                    aria-label="Show password"
+                    title="Show password"
+                >
+                    👁️
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="submit"
+            id="createButton"
+        >
+            Create Account
+        </button>
+
+    </form>
+
+
+    <div id="message"></div>
+
+
+    <div class="security-note">
+
+        Your Student ID and email must match the records
+        registered by STI Academy before your portal account
+        can be activated.
+
+    </div>
+
+
+    <div class="login">
+
+        Already have an account?
+
+        <a href="login.html">
+            Login
+        </a>
+
+    </div>
+
+</div>
+
+</div><script>
+
+
+/* =========================================
+   FIREBASE CONFIGURATION
+========================================= */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840641262",
+
+    appId:
+        "1:709840641262:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+firebase.initializeApp(firebaseConfig);
+
+
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.firestore();
+
+
+
+/* =========================================
+   PASSWORD SHOW / HIDE
+========================================= */
+
+const toggleButtons =
+    document.querySelectorAll(
+        ".toggle-password"
+    );
+
+
+toggleButtons.forEach(function(button) {
+
+    button.addEventListener(
+        "click",
+        function() {
+
+            const targetId =
+                button.getAttribute(
+                    "data-target"
+                );
+
+
+            const passwordInput =
+                document.getElementById(
+                    targetId
+                );
+
+
+            if (!passwordInput) {
+                return;
+            }
+
+
+            if (
+                passwordInput.type ===
+                "password"
+            ) {
+
+                passwordInput.type =
+                    "text";
+
+                button.textContent =
+                    "🙈";
+
+                button.setAttribute(
+                    "aria-label",
+                    "Hide password"
+                );
+
+                button.setAttribute(
+                    "title",
+                    "Hide password"
+                );
+
+            } else {
+
+                passwordInput.type =
+                    "password";
+
+                button.textContent =
+                    "👁️";
+
+                button.setAttribute(
+                    "aria-label",
+                    "Show password"
+                );
+
+                button.setAttribute(
+                    "title",
+                    "Show password"
+                );
+
+            }
+
+        }
+    );
+
+});
+
+
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const form =
+    document.getElementById(
+        "createAccountForm"
+    );
+
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+
+const button =
+    document.getElementById(
+        "createButton"
+    );
+
+
+
+/* =========================================
+   MESSAGE
+========================================= */
+
+function showMessage(text, type) {
+
+    message.textContent =
+        text;
+
+    message.className =
+        type;
+
+}
+
+
+
+/* =========================================
+   CLEAR MESSAGE
+========================================= */
+
+function clearMessage() {
+
+    message.textContent =
+        "";
+
+    message.className =
+        "";
+
+}
+
+
+
+/* =========================================
+   CREATE ACCOUNT
+========================================= */
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        clearMessage();
+
+
+        const studentId =
+            document
+                .getElementById("studentId")
+                .value
+                .trim()
+                .toUpperCase();
+
+
+        const email =
+            document
+                .getElementById("email")
+                .value
+                .trim()
+                .toLowerCase();
+
+
+        const password =
+            document
+                .getElementById("password")
+                .value;
+
+
+        const confirmPassword =
+            document
+                .getElementById("confirmPassword")
+                .value;
+
+
+
+        /* =========================================
+           BASIC VALIDATION
+        ========================================= */
+
+        if (!studentId) {
+
+            showMessage(
+                "Please enter your Student ID.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!email) {
+
+            showMessage(
+                "Please enter your registered email.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (password.length < 6) {
+
+            showMessage(
+                "Password must contain at least 6 characters.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (
+            password !==
+            confirmPassword
+        ) {
+
+            showMessage(
+                "Passwords do not match.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+
+        button.disabled =
+            true;
+
+
+        button.textContent =
+            "Checking student record...";
+
+
+
+        let createdUser = null;
+
+
+        try {
+
+
+            /* =========================================
+               GET STUDENT RECORD
+            ========================================= */
+
+            const studentRef =
+                db
+                    .collection("students")
+                    .doc(studentId);
+
+
+            const studentDoc =
+                await studentRef.get();
+
+
+
+            if (!studentDoc.exists) {
+
+                throw new Error(
+                    "Student ID was not found. Please check your Student ID."
+                );
+
+            }
+
+
+            const student =
+                studentDoc.data();
+
+
+
+            /* =========================================
+               VERIFY STUDENT ID
+            ========================================= */
+
+            if (
+                !student.studentId ||
+                String(student.studentId)
+                    .trim()
+                    .toUpperCase() !==
+                studentId
+            ) {
+
+                throw new Error(
+                    "This Student ID does not match the Academy record."
+                );
+
+            }
+
+
+
+            /* =========================================
+               VERIFY EMAIL
+            ========================================= */
+
+            if (
+                !student.email ||
+                String(student.email)
+                    .trim()
+                    .toLowerCase() !==
+                email
+            ) {
+
+                throw new Error(
+                    "The email does not match the email registered for this Student ID."
+                );
+
+            }
+
+
+
+            /* =========================================
+               VERIFY STATUS
+            ========================================= */
+
+            if (
+                String(
+                    student.status || ""
+                )
+                    .toLowerCase() !==
+                "active"
+            ) {
+
+                throw new Error(
+                    "This student account is not currently active."
+                );
+
+            }
+
+
+
+            /* =========================================
+               CHECK EXISTING ACTIVATION
+            ========================================= */
+
+            if (
+                student.portalActivated ===
+                true ||
+                student.uid
+            ) {
+
+                throw new Error(
+                    "This student account has already been activated. Please use the Login page."
+                );
+
+            }
+
+
+
+            button.textContent =
+                "Creating account...";
+
+
+
+            /* =========================================
+               CREATE FIREBASE AUTH ACCOUNT
+            ========================================= */
+
+            const userCredential =
+                await auth
+                    .createUserWithEmailAndPassword(
+                        email,
+                        password
+                    );
+
+
+            createdUser =
+                userCredential.user;
+
+
+            const uid =
+                createdUser.uid;
+
+
+
+            /* =========================================
+               PREPARE USER PROFILE
+            ========================================= */
+
+            const userRef =
+                db
+                    .collection("users")
+                    .doc(uid);
+
+
+            const userData = {
+
+                uid:
+                    uid,
+
+                email:
+                    email,
+
+                fullName:
+                    student.fullName ||
+                    "",
+
+                role:
+                    "student",
+
+                studentId:
+                    studentId,
+
+                status:
+                    "active",
+
+                accountStatus:
+                    "active",
+
+                createdAt:
+                    firebase.firestore
+                        .FieldValue
+                        .serverTimestamp()
+
+            };
+
+
+
+            /* =========================================
+               UPDATE STUDENT + CREATE USER
+               ATOMIC FIRESTORE BATCH
+            ========================================= */
+
+            button.textContent =
+                "Linking student account...";
+
+
+            const batch =
+                db.batch();
+
+
+            batch.set(
+                userRef,
+                userData
+            );
+
+
+            batch.update(
+                studentRef,
+                {
+
+                    uid:
+                        uid,
+
+                    portalActivated:
+                        true,
+
+                    accountStatus:
+                        "active",
+
+                    updatedAt:
+                        firebase.firestore
+                            .FieldValue
+                            .serverTimestamp(),
+
+                    updatedBy:
+                        uid
+
+                }
+            );
+
+
+            await batch.commit();
+
+
+
+            /* =========================================
+               SUCCESS
+            ========================================= */
+
+            showMessage(
+                "Account created and linked successfully. Redirecting to your dashboard...",
+                "success"
+            );
+
+
+            button.textContent =
+                "Account Created";
+
+
+            setTimeout(
+                function() {
+
+                    window.location.href =
+                        "student/dashboard.html";
+
+                },
+                1200
+            );
+
+        }
+
+
+        catch (error) {
+
+            console.error(
+                "Account activation error:",
+                error
+            );
+
+
+            /*
+               If Firebase Auth was created but
+               Firestore linking failed, remove
+               the newly created Auth account.
+            */
+
+            if (
+                createdUser &&
+                error.code !==
+                "auth/email-already-in-use"
+            ) {
+
+                try {
+
+                    await createdUser.delete();
+
+                }
+
+                catch (deleteError) {
+
+                    console.error(
+                        "Unable to roll back Auth account:",
+                        deleteError
+                    );
+
+                }
+
+            }
+
+
+
+            let errorMessage =
+                "Unable to create your portal account.";
+
+
+
+            /* =========================================
+               AUTH ERRORS
+            ========================================= */
+
+            if (
+                error.code ===
+                "auth/email-already-in-use"
+            ) {
+
+                errorMessage =
+                    "This email already has a Firebase account. Please use the Login page.";
+
+            }
+
+            else if (
+                error.code ===
+                "auth/invalid-email"
+            ) {
+
+                errorMessage =
+                    "Please enter a valid email address.";
+
+            }
+
+            else if (
+                error.code ===
+                "auth/weak-password"
+            ) {
+
+                errorMessage =
+                    "Your password is too weak. Please use at least 6 characters.";
+
+            }
+
+            else if (
+                error.code ===
+                "permission-denied" ||
+                error.code ===
+                "firestore/permission-denied"
+            ) {
+
+                errorMessage =
+                    "The portal could not complete the student account linking. Please contact STI Academy.";
+
+            }
+
+            else if (
+                error.message
+            ) {
+
+                errorMessage =
+                    error.message;
+
+            }
+
+
+
+            showMessage(
+                errorMessage,
+                "error"
+            );
+
+
+            button.disabled =
+                false;
+
+
+            button.textContent =
+                "Create Account";
+
+        }
+
+    }
+);
+
+</script></body></html>
