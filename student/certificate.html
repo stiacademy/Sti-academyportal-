@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Certificate | STI Academy</title>
+
+    <!-- FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
+
+        body{
+            font-family:Arial, sans-serif;
+            background:#000;
+            color:#fff;
+            min-height:100vh;
+        }
+
+        .header{
+            background:#080808;
+            border-bottom:1px solid #1b1b1b;
+            padding:20px;
+        }
+
+        .header h1{
+            font-size:24px;
+            color:#1683ff;
+            margin-bottom:6px;
+        }
+
+        .header p{
+            color:#aaa;
+            font-size:14px;
+        }
+
+        .container{
+            max-width:1100px;
+            margin:auto;
+            padding:25px 18px 50px;
+        }
+
+        .status-card{
+            background:#0b0b0b;
+            border:1px solid #1c1c1c;
+            border-radius:14px;
+            padding:20px;
+            margin-bottom:25px;
+        }
+
+        .status-title{
+            color:#aaa;
+            font-size:13px;
+            margin-bottom:8px;
+        }
+
+        .status{
+            display:inline-block;
+            padding:7px 13px;
+            border-radius:20px;
+            background:rgba(22,131,255,.12);
+            color:#1683ff;
+            font-size:13px;
+            font-weight:bold;
+        }
+
+        .info-grid{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:15px;
+            margin-top:20px;
+        }
+
+        .info-box{
+            background:#111;
+            border-radius:10px;
+            padding:14px;
+        }
+
+        .info-box small{
+            display:block;
+            color:#777;
+            font-size:11px;
+            margin-bottom:6px;
+        }
+
+        .info-box strong{
+            color:#fff;
+            font-size:14px;
+        }
+
+        .certificate-wrapper{
+            background:#111;
+            padding:15px;
+            border-radius:15px;
+            border:1px solid #202020;
+            overflow:auto;
+        }
+
+        .certificate{
+            width:100%;
+            max-width:950px;
+            min-height:620px;
+            margin:auto;
+            background:#fff;
+            color:#111;
+            position:relative;
+            padding:55px 50px;
+            text-align:center;
+            border:10px solid #1683ff;
+            outline:3px solid #111;
+            outline-offset:-18px;
+        }
+
+        .certificate-inner{
+            min-height:500px;
+            border:2px solid #1683ff;
+            padding:40px 30px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .academy-name{
+            font-size:17px;
+            font-weight:bold;
+            color:#1683ff;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            margin-bottom:10px;
+        }
+
+        .school-name{
+            font-size:13px;
+            color:#555;
+            margin-bottom:35px;
+        }
+
+        .certificate-title{
+            font-size:35px;
+            font-weight:bold;
+            text-transform:uppercase;
+            letter-spacing:3px;
+            margin-bottom:25px;
+        }
+
+        .presented{
+            font-size:14px;
+            color:#666;
+            margin-bottom:10px;
+        }
+
+        .student-name{
+            font-size:34px;
+            font-weight:bold;
+            color:#1683ff;
+            margin-bottom:18px;
+        }
+
+        .completion-text{
+            max-width:650px;
+            line-height:1.7;
+            font-size:15px;
+            color:#444;
+        }
+
+        .course-name{
+            font-weight:bold;
+            color:#111;
+        }
+
+        .certificate-details{
+            display:flex;
+            justify-content:space-between;
+            gap:20px;
+            width:100%;
+            margin-top:45px;
+            padding-top:20px;
+            border-top:1px solid #ddd;
+        }
+
+        .detail{
+            flex:1;
+        }
+
+        .detail-label{
+            display:block;
+            color:#777;
+            font-size:10px;
+            margin-bottom:5px;
+            text-transform:uppercase;
+        }
+
+        .detail-value{
+            font-size:13px;
+            font-weight:bold;
+        }
+
+        .signature-area{
+            display:flex;
+            justify-content:space-between;
+            align-items:end;
+            width:100%;
+            margin-top:40px;
+        }
+
+        .signature{
+            width:180px;
+            border-top:1px solid #222;
+            padding-top:8px;
+            font-size:11px;
+            color:#444;
+        }
+
+        .actions{
+            display:flex;
+            justify-content:center;
+            gap:12px;
+            margin-top:25px;
+        }
+
+        button{
+            border:none;
+            border-radius:8px;
+            padding:12px 22px;
+            font-size:14px;
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        .print-btn{
+            background:#1683ff;
+            color:#fff;
+        }
+
+        .message{
+            text-align:center;
+            padding:60px 20px;
+            background:#0b0b0b;
+            border:1px solid #1c1c1c;
+            border-radius:14px;
+        }
+
+        .message h2{
+            margin-bottom:10px;
+        }
+
+        .message p{
+            color:#888;
+            line-height:1.6;
+        }
+
+        .loading{
+            color:#aaa;
+        }
+
+        .feedback-card{
+            margin-top:25px;
+            background:#0b0b0b;
+            border:1px solid #1c1c1c;
+            border-radius:14px;
+            padding:20px;
+        }
+
+        .feedback-card h3{
+            color:#1683ff;
+            margin-bottom:10px;
+            font-size:16px;
+        }
+
+        .feedback-card p{
+            color:#bbb;
+            line-height:1.7;
+            font-size:14px;
+        }
+
+        @media(max-width:650px){
+
+            .info-grid{
+                grid-template-columns:1fr;
+            }
+
+            .certificate{
+                min-width:700px;
+            }
+
+            .certificate-wrapper{
+                overflow-x:auto;
+            }
+
+            .student-name{
+                font-size:28px;
+            }
+
+        }
+
+        @media print{
+
+            body{
+                background:#fff;
+            }
+
+            .header,
+            .status-card,
+            .actions,
+            .feedback-card{
+                display:none !important;
+            }
+
+            .container{
+                padding:0;
+                max-width:none;
+            }
+
+            .certificate-wrapper{
+                border:none;
+                padding:0;
+                background:#fff;
+            }
+
+            .certificate{
+                max-width:none;
+                width:100%;
+                min-height:100vh;
+                border:10px solid #1683ff;
+                page-break-inside:avoid;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>My Certificate</h1>
+
+        <p>
+            View your STI Academy certificate
+        </p>
+
+    </div>
+
+
+    <main class="container">
+
+        <div id="loadingMessage" class="message">
+
+            <h2>Loading Certificate</h2>
+
+            <p class="loading">
+                Please wait...
+            </p>
+
+        </div>
+
+
+        <div id="certificateContent" style="display:none;">
+
+            <div class="status-card">
+
+                <div class="status-title">
+                    Certificate Status
+                </div>
+
+                <span
+                    id="certificateStatus"
+                    class="status"
+                >
+                    Issued
+                </span>
+
+
+                <div class="info-grid">
+
+                    <div class="info-box">
+
+                        <small>
+                            Certificate ID
+                        </small>
+
+                        <strong id="certificateId">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <small>
+                            Student ID
+                        </small>
+
+                        <strong id="studentId">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <small>
+                            Course
+                        </small>
+
+                        <strong id="courseName">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <small>
+                            Cohort
+                        </small>
+
+                        <strong id="cohortName">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <small>
+                            Completion Date
+                        </small>
+
+                        <strong id="completionDate">
+                            -
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="certificate-wrapper">
+
+                <div
+                    class="certificate"
+                    id="printCertificate"
+                >
+
+                    <div class="certificate-inner">
+
+                        <div class="academy-name">
+                            STI Academy
+                        </div>
+
+                        <div class="school-name">
+                            School of Technology and Innovation
+                        </div>
+
+
+                        <div class="certificate-title">
+                            Certificate of Completion
+                        </div>
+
+
+                        <div class="presented">
+                            This certificate is proudly presented to
+                        </div>
+
+
+                        <div
+                            class="student-name"
+                            id="certificateStudentName"
+                        >
+                            -
+                        </div>
+
+
+                        <div class="completion-text">
+
+                            In recognition of successfully completing the
+
+                            <span
+                                class="course-name"
+                                id="certificateCourseName"
+                            >
+                                -
+                            </span>
+
+                            course at STI Academy.
+
+
+                        </div>
+
+
+                        <div class="certificate-details">
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                                    Student ID
+                                </span>
+
+                                <span
+                                    class="detail-value"
+                                    id="certificateStudentId"
+                                >
+                                    -
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                                    Cohort
+                                </span>
+
+                                <span
+                                    class="detail-value"
+                                    id="certificateCohort"
+                                >
+                                    -
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                                    Completion Date
+                                </span>
+
+                                <span
+                                    class="detail-value"
+                                    id="certificateCompletionDate"
+                                >
+                                    -
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                                    Certificate ID
+                                </span>
+
+                                <span
+                                    class="detail-value"
+                                    id="certificateCertificateId"
+                                >
+                                    -
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="signature-area">
+
+                            <div class="signature">
+                                STI Academy
+                            </div>
+
+                            <div class="signature">
+                                Authorized Signature
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="actions">
+
+                <button
+                    class="print-btn"
+                    onclick="printCertificate()"
+                >
+                    Print Certificate
+                </button>
+
+            </div>
+
+
+            <div
+                id="feedbackCard"
+                class="feedback-card"
+                style="display:none;"
+            >
+
+                <h3>
+                    Comments / Feedback
+                </h3>
+
+                <p id="feedbackText"></p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="noCertificate"
+            class="message"
+            style="display:none;"
+        >
+
+            <h2>
+                Certificate Not Available Yet
+            </h2>
+
+            <p>
+                Your certificate will appear here once it has
+                been issued by STI Academy.
+            </p>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        const firebaseConfig = {
+            apiKey:
+                "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+            authDomain:
+                "sti-academy.firebaseapp.com",
+            projectId:
+                "sti-academy",
+            storageBucket:
+                "sti-academy.firebasestorage.app",
+            messagingSenderId:
+                "709840261642",
+            appId:
+                "1:709840261642:web:714b09bf661afa159f27ff",
+            measurementId:
+                "G-7ZRZ3P28YP"
+        };
+
+
+        firebase.initializeApp(firebaseConfig);
+
+
+        const auth = firebase.auth();
+
+        const db = firebase.firestore();
+
+
+        auth.onAuthStateChanged(
+            async user => {
+
+                if(!user){
+
+                    window.location.href =
+                        "../login.html";
+
+                    return;
+
+                }
+
+
+                try{
+
+                    const userDoc =
+                        await db
+                        .collection("users")
+                        .doc(user.uid)
+                        .get();
+
+
+                    if(!userDoc.exists){
+
+                        showNoCertificate(
+                            "Student account not found."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const userData =
+                        userDoc.data();
+
+
+                    if(
+                        userData.role !== "student"
+                    ){
+
+                        alert(
+                            "Access denied."
+                        );
+
+                        window.location.href =
+                            "../index.html";
+
+                        return;
+
+                    }
+
+
+                    const certificateSnapshot =
+                        await db
+                        .collection("certificates")
+                        .where(
+                            "studentUid",
+                            "==",
+                            user.uid
+                        )
+                        .get();
+
+
+                    if(
+                        certificateSnapshot.empty
+                    ){
+
+                        showNoCertificate();
+
+                        return;
+
+                    }
+
+
+                    let certificate = null;
+
+
+                    certificateSnapshot.forEach(
+                        doc => {
+
+                            const data =
+                                doc.data();
+
+
+                            if(
+                                data.status === "issued"
+                            ){
+
+                                certificate = {
+                                    id: doc.id,
+                                    ...data
+                                };
+
+                            }
+
+                        }
+                    );
+
+
+                    if(!certificate){
+
+                        showNoCertificate();
+
+                        return;
+
+                    }
+
+
+                    renderCertificate(
+                        certificate
+                    );
+
+
+                }catch(error){
+
+                    console.error(error);
+
+                    showNoCertificate(
+                        error.message
+                    );
+
+                }
+
+            }
+        );
+
+
+        function renderCertificate(
+            certificate
+        ){
+
+            document
+                .getElementById(
+                    "loadingMessage"
+                )
+                .style.display = "none";
+
+
+            document
+                .getElementById(
+                    "certificateContent"
+                )
+                .style.display = "block";
+
+
+            document
+                .getElementById(
+                    "certificateStatus"
+                )
+                .textContent =
+                    certificate.status ||
+                    "Issued";
+
+
+            document
+                .getElementById(
+                    "certificateId"
+                )
+                .textContent =
+                    certificate.certificateId ||
+                    "-";
+
+
+            document
+                .getElementById(
+                    "studentId"
+                )
+                .textContent =
+                    certificate.studentId ||
+                    "-";
+
+
+            document
+                .getElementById(
+                    "courseName"
+                )
+                .textContent =
+                    certificate.courseName ||
+                    "-";
+
+
+            document
+                .getElementById(
+                    "cohortName"
+                )
+                .textContent =
+                    certificate.cohortName ||
+                    "-";
+
+
+            document
+                .getElementById(
+                    "completionDate"
+                )
+                .textContent =
+                    formatDate(
+                        certificate.completionDate
+                    );
+
+
+            document
+                .getElementById(
+                    "certificateStudentName"
+                )
+                .textContent =
+                    certificate.studentName ||
+                    "Student";
+
+
+            document
+                .getElementById(
+                    "certificateCourseName"
+                )
+                .textContent =
+                    certificate.courseName ||
+                    "-";
+
+
+            document
+                .getElementById(
+                    "certificateStudentId"
+                )
+                .textContent =
+                    certificate.studentId ||
+                    "-";
+
+
+            document
+                .getElementById(
+                    "certificateCohort"
+                )
+                .textContent =
+                    certificate.cohortName ||
+                    "-";
+
+
+            document
+                .getElementById(
+                    "certificateCompletionDate"
+                )
+                .textContent =
+                    formatDate(
+                        certificate.completionDate
+                    );
+
+
+            document
+                .getElementById(
+                    "certificateCertificateId"
+                )
+                .textContent =
+                    certificate.certificateId ||
+                    "-";
+
+
+            if(
+                certificate.feedback &&
+                certificate.feedback.trim()
+            ){
+
+                document
+                    .getElementById(
+                        "feedbackCard"
+                    )
+                    .style.display =
+                        "block";
+
+
+                document
+                    .getElementById(
+                        "feedbackText"
+                    )
+                    .textContent =
+                        certificate.feedback;
+
+            }
+
+        }
+
+
+        function formatDate(date){
+
+            if(!date){
+
+                return "-";
+
+            }
+
+
+            try{
+
+                if(
+                    date.toDate
+                ){
+
+                    date =
+                        date.toDate();
+
+                }
+
+
+                const parsed =
+                    new Date(date);
+
+
+                if(
+                    isNaN(
+                        parsed.getTime()
+                    )
+                ){
+
+                    return date;
+
+                }
+
+
+                return parsed.toLocaleDateString(
+                    "en-GB",
+                    {
+                        day:"2-digit",
+                        month:"long",
+                        year:"numeric"
+                    }
+                );
+
+            }catch(error){
+
+                return "-";
+
+            }
+
+        }
+
+
+        function showNoCertificate(
+            message
+        ){
+
+            document
+                .getElementById(
+                    "loadingMessage"
+                )
+                .style.display = "none";
+
+
+            document
+                .getElementById(
+                    "certificateContent"
+                )
+                .style.display = "none";
+
+
+            document
+                .getElementById(
+                    "noCertificate"
+                )
+                .style.display = "block";
+
+
+            if(message){
+
+                document
+                    .querySelector(
+                        "#noCertificate p"
+                    )
+                    .textContent =
+                        message;
+
+            }
+
+        }
+
+
+        function printCertificate(){
+
+            window.print();
+
+        }
+
+    </script>
+
+</body>
+
+</html>

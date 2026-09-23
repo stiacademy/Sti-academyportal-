@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Tests | STI Academy</title>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #05070d;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+
+        .header {
+            background: #080b13;
+            border-bottom: 1px solid #151b2b;
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: #168cff;
+        }
+
+        .brand span {
+            display: block;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 400;
+            margin-top: 3px;
+        }
+
+        .back-btn {
+            color: #ffffff;
+            text-decoration: none;
+            border: 1px solid #263149;
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            background: #0c111c;
+        }
+
+        .back-btn:hover {
+            border-color: #168cff;
+            color: #168cff;
+        }
+
+        /* MAIN */
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px 20px 60px;
+        }
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h1 {
+            font-size: 30px;
+            margin-bottom: 7px;
+        }
+
+        .page-title p {
+            color: #8e99ad;
+            font-size: 14px;
+        }
+
+        /* STATS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #0a0e18;
+            border: 1px solid #171e30;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            color: #8994a8;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .stat-number {
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        /* FILTERS */
+
+        .filters {
+            display: grid;
+            grid-template-columns: 1fr 190px;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 9px;
+            border: 1px solid #202a40;
+            background: #090e18;
+            color: #ffffff;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #168cff;
+        }
+
+        option {
+            background: #090e18;
+            color: #ffffff;
+        }
+
+        /* SECTION */
+
+        .section {
+            margin-top: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .section-header h2 {
+            font-size: 19px;
+        }
+
+        .section-count {
+            color: #7f8ba1;
+            font-size: 12px;
+        }
+
+        /* TEST CARDS */
+
+        .tests-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .test-card {
+            background: #0a0e18;
+            border: 1px solid #182136;
+            border-radius: 13px;
+            padding: 20px;
+            transition: 0.2s;
+        }
+
+        .test-card:hover {
+            border-color: #168cff;
+            transform: translateY(-2px);
+        }
+
+        .test-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 13px;
+        }
+
+        .test-title {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        .status {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 5px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .status-available {
+            color: #66d9ff;
+            background: rgba(22, 140, 255, 0.12);
+        }
+
+        .status-upcoming {
+            color: #ffc857;
+            background: rgba(255, 200, 87, 0.12);
+        }
+
+        .status-completed {
+            color: #68e09b;
+            background: rgba(104, 224, 155, 0.12);
+        }
+
+        .test-course {
+            color: #168cff;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .test-description {
+            color: #8e99ad;
+            font-size: 13px;
+            line-height: 1.55;
+            margin-bottom: 17px;
+        }
+
+        .test-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 9px;
+            margin-bottom: 18px;
+        }
+
+        .info-box {
+            background: #070a11;
+            border: 1px solid #141c2d;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .info-label {
+            color: #69758b;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .deadline {
+            color: #ffbd66;
+        }
+
+        .completed-result {
+            background: #070a11;
+            border: 1px solid #141c2d;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .result-label {
+            color: #69758b;
+            font-size: 10px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .btn-primary {
+            background: #168cff;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #0878e8;
+        }
+
+        .btn-disabled {
+            background: #151b29;
+            color: #68758b;
+            cursor: not-allowed;
+        }
+
+        /* EMPTY */
+
+        .empty {
+            background: #0a0e18;
+            border: 1px dashed #202a40;
+            border-radius: 12px;
+            padding: 35px 20px;
+            text-align: center;
+            color: #778399;
+        }
+
+        .empty strong {
+            display: block;
+            color: #ffffff;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .empty p {
+            font-size: 12px;
+        }
+
+        /* LOADING */
+
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7d899e;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #182136;
+            border-top-color: #168cff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ERROR */
+
+        .error {
+            background: rgba(255, 70, 70, 0.08);
+            border: 1px solid rgba(255, 70, 70, 0.25);
+            color: #ff8585;
+            padding: 14px;
+            border-radius: 9px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 750px) {
+
+            .header {
+                padding: 15px;
+            }
+
+            .container {
+                padding: 25px 14px 50px;
+            }
+
+            .page-title h1 {
+                font-size: 25px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 14px 10px;
+            }
+
+            .stat-number {
+                font-size: 20px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .tests-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 430px) {
+
+            .brand {
+                font-size: 17px;
+            }
+
+            .back-btn {
+                font-size: 11px;
+                padding: 8px 10px;
+            }
+
+            .test-info {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+    <div class="brand">
+
+        STI Academy
+
+        <span>
+            School of Technology and Innovation
+        </span>
+
+    </div>
+
+    <a
+        href="dashboard.html"
+        class="back-btn"
+    >
+        ← Dashboard
+    </a>
+
+</header>
+
+
+<main class="container">
+
+
+    <div class="page-title">
+
+        <h1>Tests</h1>
+
+        <p>
+            View your tests, deadlines and completed assessments.
+        </p>
+
+    </div>
+
+
+    <div
+        id="errorBox"
+        class="error"
+    ></div>
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Available
+            </div>
+
+            <div
+                class="stat-number"
+                id="availableCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Upcoming
+            </div>
+
+            <div
+                class="stat-number"
+                id="upcomingCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Completed
+            </div>
+
+            <div
+                class="stat-number"
+                id="completedCount"
+            >
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+        <input
+            type="search"
+            id="searchInput"
+            placeholder="Search tests..."
+        >
+
+        <select id="courseFilter">
+
+            <option value="">
+                All Courses
+            </option>
+
+            <option value="Web Design">
+                Web Design
+            </option>
+
+            <option value="Web Development">
+                Web Development
+            </option>
+
+            <option value="Graphic Design">
+                Graphic Design
+            </option>
+
+            <option value="Video Editing">
+                Video Editing
+            </option>
+
+            <option value="Social Media Management">
+                Social Media Management
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+
+        <div class="spinner"></div>
+
+        Loading tests...
+
+    </div>
+
+
+    <!-- AVAILABLE -->
+
+    <section
+        class="section"
+        id="availableSection"
+        style="display:none;"
+    >
+
+        <div class="section-header">
+
+            <h2>
+                Available Tests
+            </h2>
+
+            <span
+                class="section-count"
+                id="availableSectionCount"
+            >
+                0 tests
+            </span>
+
+        </div>
+
+        <div
+            class="tests-grid"
+            id="availableTests"
+        ></div>
+
+    </section>
+
+
+    <!-- UPCOMING -->
+
+    <section
+        class="section"
+        id="upcomingSection"
+        style="display:none;"
+    >
+
+        <div class="section-header">
+
+            <h2>
+                Upcoming Tests
+            </h2>
+
+            <span
+                class="section-count"
+                id="upcomingSectionCount"
+            >
+                0 tests
+            </span>
+
+        </div>
+
+        <div
+            class="tests-grid"
+            id="upcomingTests"
+        ></div>
+
+    </section>
+
+
+    <!-- COMPLETED -->
+
+    <section
+        class="section"
+        id="completedSection"
+        style="display:none;"
+    >
+
+        <div class="section-header">
+
+            <h2>
+                Completed Tests
+            </h2>
+
+            <span
+                class="section-count"
+                id="completedSectionCount"
+            >
+                0 tests
+            </span>
+
+        </div>
+
+        <div
+            class="tests-grid"
+            id="completedTests"
+        ></div>
+
+    </section>
+
+
+    <div
+        id="noTests"
+        class="empty"
+        style="display:none;"
+    >
+
+        <strong>
+            No tests found
+        </strong>
+
+        <p>
+            There are currently no tests matching your search or course filter.
+        </p>
+
+    </div>
+
+
+</main>
+
+
+<script>
+
+
+/* =========================================================
+   FIREBASE CONFIG
+========================================================= */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840261642",
+
+    appId:
+        "1:709840261642:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+/* =========================================================
+   INITIALIZE FIREBASE
+========================================================= */
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+const db = firebase.firestore();
+
+
+/* =========================================================
+   GLOBAL DATA
+========================================================= */
+
+let currentUser = null;
+
+let studentData = null;
+
+let allTests = [];
+
+let allSubmissions = [];
+
+let filteredTests = [];
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const loading = document.getElementById("loading");
+
+const errorBox = document.getElementById("errorBox");
+
+const availableSection =
+    document.getElementById("availableSection");
+
+const upcomingSection =
+    document.getElementById("upcomingSection");
+
+const completedSection =
+    document.getElementById("completedSection");
+
+const availableTests =
+    document.getElementById("availableTests");
+
+const upcomingTests =
+    document.getElementById("upcomingTests");
+
+const completedTests =
+    document.getElementById("completedTests");
+
+const noTests =
+    document.getElementById("noTests");
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const courseFilter =
+    document.getElementById("courseFilter");
+
+
+/* =========================================================
+   AUTHENTICATION
+========================================================= */
+
+auth.onAuthStateChanged(async user => {
+
+    if (!user) {
+
+        window.location.href =
+            "../login.html";
+
+        return;
+
+    }
+
+    currentUser = user;
+
+    try {
+
+        await loadStudent();
+
+        await loadTests();
+
+        await loadSubmissions();
+
+        processTests();
+
+        renderTests();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            error.message ||
+            "Unable to load tests."
+        );
+
+    }
+
+});
+
+
+/* =========================================================
+   LOAD STUDENT
+========================================================= */
+
+async function loadStudent() {
+
+    const userRef =
+        db.collection("users")
+          .doc(currentUser.uid);
+
+    const userSnap =
+        await userRef.get();
+
+    if (!userSnap.exists) {
+
+        throw new Error(
+            "Your student account could not be found."
+        );
+
+    }
+
+    const user = userSnap.data();
+
+
+    if (
+        user.role !== "student" ||
+        user.status !== "active"
+    ) {
+
+        await auth.signOut();
+
+        window.location.href =
+            "../login.html";
+
+        return;
+
+    }
+
+
+    if (!user.studentId) {
+
+        throw new Error(
+            "Your student ID is missing from your account."
+        );
+
+    }
+
+
+    const studentRef =
+        db.collection("students")
+          .doc(user.studentId);
+
+    const studentSnap =
+        await studentRef.get();
+
+
+    if (!studentSnap.exists) {
+
+        throw new Error(
+            "Your student record could not be found."
+        );
+
+    }
+
+
+    studentData = {
+
+        ...studentSnap.data(),
+
+        uid: currentUser.uid
+
+    };
+
+}
+
+
+/* =========================================================
+   LOAD TESTS
+========================================================= */
+
+async function loadTests() {
+
+    const snapshot =
+        await db
+            .collection("tests")
+            .get();
+
+
+    allTests = [];
+
+
+    snapshot.forEach(doc => {
+
+        const data = doc.data();
+
+
+        /*
+         * Students only see published tests.
+         */
+
+        if (
+            String(data.status || "").toLowerCase()
+            !== "published"
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Only show tests belonging
+         * to the student's course.
+         */
+
+        if (
+            data.course &&
+            studentData.course &&
+            data.course !== studentData.course
+        ) {
+
+            return;
+
+        }
+
+
+        allTests.push({
+
+            id: doc.id,
+
+            ...data
+
+        });
+
+    });
+
+
+    /*
+     * Sort newest first.
+     */
+
+    allTests.sort((a, b) => {
+
+        const aTime =
+            getDateValue(
+                a.createdAt
+            );
+
+        const bTime =
+            getDateValue(
+                b.createdAt
+            );
+
+        return bTime - aTime;
+
+    });
+
+}
+
+
+/* =========================================================
+   LOAD SUBMISSIONS
+========================================================= */
+
+async function loadSubmissions() {
+
+    const snapshot =
+        await db
+            .collection("testSubmissions")
+            .where(
+                "studentUid",
+                "==",
+                currentUser.uid
+            )
+            .get();
+
+
+    allSubmissions = [];
+
+
+    snapshot.forEach(doc => {
+
+        allSubmissions.push({
+
+            id: doc.id,
+
+            ...doc.data()
+
+        });
+
+    });
+
+}
+
+
+/* =========================================================
+   PROCESS TESTS
+========================================================= */
+
+function processTests() {
+
+    const now = new Date();
+
+
+    allTests.forEach(test => {
+
+        const startDate =
+            parseDate(test.startDate);
+
+        const deadline =
+            parseDate(test.deadline);
+
+
+        /*
+         * Check whether student has
+         * already submitted this test.
+         */
+
+        const submission =
+            getSubmission(test.id);
+
+
+        test._submission = submission;
+
+
+        if (submission) {
+
+            test._status =
+                "completed";
+
+            return;
+
+        }
+
+
+        /*
+         * Upcoming
+         */
+
+        if (
+            startDate &&
+            now < startDate
+        ) {
+
+            test._status =
+                "upcoming";
+
+            return;
+
+        }
+
+
+        /*
+         * Deadline passed
+         */
+
+        if (
+            deadline &&
+            now > deadline
+        ) {
+
+            test._status =
+                "completed";
+
+            test._expired =
+                true;
+
+            return;
+
+        }
+
+
+        /*
+         * Available
+         */
+
+        test._status =
+            "available";
+
+    });
+
+}
+
+
+/* =========================================================
+   FILTER + RENDER
+========================================================= */
+
+function renderTests() {
+
+    const search =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+    const course =
+        courseFilter.value;
+
+
+    filteredTests =
+        allTests.filter(test => {
+
+            const title =
+                String(
+                    test.title || ""
+                ).toLowerCase();
+
+            const testCourse =
+                String(
+                    test.course || ""
+                );
+
+
+            const matchesSearch =
+                !search ||
+                title.includes(search) ||
+                testCourse
+                    .toLowerCase()
+                    .includes(search);
+
+
+            const matchesCourse =
+                !course ||
+                testCourse === course;
+
+
+            return (
+                matchesSearch &&
+                matchesCourse
+            );
+
+        });
+
+
+    const available =
+        filteredTests.filter(
+            test =>
+                test._status === "available"
+        );
+
+
+    const upcoming =
+        filteredTests.filter(
+            test =>
+                test._status === "upcoming"
+        );
+
+
+    const completed =
+        filteredTests.filter(
+            test =>
+                test._status === "completed"
+        );
+
+
+    /*
+     * Update top stats
+     */
+
+    document.getElementById(
+        "availableCount"
+    ).textContent =
+        allTests.filter(
+            test =>
+                test._status === "available"
+        ).length;
+
+
+    document.getElementById(
+        "upcomingCount"
+    ).textContent =
+        allTests.filter(
+            test =>
+                test._status === "upcoming"
+        ).length;
+
+
+    document.getElementById(
+        "completedCount"
+    ).textContent =
+        allTests.filter(
+            test =>
+                test._status === "completed"
+        ).length;
+
+
+    /*
+     * Available
+     */
+
+    renderSection(
+        availableSection,
+        availableTests,
+        available,
+        "available"
+    );
+
+
+    /*
+     * Upcoming
+     */
+
+    renderSection(
+        upcomingSection,
+        upcomingTests,
+        upcoming,
+        "upcoming"
+    );
+
+
+    /*
+     * Completed
+     */
+
+    renderSection(
+        completedSection,
+        completedTests,
+        completed,
+        "completed"
+    );
+
+
+    /*
+     * Show no tests
+     */
+
+    if (
+        filteredTests.length === 0
+    ) {
+
+        noTests.style.display =
+            "block";
+
+    } else {
+
+        noTests.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER SECTION
+========================================================= */
+
+function renderSection(
+    section,
+    container,
+    tests,
+    type
+) {
+
+    if (!tests.length) {
+
+        section.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    section.style.display =
+        "block";
+
+
+    const countElement =
+        section.querySelector(
+            ".section-count"
+        );
+
+
+    countElement.textContent =
+        tests.length +
+        (
+            tests.length === 1
+                ? " test"
+                : " tests"
+        );
+
+
+    container.innerHTML =
+        tests
+            .map(test =>
+                createTestCard(
+                    test,
+                    type
+                )
+            )
+            .join("");
+
+}
+
+
+/* =========================================================
+   CREATE TEST CARD
+========================================================= */
+
+function createTestCard(
+    test,
+    type
+) {
+
+    const title =
+        escapeHtml(
+            test.title ||
+            "Untitled Test"
+        );
+
+
+    const course =
+        escapeHtml(
+            test.course ||
+            "General"
+        );
+
+
+    const instructions =
+        test.instructions
+            ? escapeHtml(
+                test.instructions
+            )
+            : "Complete this assessment within the stated time."
+
+
+    const duration =
+        Number(
+            test.duration || 0
+        );
+
+
+    const totalMarks =
+        Number(
+            test.totalMarks || 0
+        );
+
+
+    const questionCount =
+        Number(
+            test.questionCount ||
+            test.totalQuestions ||
+            0
+        );
+
+
+    const startDate =
+        parseDate(
+            test.startDate
+        );
+
+
+    const deadline =
+        parseDate(
+            test.deadline
+        );
+
+
+    let action = "";
+
+    let statusClass = "";
+
+    let statusText = "";
+
+
+    /* AVAILABLE */
+
+    if (type === "available") {
+
+        statusClass =
+            "status-available";
+
+        statusText =
+            "Available";
+
+
+        action = `
+
+            <a
+                class="btn btn-primary"
+                href="test.html?testId=${encodeURIComponent(test.id)}"
+            >
+                Start Test
+            </a>
+
+        `;
+
+    }
+
+
+    /* UPCOMING */
+
+    else if (type === "upcoming") {
+
+        statusClass =
+            "status-upcoming";
+
+        statusText =
+            "Upcoming";
+
+
+        action = `
+
+            <div class="btn btn-disabled">
+                Not Started Yet
+            </div>
+
+        `;
+
+    }
+
+
+    /* COMPLETED */
+
+    else {
+
+        statusClass =
+            "status-completed";
+
+        statusText =
+            test._expired
+                ? "Expired"
+                : "Completed";
+
+
+        action = `
+
+            <div class="btn btn-disabled">
+                ${
+                    test._expired
+                        ? "Test Expired"
+                        : "Submitted"
+                }
+            </div>
+
+        `;
+
+    }
+
+
+    let resultHtml = "";
+
+
+    if (
+        type === "completed" &&
+        test._submission
+    ) {
+
+        const submission =
+            test._submission;
+
+
+        let resultText =
+            "Awaiting grading";
+
+
+        if (
+            submission.score !== undefined &&
+            submission.score !== null
+        ) {
+
+            const percentage =
+                submission.percentage !== undefined &&
+                submission.percentage !== null
+                    ? Number(
+                        submission.percentage
+                    )
+                    : totalMarks > 0
+                        ? (
+                            Number(
+                                submission.score
+                            ) /
+                            totalMarks
+                        ) * 100
+                        : 0;
+
+
+            resultText =
+                `${formatNumber(
+                    submission.score
+                )} / ${formatNumber(
+                    totalMarks
+                )} (${formatNumber(
+                    percentage
+                )}%)`;
+
+        }
+
+
+        resultHtml = `
+
+            <div class="completed-result">
+
+                <div class="result-label">
+                    Result
+                </div>
+
+                <div class="result-value">
+                    ${escapeHtml(resultText)}
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    return `
+
+        <article class="test-card">
+
+            <div class="test-top">
+
+                <div class="test-title">
+                    ${title}
+                </div>
+
+                <div class="status ${statusClass}">
+                    ${statusText}
+                </div>
+
+            </div>
+
+
+            <div class="test-course">
+                ${course}
+            </div>
+
+
+            <div class="test-description">
+                ${instructions}
+            </div>
+
+
+            <div class="test-info">
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Duration
+                    </div>
+
+                    <div class="info-value">
+                        ${
+                            duration
+                                ? duration + " minutes"
+                                : "Not specified"
+                        }
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Questions
+                    </div>
+
+                    <div class="info-value">
+                        ${
+                            questionCount ||
+                            "Not specified"
+                        }
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Total Marks
+                    </div>
+
+                    <div class="info-value">
+                        ${
+                            totalMarks ||
+                            "Not specified"
+                        }
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Deadline
+                    </div>
+
+                    <div class="info-value deadline">
+                        ${
+                            deadline
+                                ? formatDate(deadline)
+                                : "No deadline"
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            ${
+                type === "upcoming" &&
+                startDate
+                    ? `
+                        <div class="completed-result">
+
+                            <div class="result-label">
+                                Starts
+                            </div>
+
+                            <div class="result-value">
+                                ${formatDate(startDate)}
+                            </div>
+
+                        </div>
+                    `
+                    : ""
+            }
+
+
+            ${resultHtml}
+
+
+            ${action}
+
+        </article>
+
+    `;
+
+}
+
+
+/* =========================================================
+   GET SUBMISSION
+========================================================= */
+
+function getSubmission(testId) {
+
+    /*
+     * If there are duplicate submissions,
+     * use the most recent one.
+     */
+
+    const matches =
+        allSubmissions
+            .filter(
+                submission =>
+                    submission.testId === testId
+            )
+            .sort(
+                (a, b) =>
+                    getDateValue(
+                        b.submittedAt
+                    ) -
+                    getDateValue(
+                        a.submittedAt
+                    )
+            );
+
+
+    return matches.length
+        ? matches[0]
+        : null;
+
+}
+
+
+/* =========================================================
+   DATE HELPERS
+========================================================= */
+
+function parseDate(value) {
+
+    if (!value) {
+        return null;
+    }
+
+
+    if (
+        value &&
+        typeof value.toDate === "function"
+    ) {
+
+        return value.toDate();
+
+    }
+
+
+    if (
+        value instanceof Date
+    ) {
+
+        return value;
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return date;
+
+}
+
+
+/* =========================================================
+   DATE VALUE
+========================================================= */
+
+function getDateValue(value) {
+
+    const date =
+        parseDate(value);
+
+
+    return date
+        ? date.getTime()
+        : 0;
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(date) {
+
+    if (!date) {
+
+        return "Not specified";
+
+    }
+
+
+    return date.toLocaleString(
+        "en-NG",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT NUMBER
+========================================================= */
+
+function formatNumber(value) {
+
+    const number =
+        Number(value);
+
+
+    if (
+        !Number.isFinite(number)
+    ) {
+
+        return "0";
+
+    }
+
+
+    if (
+        Number.isInteger(number)
+    ) {
+
+        return String(number);
+
+    }
+
+
+    return number.toFixed(2);
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+function showError(message) {
+
+    loading.style.display =
+        "none";
+
+    errorBox.textContent =
+        message;
+
+    errorBox.style.display =
+        "block";
+
+}
+
+
+/* =========================================================
+   FILTER EVENTS
+========================================================= */
+
+searchInput.addEventListener(
+    "input",
+    renderTests
+);
+
+
+courseFilter.addEventListener(
+    "change",
+    renderTests
+);
+
+
+/* =========================================================
+   HIDE LOADING AFTER INITIAL LOAD
+========================================================= */
+
+firebase.auth().onAuthStateChanged(
+    user => {
+
+        if (user) {
+
+            setTimeout(() => {
+
+                loading.style.display =
+                    "none";
+
+            }, 500);
+
+        }
+
+    }
+);
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,1 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Announcements | STI Academy</title>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: #ffffff;
+        }
+
+        header {
+            background: #080808;
+            border-bottom: 1px solid #1683ff;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #1683ff;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .dashboard-btn {
+            background: #1683ff;
+            color: #ffffff;
+        }
+
+        .logout-btn {
+            background: #222222;
+            color: #ffffff;
+            border: 1px solid #444444;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 25px 18px 50px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        .welcome p {
+            margin: 0;
+            color: #999999;
+            line-height: 1.6;
+        }
+
+        .student-course {
+            color: #1683ff;
+            font-weight: bold;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: #111111;
+            border: 1px solid #333333;
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 13px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            border-color: #1683ff;
+        }
+
+        .announcement-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .announcement-card {
+            background: #0d0d0d;
+            border: 1px solid #252525;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .announcement-card:hover {
+            border-color: #1683ff;
+        }
+
+        .announcement-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .announcement-title {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+
+        .announcement-date {
+            color: #777777;
+            font-size: 13px;
+        }
+
+        .audience {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: rgba(22, 131, 255, 0.12);
+            color: #1683ff;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .announcement-message {
+            margin-top: 18px;
+            color: #dddddd;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .empty {
+            text-align: center;
+            background: #0d0d0d;
+            border: 1px solid #222222;
+            border-radius: 12px;
+            padding: 45px 20px;
+            color: #777777;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999999;
+        }
+
+        .error {
+            text-align: center;
+            background: #160909;
+            border: 1px solid #5c2020;
+            border-radius: 12px;
+            padding: 25px;
+            color: #ff8c8c;
+        }
+
+        @media (max-width: 600px) {
+
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions button {
+                flex: 1;
+            }
+
+            .announcement-top {
+                flex-direction: column;
+            }
+
+            .announcement-card {
+                padding: 16px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<header>
+
+    <h1>
+        STI Academy | Announcements
+    </h1>
+
+    <div class="header-actions">
+
+        <button
+            class="dashboard-btn"
+            id="dashboardBtn"
+        >
+            Dashboard
+        </button>
+
+        <button
+            class="logout-btn"
+            id="logoutBtn"
+        >
+            Sign Out
+        </button>
+
+    </div>
+
+</header>
+
+
+<div class="container">
+
+
+    <div class="welcome">
+
+        <h2>
+            Announcements
+        </h2>
+
+        <p>
+            Important updates and information from STI Academy.
+        </p>
+
+        <p style="margin-top: 8px;">
+
+            Course:
+            <span
+                class="student-course"
+                id="studentCourse"
+            >
+                Loading...
+            </span>
+
+        </p>
+
+    </div>
+
+
+    <div class="search-box">
+
+        <input
+            type="text"
+            id="announcementSearch"
+            placeholder="Search announcements..."
+        >
+
+    </div>
+
+
+    <div
+        class="announcement-list"
+        id="announcementList"
+    >
+
+        <div class="loading">
+            Loading announcements...
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   FIREBASE
+========================= */
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain: "sti-academy.firebaseapp.com",
+
+    projectId: "sti-academy",
+
+    storageBucket: "sti-academy.firebasestorage.app",
+
+    messagingSenderId: "709840641262",
+
+    appId: "1:709840641262:web:714b09bf661afa159f27ff",
+
+    measurementId: "G-7ZRZ3P28YP"
+
+};
+
+
+if (!firebase.apps.length) {
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+}
+
+
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.firestore();
+
+
+let allAnnouncements = [];
+
+let studentData = null;
+
+let studentCourseId = "";
+
+let studentCourseName = "";
+
+
+/* =========================
+   AUTH
+========================= */
+
+auth.onAuthStateChanged(
+    async user => {
+
+        if (!user) {
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+
+        try {
+
+            await loadStudentData(
+                user.uid
+            );
+
+            await loadAnnouncements();
+
+        } catch (error) {
+
+            console.error(error);
+
+            showError(
+                "Unable to load your announcements."
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================
+   LOAD STUDENT
+========================= */
+
+async function loadStudentData(
+    uid
+) {
+
+    const userDoc =
+        await db
+            .collection("users")
+            .doc(uid)
+            .get();
+
+
+    if (!userDoc.exists) {
+
+        throw new Error(
+            "Student account not found."
+        );
+
+    }
+
+
+    const userData =
+        userDoc.data();
+
+
+    const studentId =
+        userData.studentId;
+
+
+    if (!studentId) {
+
+        throw new Error(
+            "Student ID is missing from your account."
+        );
+
+    }
+
+
+    const studentDoc =
+        await db
+            .collection("students")
+            .doc(studentId)
+            .get();
+
+
+    if (!studentDoc.exists) {
+
+        throw new Error(
+            "Student record not found."
+        );
+
+    }
+
+
+    studentData =
+        studentDoc.data();
+
+
+    /*
+     * Get student's course
+     * from the students record.
+     */
+
+    studentCourseId =
+        String(
+            studentData.courseId ||
+            ""
+        ).trim();
+
+
+    studentCourseName =
+        String(
+            studentData.courseName ||
+            studentData.course ||
+            ""
+        ).trim();
+
+
+    document.getElementById(
+        "studentCourse"
+    ).textContent =
+        studentCourseName ||
+        studentCourseId ||
+        "Not assigned";
+
+}
+
+
+/* =========================
+   LOAD ANNOUNCEMENTS
+========================= */
+
+async function loadAnnouncements() {
+
+    try {
+
+        let snapshot;
+
+
+        try {
+
+            snapshot =
+                await db
+                    .collection(
+                        "announcements"
+                    )
+                    .where(
+                        "status",
+                        "==",
+                        "published"
+                    )
+                    .orderBy(
+                        "createdAt",
+                        "desc"
+                    )
+                    .get();
+
+        } catch (error) {
+
+            console.error(
+                "Ordered query failed:",
+                error
+            );
+
+
+            snapshot =
+                await db
+                    .collection(
+                        "announcements"
+                    )
+                    .where(
+                        "status",
+                        "==",
+                        "published"
+                    )
+                    .get();
+
+        }
+
+
+        allAnnouncements =
+            snapshot.docs
+                .map(
+                    doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    })
+                )
+                .filter(
+                    announcement =>
+                        isAnnouncementForStudent(
+                            announcement
+                        )
+                );
+
+
+        sortAnnouncements();
+
+
+        renderAnnouncements(
+            allAnnouncements
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            "Unable to load announcements: " +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================
+   CHECK AUDIENCE
+========================= */
+
+function isAnnouncementForStudent(
+    announcement
+) {
+
+    /*
+     * All students
+     */
+
+    if (
+        announcement.audienceType ===
+        "all"
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+     * Specific course
+     */
+
+    if (
+        announcement.audienceType ===
+        "course"
+    ) {
+
+        const announcementCourseId =
+            String(
+                announcement.audienceCourseId ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        const announcementCourseName =
+            String(
+                announcement.audienceName ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        const currentCourseId =
+            String(
+                studentCourseId ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        const currentCourseName =
+            String(
+                studentCourseName ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        /*
+         * Match Course ID
+         */
+
+        if (
+            announcementCourseId &&
+            currentCourseId &&
+            announcementCourseId ===
+                currentCourseId
+        ) {
+
+            return true;
+
+        }
+
+
+        /*
+         * Match Course Name
+         */
+
+        if (
+            announcementCourseName &&
+            currentCourseName &&
+            announcementCourseName ===
+                currentCourseName
+        ) {
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================
+   SORT
+========================= */
+
+function sortAnnouncements() {
+
+    allAnnouncements.sort(
+        (a, b) => {
+
+            const dateA =
+                getTimestampDate(
+                    a.createdAt
+                );
+
+
+            const dateB =
+                getTimestampDate(
+                    b.createdAt
+                );
+
+
+            return dateB - dateA;
+
+        }
+    );
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderAnnouncements(
+    announcements
+) {
+
+    const list =
+        document.getElementById(
+            "announcementList"
+        );
+
+
+    if (!announcements.length) {
+
+        list.innerHTML = `
+
+            <div class="empty">
+
+                <h3>
+                    No announcements yet
+                </h3>
+
+                <p>
+                    There are currently no announcements available for you.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+        announcements
+            .map(
+                announcement => {
+
+                    const date =
+                        formatDate(
+                            announcement.createdAt
+                        );
+
+
+                    const audience =
+                        announcement.audienceType ===
+                        "course"
+                            ? (
+                                announcement.audienceName ||
+                                "Your Course"
+                            )
+                            : "All Students";
+
+
+                    return `
+
+                        <div
+                            class="announcement-card"
+                        >
+
+                            <div
+                                class="announcement-top"
+                            >
+
+                                <div>
+
+                                    <h3
+                                        class="announcement-title"
+                                    >
+                                        ${escapeHtml(
+                                            announcement.title ||
+                                            ""
+                                        )}
+                                    </h3>
+
+                                    <div
+                                        class="announcement-date"
+                                    >
+                                        ${escapeHtml(
+                                            date
+                                        )}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <span
+                                class="audience"
+                            >
+                                ${escapeHtml(
+                                    audience
+                                )}
+                            </span>
+
+
+                            <div
+                                class="announcement-message"
+                            >
+                                ${escapeHtml(
+                                    announcement.message ||
+                                    ""
+                                )}
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+document
+    .getElementById(
+        "announcementSearch"
+    )
+    .addEventListener(
+        "input",
+        function() {
+
+            const search =
+                this.value
+                    .trim()
+                    .toLowerCase();
+
+
+            if (!search) {
+
+                renderAnnouncements(
+                    allAnnouncements
+                );
+
+                return;
+
+            }
+
+
+            const filtered =
+                allAnnouncements.filter(
+                    announcement => {
+
+                        const title =
+                            String(
+                                announcement.title ||
+                                ""
+                            )
+                                .toLowerCase();
+
+
+                        const message =
+                            String(
+                                announcement.message ||
+                                ""
+                            )
+                                .toLowerCase();
+
+
+                        const audience =
+                            String(
+                                announcement.audienceName ||
+                                ""
+                            )
+                                .toLowerCase();
+
+
+                        return (
+                            title.includes(search) ||
+                            message.includes(search) ||
+                            audience.includes(search)
+                        );
+
+                    }
+                );
+
+
+            renderAnnouncements(
+                filtered
+            );
+
+        }
+    );
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+document
+    .getElementById(
+        "dashboardBtn"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+    );
+
+
+/* =========================
+   SIGN OUT
+========================= */
+
+document
+    .getElementById(
+        "logoutBtn"
+    )
+    .addEventListener(
+        "click",
+        async function() {
+
+            try {
+
+                await auth.signOut();
+
+
+                window.location.href =
+                    "../login.html";
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "Unable to sign out."
+                );
+
+            }
+
+        }
+    );
+
+
+/* =========================
+   ERROR
+========================= */
+
+function showError(
+    message
+) {
+
+    document.getElementById(
+        "announcementList"
+    ).innerHTML = `
+
+        <div class="error">
+
+            ${escapeHtml(
+                message
+            )}
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================
+   DATE
+========================= */
+
+function getTimestampDate(
+    timestamp
+) {
+
+    if (
+        timestamp &&
+        typeof timestamp.toDate ===
+            "function"
+    ) {
+
+        return timestamp.toDate();
+
+    }
+
+
+    return new Date(0);
+
+}
+
+
+function formatDate(
+    timestamp
+) {
+
+    const date =
+        getTimestampDate(
+            timestamp
+        );
+
+
+    if (
+        date.getTime() === 0
+    ) {
+
+        return "Date unavailable";
+
+    }
+
+
+    return date.toLocaleString(
+        "en-NG",
+        {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================
+   SECURITY HELPERS
+========================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(value || "")
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+</script>
+
+</body>
+
+</html>

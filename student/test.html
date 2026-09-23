@@ -1,0 +1,2721 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Take Test | STI Academy</title>
+
+
+    <!-- FIREBASE -->
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #050505;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        header {
+            background: #000;
+            border-bottom: 1px solid #222;
+            padding: 17px 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1100px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .brand {
+            color: #168cff;
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .brand small {
+            display: block;
+            color: #999;
+            font-size: 10px;
+            font-weight: normal;
+            margin-top: 4px;
+        }
+
+        .timer {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 9px;
+            padding: 10px 15px;
+            text-align: center;
+            min-width: 105px;
+        }
+
+        .timer-label {
+            color: #888;
+            font-size: 10px;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .timer-value {
+            color: #168cff;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .timer.warning {
+            border-color: #8a6517;
+        }
+
+        .timer.warning .timer-value {
+            color: #ffc107;
+        }
+
+        .timer.danger {
+            border-color: #772727;
+        }
+
+        .timer.danger .timer-value {
+            color: #ff6262;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: auto;
+            padding: 25px 15px 70px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .message {
+            padding: 13px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 13px;
+        }
+
+        .message.error {
+            background: rgba(255, 60, 60, 0.08);
+            border: 1px solid #5c2525;
+            color: #ff7777;
+        }
+
+        .message.success {
+            background: rgba(30, 200, 100, 0.08);
+            border: 1px solid #205c38;
+            color: #67e69a;
+        }
+
+        /* TEST HEADER */
+
+        .test-header {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 18px;
+        }
+
+        .test-title {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        .test-course {
+            color: #168cff;
+            font-size: 13px;
+            margin-top: 7px;
+            font-weight: 700;
+        }
+
+        .test-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .meta-item {
+            background: #080808;
+            border: 1px solid #292929;
+            border-radius: 8px;
+            padding: 9px 12px;
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .meta-item strong {
+            color: white;
+        }
+
+        /* INSTRUCTIONS */
+
+        .instructions {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+
+        .section-title {
+            color: #168cff;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .instructions-text {
+            color: #bbb;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+
+        /* PROGRESS */
+
+        .progress-card {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 7px;
+            background: #222;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #168cff;
+            transition: width 0.2s ease;
+        }
+
+        /* QUESTION */
+
+        .question-card {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 18px;
+        }
+
+        .question-label {
+            color: #168cff;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .marks {
+            color: #777;
+            font-size: 11px;
+            margin-top: -10px;
+            margin-bottom: 18px;
+        }
+
+        /* OBJECTIVE */
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+
+        .option {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px;
+            border: 1px solid #303030;
+            border-radius: 9px;
+            background: #080808;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .option:hover {
+            border-color: #168cff;
+        }
+
+        .option.selected {
+            border-color: #168cff;
+            background: rgba(22, 140, 255, 0.08);
+        }
+
+        .option input {
+            margin-top: 3px;
+            accent-color: #168cff;
+        }
+
+        .option-text {
+            color: #ddd;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* THEORY */
+
+        .theory-answer {
+            width: 100%;
+            min-height: 180px;
+            resize: vertical;
+            background: #050505;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 9px;
+            padding: 14px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        .theory-answer:focus {
+            border-color: #168cff;
+        }
+
+        /* NAVIGATION */
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            background: #151515;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .nav-btn:hover {
+            border-color: #168cff;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .submit-section {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 14px;
+            padding: 22px;
+            margin-top: 20px;
+        }
+
+        .submit-info {
+            color: #999;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            border: none;
+            background: #168cff;
+            color: white;
+            padding: 14px;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #0878df;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* QUESTION NAV */
+
+        .question-navigation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 18px;
+        }
+
+        .question-number-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 7px;
+            border: 1px solid #333;
+            background: #111;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .question-number-btn.current {
+            border-color: #168cff;
+            color: #168cff;
+        }
+
+        .question-number-btn.answered {
+            background: rgba(22, 140, 255, 0.12);
+            border-color: #168cff;
+            color: white;
+        }
+
+        /* CONFIRMATION */
+
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 500;
+        }
+
+        .confirm-overlay.show {
+            display: flex;
+        }
+
+        .confirm-box {
+            width: 100%;
+            max-width: 430px;
+            background: #101010;
+            border: 1px solid #333;
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .confirm-box h2 {
+            margin: 0 0 10px;
+        }
+
+        .confirm-box p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .confirm-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .stay-btn {
+            background: #222;
+            color: white;
+            border: 1px solid #333;
+        }
+
+        .confirm-submit {
+            background: #168cff;
+            color: white;
+            border: 1px solid #168cff;
+        }
+
+        @media (max-width: 650px) {
+
+            .header-inner {
+                align-items: flex-start;
+            }
+
+            .brand {
+                font-size: 18px;
+            }
+
+            .timer {
+                min-width: 90px;
+                padding: 8px 10px;
+            }
+
+            .timer-value {
+                font-size: 15px;
+            }
+
+            main {
+                padding: 18px 12px 50px;
+            }
+
+            .test-title {
+                font-size: 23px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
+
+            .navigation {
+                flex-direction: column;
+            }
+
+            .nav-btn {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="header-inner">
+
+        <div class="brand">
+
+            STI Academy
+
+            <small>
+                School of Technology and Innovation
+            </small>
+
+        </div>
+
+
+        <div
+            id="timerBox"
+            class="timer"
+        >
+
+            <span class="timer-label">
+                TIME LEFT
+            </span>
+
+            <span
+                id="timer"
+                class="timer-value"
+            >
+                --:--
+            </span>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<main>
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+        Loading test...
+    </div>
+
+
+
+    <div
+        id="message"
+        class="message hidden"
+    ></div>
+
+
+
+    <div
+        id="testContent"
+        class="hidden"
+    >
+
+
+        <!-- TEST INFORMATION -->
+
+        <div class="test-header">
+
+            <h1
+                id="testTitle"
+                class="test-title"
+            >
+                Test
+            </h1>
+
+
+            <div
+                id="testCourse"
+                class="test-course"
+            >
+                Course
+            </div>
+
+
+            <div class="test-meta">
+
+
+                <div class="meta-item">
+
+                    Questions:
+                    <strong id="questionTotal">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                    Total Marks:
+                    <strong id="totalMarks">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                    Duration:
+                    <strong id="duration">
+                        0
+                    </strong>
+                    mins
+
+                </div>
+
+
+                <div class="meta-item">
+
+                    Deadline:
+                    <strong id="deadline">
+                        -
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- INSTRUCTIONS -->
+
+        <div class="instructions">
+
+            <div class="section-title">
+                Instructions
+            </div>
+
+
+            <div
+                id="instructions"
+                class="instructions-text"
+            >
+                No special instructions.
+            </div>
+
+        </div>
+
+
+
+        <!-- PROGRESS -->
+
+        <div class="progress-card">
+
+            <div class="progress-top">
+
+                <span>
+                    Question
+                    <strong id="currentQuestion">
+                        1
+                    </strong>
+                    of
+                    <strong id="progressTotal">
+                        0
+                    </strong>
+                </span>
+
+
+                <span id="answeredCount">
+                    0 answered
+                </span>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+                <div
+                    id="progressFill"
+                    class="progress-fill"
+                ></div>
+
+            </div>
+
+
+            <div
+                id="questionNavigation"
+                class="question-navigation"
+            ></div>
+
+        </div>
+
+
+
+        <!-- QUESTION -->
+
+        <div
+            id="questionContainer"
+        ></div>
+
+
+
+        <!-- NAVIGATION -->
+
+        <div class="navigation">
+
+            <button
+                type="button"
+                id="previousButton"
+                class="nav-btn"
+                onclick="previousQuestion()"
+            >
+                ← Previous
+            </button>
+
+
+            <button
+                type="button"
+                id="nextButton"
+                class="nav-btn"
+                onclick="nextQuestion()"
+            >
+                Next →
+            </button>
+
+        </div>
+
+
+
+        <!-- SUBMIT -->
+
+        <div class="submit-section">
+
+            <div class="section-title">
+                Submit Test
+            </div>
+
+
+            <div class="submit-info">
+
+                Make sure you have reviewed your answers before submitting.
+                Once submitted, you will not be able to change your answers.
+
+            </div>
+
+
+            <button
+                type="button"
+                id="submitButton"
+                class="submit-btn"
+                onclick="openSubmitConfirmation()"
+            >
+                Submit Test
+            </button>
+
+        </div>
+
+
+    </div>
+
+
+</main>
+
+
+
+<!-- CONFIRMATION -->
+
+<div
+    id="confirmOverlay"
+    class="confirm-overlay"
+>
+
+    <div class="confirm-box">
+
+        <h2>
+            Submit Test?
+        </h2>
+
+
+        <p id="confirmText">
+            Are you sure you want to submit this test?
+        </p>
+
+
+        <div class="confirm-actions">
+
+            <button
+                type="button"
+                class="stay-btn"
+                onclick="closeSubmitConfirmation()"
+            >
+                Continue Test
+            </button>
+
+
+            <button
+                type="button"
+                class="confirm-submit"
+                onclick="submitTest()"
+            >
+                Submit Test
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* =========================================================
+   FIREBASE CONFIG
+========================================================= */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840261642",
+
+    appId:
+        "1:709840261642:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+
+/* =========================================================
+   FIREBASE
+========================================================= */
+
+if (!firebase.apps.length) {
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+}
+
+const auth =
+    firebase.auth();
+
+const db =
+    firebase.firestore();
+
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let currentUser = null;
+
+let studentData = null;
+
+let testId = null;
+
+let testData = null;
+
+let questions = [];
+
+let currentQuestionIndex = 0;
+
+let answers = {};
+
+let timerInterval = null;
+
+let secondsRemaining = 0;
+
+let submitting = false;
+
+
+
+/* =========================================================
+   URL
+========================================================= */
+
+function getTestId() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    return params.get(
+        "testId"
+    );
+
+}
+
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
+const testContent =
+    document.getElementById(
+        "testContent"
+    );
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(
+    text,
+    type = "error"
+) {
+
+    message.textContent =
+        text;
+
+    message.className =
+        "message " + type;
+
+    message.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+auth.onAuthStateChanged(
+    async function(user) {
+
+        if (!user) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+
+        }
+
+
+        currentUser =
+            user;
+
+
+        testId =
+            getTestId();
+
+
+        if (!testId) {
+
+            loading.classList.add(
+                "hidden"
+            );
+
+            showMessage(
+                "No test was selected.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            await loadStudent();
+
+
+            await loadTest();
+
+
+            await checkExistingSubmission();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            loading.classList.add(
+                "hidden"
+            );
+
+            showMessage(
+                "Unable to load this test. " +
+                error.message,
+                "error"
+            );
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   LOAD STUDENT
+========================================================= */
+
+async function loadStudent() {
+
+    const userSnapshot =
+        await db
+            .collection("users")
+            .doc(currentUser.uid)
+            .get();
+
+
+    if (!userSnapshot.exists) {
+
+        throw new Error(
+            "Your student account could not be found."
+        );
+
+    }
+
+
+    const user =
+        userSnapshot.data();
+
+
+    if (
+        user.role !== "student" ||
+        user.status !== "active"
+    ) {
+
+        throw new Error(
+            "You do not have access to the student portal."
+        );
+
+    }
+
+
+    studentData =
+        user;
+
+}
+
+
+
+/* =========================================================
+   LOAD TEST
+========================================================= */
+
+async function loadTest() {
+
+    const snapshot =
+        await db
+            .collection("tests")
+            .doc(testId)
+            .get();
+
+
+    if (!snapshot.exists) {
+
+        throw new Error(
+            "This test does not exist."
+        );
+
+    }
+
+
+    testData =
+        snapshot.data();
+
+
+    if (
+        testData.status !==
+        "published"
+    ) {
+
+        throw new Error(
+            "This test is not currently available."
+        );
+
+    }
+
+
+    /* =========================================
+       CHECK COURSE
+    ========================================= */
+
+    if (
+        studentData.course &&
+        testData.course &&
+        studentData.course !==
+        testData.course
+    ) {
+
+        throw new Error(
+            "This test is not assigned to your course."
+        );
+
+    }
+
+
+    /* =========================================
+       CHECK START / DEADLINE
+    ========================================= */
+
+    const now =
+        new Date();
+
+
+    const startDate =
+        getTimestampDate(
+            testData.startDate
+        );
+
+
+    const deadline =
+        getTimestampDate(
+            testData.deadline
+        );
+
+
+    if (
+        startDate &&
+        now < startDate
+    ) {
+
+        throw new Error(
+            "This test has not started yet."
+        );
+
+    }
+
+
+    if (
+        deadline &&
+        now > deadline
+    ) {
+
+        throw new Error(
+            "The deadline for this test has passed."
+        );
+
+    }
+
+
+    /* =========================================
+       GET QUESTIONS
+    ========================================= */
+
+    const questionSnapshot =
+        await db
+            .collection(
+                "testQuestions"
+            )
+            .where(
+                "testId",
+                "==",
+                testId
+            )
+            .get();
+
+
+    questions = [];
+
+
+    questionSnapshot.forEach(
+        function(doc) {
+
+            questions.push({
+
+                id:
+                    doc.id,
+
+                ...doc.data()
+
+            });
+
+        }
+    );
+
+
+    questions.sort(
+        function(a, b) {
+
+            return (
+                Number(a.order || 0) -
+                Number(b.order || 0)
+            );
+
+        }
+    );
+
+
+    if (
+        questions.length === 0
+    ) {
+
+        throw new Error(
+            "This test does not have any questions yet."
+        );
+
+    }
+
+
+    displayTest();
+
+
+    buildQuestionNavigation();
+
+
+    renderQuestion();
+
+
+    startTimer();
+
+
+    loading.classList.add(
+        "hidden"
+    );
+
+
+    testContent.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+
+/* =========================================================
+   CHECK EXISTING SUBMISSION
+========================================================= */
+
+async function checkExistingSubmission() {
+
+    const snapshot =
+        await db
+            .collection(
+                "testSubmissions"
+            )
+            .where(
+                "studentUid",
+                "==",
+                currentUser.uid
+            )
+            .where(
+                "testId",
+                "==",
+                testId
+            )
+            .get();
+
+
+    if (
+        !snapshot.empty
+    ) {
+
+        throw new Error(
+            "You have already submitted this test."
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   DISPLAY TEST
+========================================================= */
+
+function displayTest() {
+
+    document.getElementById(
+        "testTitle"
+    ).textContent =
+        testData.title ||
+        "Test";
+
+
+    document.getElementById(
+        "testCourse"
+    ).textContent =
+        testData.course ||
+        "";
+
+
+    document.getElementById(
+        "questionTotal"
+    ).textContent =
+        questions.length;
+
+
+    document.getElementById(
+        "progressTotal"
+    ).textContent =
+        questions.length;
+
+
+    document.getElementById(
+        "totalMarks"
+    ).textContent =
+        testData.totalMarks ??
+        calculateTotalMarks();
+
+
+    document.getElementById(
+        "duration"
+    ).textContent =
+        testData.duration ||
+        0;
+
+
+    document.getElementById(
+        "instructions"
+    ).textContent =
+        testData.instructions ||
+        "No special instructions.";
+
+
+    const deadline =
+        getTimestampDate(
+            testData.deadline
+        );
+
+
+    if (deadline) {
+
+        document.getElementById(
+            "deadline"
+        ).textContent =
+            formatDateTime(
+                deadline
+            );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   TOTAL MARKS
+========================================================= */
+
+function calculateTotalMarks() {
+
+    return questions.reduce(
+        function(total, question) {
+
+            return total +
+                Number(
+                    question.marks || 0
+                );
+
+        },
+        0
+    );
+
+}
+
+
+
+/* =========================================================
+   QUESTION NAVIGATION
+========================================================= */
+
+function buildQuestionNavigation() {
+
+    const container =
+        document.getElementById(
+            "questionNavigation"
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    questions.forEach(
+        function(question, index) {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.type =
+                "button";
+
+
+            button.className =
+                "question-number-btn";
+
+
+            button.textContent =
+                index + 1;
+
+
+            button.onclick =
+                function() {
+
+                    saveCurrentAnswer();
+
+                    currentQuestionIndex =
+                        index;
+
+                    renderQuestion();
+
+                };
+
+
+            container.appendChild(
+                button
+            );
+
+        }
+    );
+
+
+    updateQuestionNavigation();
+
+}
+
+
+
+/* =========================================================
+   UPDATE NAVIGATION
+========================================================= */
+
+function updateQuestionNavigation() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".question-number-btn"
+        );
+
+
+    buttons.forEach(
+        function(button, index) {
+
+            button.classList.toggle(
+                "current",
+                index ===
+                currentQuestionIndex
+            );
+
+
+            button.classList.toggle(
+                "answered",
+                isQuestionAnswered(
+                    questions[index]
+                )
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   RENDER QUESTION
+========================================================= */
+
+function renderQuestion() {
+
+    const question =
+        questions[
+            currentQuestionIndex
+        ];
+
+
+    if (!question) {
+
+        return;
+
+    }
+
+
+    const container =
+        document.getElementById(
+            "questionContainer"
+        );
+
+
+    const type =
+        question.type ||
+        "objective";
+
+
+    const questionNumber =
+        currentQuestionIndex + 1;
+
+
+    let html = `
+
+        <div class="question-card">
+
+            <div class="question-label">
+                QUESTION ${questionNumber}
+            </div>
+
+            <div class="question-text">
+                ${escapeHtml(
+                    question.question || ""
+                )}
+            </div>
+
+            <div class="marks">
+                ${Number(question.marks || 0)} mark${Number(question.marks || 0) === 1 ? "" : "s"}
+            </div>
+
+    `;
+
+
+    if (
+        type ===
+        "objective"
+    ) {
+
+        html +=
+            buildObjectiveQuestion(
+                question
+            );
+
+    } else {
+
+        html +=
+            buildTheoryQuestion(
+                question
+            );
+
+    }
+
+
+    html += `
+        </div>
+    `;
+
+
+    container.innerHTML =
+        html;
+
+
+    restoreAnswer(
+        question
+    );
+
+
+    document.getElementById(
+        "currentQuestion"
+    ).textContent =
+        questionNumber;
+
+
+    updateProgress();
+
+
+    updateNavigationButtons();
+
+
+    updateQuestionNavigation();
+
+}
+
+
+
+/* =========================================================
+   OBJECTIVE QUESTION
+========================================================= */
+
+function buildObjectiveQuestion(
+    question
+) {
+
+    const options =
+        question.options ||
+        {};
+
+
+    const letters =
+        ["A", "B", "C", "D"];
+
+
+    let html =
+        '<div class="options">';
+
+
+    letters.forEach(
+        function(letter) {
+
+            html += `
+
+                <label
+                    class="option"
+                    data-option="${letter}"
+                >
+
+                    <input
+                        type="radio"
+                        name="currentAnswer"
+                        value="${letter}"
+                        onchange="saveCurrentAnswer()"
+                    >
+
+                    <span class="option-text">
+
+                        <strong>
+                            ${letter}.
+                        </strong>
+
+                        ${escapeHtml(
+                            options[letter] || ""
+                        )}
+
+                    </span>
+
+                </label>
+
+            `;
+
+        }
+    );
+
+
+    html +=
+        "</div>";
+
+
+    return html;
+
+}
+
+
+
+/* =========================================================
+   THEORY QUESTION
+========================================================= */
+
+function buildTheoryQuestion(
+    question
+) {
+
+    return `
+
+        <textarea
+            id="theoryAnswer"
+            class="theory-answer"
+            placeholder="Type your answer here..."
+            oninput="saveCurrentAnswer()"
+        ></textarea>
+
+    `;
+
+}
+
+
+
+/* =========================================================
+   RESTORE ANSWER
+========================================================= */
+
+function restoreAnswer(
+    question
+) {
+
+    const answer =
+        answers[
+            question.id
+        ];
+
+
+    if (
+        answer ===
+        undefined ||
+        answer ===
+        null
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        question.type ===
+        "objective"
+    ) {
+
+        const radio =
+            document.querySelector(
+                `input[name="currentAnswer"][value="${escapeSelector(answer)}"]`
+            );
+
+
+        if (radio) {
+
+            radio.checked =
+                true;
+
+
+            radio
+                .closest(
+                    ".option"
+                )
+                .classList.add(
+                    "selected"
+                );
+
+        }
+
+    } else {
+
+        const textarea =
+            document.getElementById(
+                "theoryAnswer"
+            );
+
+
+        if (textarea) {
+
+            textarea.value =
+                answer;
+
+        }
+
+    }
+
+}
+
+
+
+/* =========================================================
+   SAVE CURRENT ANSWER
+========================================================= */
+
+function saveCurrentAnswer() {
+
+    const question =
+        questions[
+            currentQuestionIndex
+        ];
+
+
+    if (!question) {
+
+        return;
+
+    }
+
+
+    let answer =
+        "";
+
+
+    if (
+        question.type ===
+        "objective"
+    ) {
+
+        const selected =
+            document.querySelector(
+                'input[name="currentAnswer"]:checked'
+            );
+
+
+        if (selected) {
+
+            answer =
+                selected.value;
+
+        }
+
+
+        document
+            .querySelectorAll(
+                ".option"
+            )
+            .forEach(
+                function(option) {
+
+                    const input =
+                        option.querySelector(
+                            "input"
+                        );
+
+
+                    option.classList.toggle(
+                        "selected",
+                        input &&
+                        input.checked
+                    );
+
+                }
+            );
+
+    } else {
+
+        const textarea =
+            document.getElementById(
+                "theoryAnswer"
+            );
+
+
+        if (textarea) {
+
+            answer =
+                textarea.value;
+
+        }
+
+    }
+
+
+    answers[
+        question.id
+    ] =
+        answer;
+
+
+    updateProgress();
+
+
+    updateQuestionNavigation();
+
+}
+
+
+
+/* =========================================================
+   QUESTION ANSWERED
+========================================================= */
+
+function isQuestionAnswered(
+    question
+) {
+
+    const answer =
+        answers[
+            question.id
+        ];
+
+
+    return (
+        answer !==
+        undefined &&
+        answer !==
+        null &&
+        String(answer).trim() !==
+        ""
+    );
+
+}
+
+
+
+/* =========================================================
+   UPDATE PROGRESS
+========================================================= */
+
+function updateProgress() {
+
+    const total =
+        questions.length;
+
+
+    let answered =
+        0;
+
+
+    questions.forEach(
+        function(question) {
+
+            if (
+                isQuestionAnswered(
+                    question
+                )
+            ) {
+
+                answered++;
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "answeredCount"
+    ).textContent =
+        answered +
+        " answered";
+
+
+    const percentage =
+        total
+            ? (
+                answered /
+                total
+            ) * 100
+            : 0;
+
+
+    document.getElementById(
+        "progressFill"
+    ).style.width =
+        percentage + "%";
+
+}
+
+
+
+/* =========================================================
+   NEXT
+========================================================= */
+
+function nextQuestion() {
+
+    saveCurrentAnswer();
+
+
+    if (
+        currentQuestionIndex <
+        questions.length - 1
+    ) {
+
+        currentQuestionIndex++;
+
+
+        renderQuestion();
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+}
+
+
+
+/* =========================================================
+   PREVIOUS
+========================================================= */
+
+function previousQuestion() {
+
+    saveCurrentAnswer();
+
+
+    if (
+        currentQuestionIndex >
+        0
+    ) {
+
+        currentQuestionIndex--;
+
+
+        renderQuestion();
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+}
+
+
+
+/* =========================================================
+   NAVIGATION BUTTONS
+========================================================= */
+
+function updateNavigationButtons() {
+
+    const previous =
+        document.getElementById(
+            "previousButton"
+        );
+
+
+    const next =
+        document.getElementById(
+            "nextButton"
+        );
+
+
+    previous.disabled =
+        currentQuestionIndex ===
+        0;
+
+
+    next.disabled =
+        currentQuestionIndex ===
+        questions.length - 1;
+
+}
+
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function startTimer() {
+
+    let duration =
+        Number(
+            testData.duration || 0
+        );
+
+
+    if (
+        duration <= 0
+    ) {
+
+        return;
+
+    }
+
+
+    secondsRemaining =
+        duration *
+        60;
+
+
+    /*
+       If the test has a deadline,
+       never allow the timer to extend
+       beyond that deadline.
+    */
+
+    const deadline =
+        getTimestampDate(
+            testData.deadline
+        );
+
+
+    if (deadline) {
+
+        const secondsUntilDeadline =
+            Math.floor(
+                (
+                    deadline.getTime() -
+                    Date.now()
+                ) / 1000
+            );
+
+
+        if (
+            secondsUntilDeadline <
+            secondsRemaining
+        ) {
+
+            secondsRemaining =
+                Math.max(
+                    0,
+                    secondsUntilDeadline
+                );
+
+        }
+
+    }
+
+
+    updateTimer();
+
+
+    timerInterval =
+        setInterval(
+            function() {
+
+                secondsRemaining--;
+
+
+                updateTimer();
+
+
+                if (
+                    secondsRemaining <=
+                    0
+                ) {
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+                    autoSubmit();
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+
+/* =========================================================
+   UPDATE TIMER
+========================================================= */
+
+function updateTimer() {
+
+    const timer =
+        document.getElementById(
+            "timer"
+        );
+
+
+    const timerBox =
+        document.getElementById(
+            "timerBox"
+        );
+
+
+    if (
+        secondsRemaining < 0
+    ) {
+
+        secondsRemaining =
+            0;
+
+    }
+
+
+    const minutes =
+        Math.floor(
+            secondsRemaining /
+            60
+        );
+
+
+    const seconds =
+        secondsRemaining %
+        60;
+
+
+    timer.textContent =
+        String(minutes).padStart(
+            2,
+            "0"
+        ) +
+        ":" +
+        String(seconds).padStart(
+            2,
+            "0"
+        );
+
+
+    timerBox.classList.remove(
+        "warning",
+        "danger"
+    );
+
+
+    if (
+        secondsRemaining <=
+        300
+    ) {
+
+        timerBox.classList.add(
+            "danger"
+        );
+
+    } else if (
+        secondsRemaining <=
+        600
+    ) {
+
+        timerBox.classList.add(
+            "warning"
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   SUBMIT CONFIRMATION
+========================================================= */
+
+function openSubmitConfirmation() {
+
+    saveCurrentAnswer();
+
+
+    const unanswered =
+        questions.filter(
+            function(question) {
+
+                return !isQuestionAnswered(
+                    question
+                );
+
+            }
+        ).length;
+
+
+    const confirmText =
+        document.getElementById(
+            "confirmText"
+        );
+
+
+    if (
+        unanswered > 0
+    ) {
+
+        confirmText.textContent =
+            "You have " +
+            unanswered +
+            " unanswered question" +
+            (
+                unanswered === 1
+                    ? ""
+                    : "s"
+            ) +
+            ". Are you sure you want to submit?";
+
+    } else {
+
+        confirmText.textContent =
+            "You have answered all questions. Are you sure you want to submit?";
+
+    }
+
+
+    document.getElementById(
+        "confirmOverlay"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+
+/* =========================================================
+   CLOSE CONFIRMATION
+========================================================= */
+
+function closeSubmitConfirmation() {
+
+    document.getElementById(
+        "confirmOverlay"
+    ).classList.remove(
+        "show"
+    );
+
+}
+
+
+
+/* =========================================================
+   SUBMIT TEST
+========================================================= */
+
+async function submitTest(
+    automatic = false
+) {
+
+    if (submitting) {
+
+        return;
+
+    }
+
+
+    saveCurrentAnswer();
+
+
+    submitting =
+        true;
+
+
+    closeSubmitConfirmation();
+
+
+    const submitButton =
+        document.getElementById(
+            "submitButton"
+        );
+
+
+    submitButton.disabled =
+        true;
+
+
+    submitButton.textContent =
+        automatic
+            ? "Time Up..."
+            : "Submitting...";
+
+
+    if (timerInterval) {
+
+        clearInterval(
+            timerInterval
+        );
+
+    }
+
+
+    try {
+
+        const answerList =
+            questions.map(
+                function(question) {
+
+                    return {
+
+                        questionId:
+                            question.id,
+
+                        question:
+                            question.question ||
+                            "",
+
+                        type:
+                            question.type ||
+                            "objective",
+
+                        marks:
+                            Number(
+                                question.marks ||
+                                0
+                            ),
+
+                        answer:
+                            answers[
+                                question.id
+                            ] ??
+                            ""
+
+                    };
+
+                }
+            );
+
+
+        /*
+           Objective answers are submitted for
+           later grading. Theory answers are also
+           stored for admin grading.
+        */
+
+
+        const submissionData = {
+
+            testId:
+                testId,
+
+            studentUid:
+                currentUser.uid,
+
+            studentId:
+                studentData.studentId ||
+                "",
+
+            studentName:
+                studentData.fullName ||
+                "",
+
+            studentEmail:
+                studentData.email ||
+                currentUser.email ||
+                "",
+
+            course:
+                studentData.course ||
+                testData.course ||
+                "",
+
+            answers:
+                answerList,
+
+            totalQuestions:
+                questions.length,
+
+            totalMarks:
+                Number(
+                    testData.totalMarks ||
+                    calculateTotalMarks()
+                ),
+
+            status:
+                "submitted",
+
+            submittedAt:
+                firebase.firestore.Timestamp.now(),
+
+            submissionMethod:
+                automatic
+                    ? "time_expired"
+                    : "student"
+
+        };
+
+
+        await db
+            .collection(
+                "testSubmissions"
+            )
+            .add(
+                submissionData
+            );
+
+
+        showMessage(
+            "Test submitted successfully.",
+            "success"
+        );
+
+
+        document.getElementById(
+            "testContent"
+        ).classList.add(
+            "hidden"
+        );
+
+
+        setTimeout(
+            function() {
+
+                window.location.href =
+                    "student-tests.html";
+
+            },
+            1200
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Submission error:",
+            error
+        );
+
+
+        submitting =
+            false;
+
+
+        submitButton.disabled =
+            false;
+
+
+        submitButton.textContent =
+            "Submit Test";
+
+
+        showMessage(
+            "The test could not be submitted. " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   AUTO SUBMIT
+========================================================= */
+
+function autoSubmit() {
+
+    showMessage(
+        "Your time has ended. Submitting your test...",
+        "error"
+    );
+
+
+    submitTest(
+        true
+    );
+
+}
+
+
+
+/* =========================================================
+   FIREBASE TIMESTAMP
+========================================================= */
+
+function getTimestampDate(
+    value
+) {
+
+    if (!value) {
+
+        return null;
+
+    }
+
+
+    if (
+        typeof value.toDate ===
+        "function"
+    ) {
+
+        return value.toDate();
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return date;
+
+}
+
+
+
+/* =========================================================
+   DATE FORMAT
+========================================================= */
+
+function formatDateTime(
+    date
+) {
+
+    return date.toLocaleString(
+        "en-NG",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================================================
+   ESCAPE SELECTOR
+========================================================= */
+
+function escapeSelector(
+    value
+) {
+
+    return String(
+        value
+    ).replace(
+        /["\\]/g,
+        "\\$&"
+    );
+
+}
+
+
+
+/* =========================================================
+   PREVENT ACCIDENTAL PAGE EXIT
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    function(event) {
+
+        if (
+            questions.length > 0 &&
+            !submitting
+        ) {
+
+            event.preventDefault();
+
+            event.returnValue =
+                "";
+
+        }
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>

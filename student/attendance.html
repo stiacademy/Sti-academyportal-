@@ -1,0 +1,1896 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Attendance | STI Academy</title><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script><style>* {
+  box-sizing: border-box;
+  }
+
+body {
+margin: 0;
+font-family: Arial, sans-serif;
+background: #050505;
+color: white;
+}
+
+.app {
+display: flex;
+min-height: 100vh;
+}
+
+.sidebar {
+width: 230px;
+background: #0b0b0b;
+border-right: 1px solid #1d1d1d;
+padding: 22px 14px;
+position: fixed;
+left: 0;
+top: 0;
+bottom: 0;
+overflow-y: auto;
+}
+
+.logo {
+font-size: 22px;
+font-weight: bold;
+color: #168cff;
+margin-bottom: 28px;
+padding: 0 10px;
+}
+
+.nav a {
+display: block;
+color: #bdbdbd;
+text-decoration: none;
+padding: 12px 10px;
+border-radius: 8px;
+margin-bottom: 4px;
+font-size: 14px;
+}
+
+.nav a:hover,
+.nav a.active {
+background: #101f30;
+color: #168cff;
+}
+
+.logout {
+margin-top: 20px;
+width: 100%;
+padding: 12px;
+border: 0;
+border-radius: 8px;
+background: #151515;
+color: #ff5f5f;
+cursor: pointer;
+}
+
+.main {
+margin-left: 230px;
+width: calc(100% - 230px);
+padding: 30px;
+}
+
+.topbar {
+margin-bottom: 25px;
+}
+
+.topbar h1 {
+margin: 0 0 8px;
+font-size: 28px;
+}
+
+.topbar p {
+margin: 0;
+color: #999;
+}
+
+.stats {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 15px;
+margin-bottom: 25px;
+}
+
+.stat {
+background: #0d0d0d;
+border: 1px solid #1d1d1d;
+border-radius: 12px;
+padding: 20px;
+}
+
+.stat-label {
+color: #999;
+font-size: 13px;
+margin-bottom: 10px;
+}
+
+.stat-value {
+font-size: 28px;
+font-weight: bold;
+}
+
+.section {
+background: #0d0d0d;
+border: 1px solid #1d1d1d;
+border-radius: 12px;
+padding: 20px;
+margin-bottom: 25px;
+}
+
+.section h2 {
+margin: 0 0 18px;
+font-size: 20px;
+}
+
+.attendance-card {
+border: 1px solid #202020;
+border-radius: 10px;
+padding: 18px;
+margin-bottom: 12px;
+background: #090909;
+}
+
+.attendance-card h3 {
+margin: 0 0 10px;
+font-size: 17px;
+}
+
+.info {
+color: #aaa;
+font-size: 14px;
+margin: 6px 0;
+}
+
+.code-box {
+margin-top: 15px;
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+.code-input {
+flex: 1;
+min-width: 180px;
+padding: 12px;
+border-radius: 8px;
+border: 1px solid #333;
+background: #111;
+color: white;
+outline: none;
+}
+
+.code-input:focus {
+border-color: #168cff;
+}
+
+.btn {
+padding: 12px 18px;
+border: 0;
+border-radius: 8px;
+background: #168cff;
+color: white;
+cursor: pointer;
+font-weight: bold;
+}
+
+.btn:hover {
+background: #0879e8;
+}
+
+.btn:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.success {
+background: #0b2a18;
+border: 1px solid #1b6b3a;
+color: #66e59a;
+padding: 12px;
+border-radius: 8px;
+margin-bottom: 15px;
+}
+
+.error {
+background: #2a0d0d;
+border: 1px solid #6b2020;
+color: #ff7777;
+padding: 12px;
+border-radius: 8px;
+margin-bottom: 15px;
+}
+
+.empty {
+color: #777;
+padding: 10px 0;
+}
+
+.table-wrap {
+overflow-x: auto;
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+min-width: 600px;
+}
+
+th,
+td {
+padding: 13px 10px;
+border-bottom: 1px solid #202020;
+text-align: left;
+font-size: 14px;
+}
+
+th {
+color: #888;
+font-weight: normal;
+}
+
+.present {
+color: #5ee58c;
+font-weight: bold;
+}
+
+.absent {
+color: #ff6969;
+font-weight: bold;
+}
+
+.loading {
+color: #777;
+}
+
+@media (max-width: 800px) {
+
+.sidebar {
+    width: 190px;
+}
+
+.main {
+    margin-left: 190px;
+    width: calc(100% - 190px);
+    padding: 20px;
+}
+
+.stats {
+    grid-template-columns: 1fr;
+}
+
+}
+
+@media (max-width: 600px) {
+
+.sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid #1d1d1d;
+}
+
+.app {
+    display: block;
+}
+
+.main {
+    margin-left: 0;
+    width: 100%;
+    padding: 18px;
+}
+
+.nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+}
+
+.logout {
+    margin-top: 10px;
+}
+
+}
+
+</style></head><body><div class="app"><aside class="sidebar"><div class="logo">
+STI Academy
+
+</div><nav class="nav"><a href="dashboard.html">
+    Dashboard
+</a>
+
+<a href="course.html">
+    Course
+</a>
+
+<a href="classes.html">
+    Classes
+</a>
+
+<a href="timetable.html">
+    Timetable
+</a>
+
+<a href="attendance.html" class="active">
+    Attendance
+</a>
+
+<a href="assignments.html">
+    Assignments
+</a>
+
+<a href="tests.html">
+    Tests
+</a>
+
+<a href="exams.html">
+    Exams
+</a>
+
+<a href="projects.html">
+    Projects
+</a>
+
+<a href="results.html">
+    Results
+</a>
+
+<a href="rankings.html">
+    Rankings
+</a>
+
+<a href="payments.html">
+    Payments
+</a>
+
+<a href="profile.html">
+    Profile
+</a>
+
+</nav><button
+class="logout"
+id="logoutBtn"
+type="button"
+
+«»
+
+Logout
+
+</button></aside><main class="main"><div class="topbar"><h1>
+    Attendance
+</h1>
+
+<p>
+    Mark your attendance for active classes and view your attendance history.
+</p>
+
+</div><div id="message"></div><section class="stats"><div class="stat">
+
+    <div class="stat-label">
+        Attendance Rate
+    </div>
+
+    <div
+        class="stat-value"
+        id="attendanceRate"
+    >
+        0%
+    </div>
+
+</div>
+
+
+<div class="stat">
+
+    <div class="stat-label">
+        Present
+    </div>
+
+    <div
+        class="stat-value"
+        id="presentCount"
+    >
+        0
+    </div>
+
+</div>
+
+
+<div class="stat">
+
+    <div class="stat-label">
+        Absent
+    </div>
+
+    <div
+        class="stat-value"
+        id="absentCount"
+    >
+        0
+    </div>
+
+</div>
+
+</section><section class="section"><h2>
+    Active Attendance
+</h2>
+
+<div id="activeAttendance">
+
+    <div class="loading">
+        Loading active attendance...
+    </div>
+
+</div>
+
+</section><section class="section"><h2>
+    Attendance History
+</h2>
+
+<div class="table-wrap">
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Date</th>
+                <th>Class</th>
+                <th>Course</th>
+                <th>Status</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="attendanceHistory">
+
+            <tr>
+
+                <td
+                    colspan="4"
+                    class="loading"
+                >
+                    Loading attendance history...
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</section></main></div><script>/* =====================================================
+FIREBASE
+===================================================== */
+
+const firebaseConfig = {
+
+apiKey:
+    "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+authDomain:
+    "sti-academy.firebaseapp.com",
+
+projectId:
+    "sti-academy",
+
+storageBucket:
+    "sti-academy.firebasestorage.app",
+
+messagingSenderId:
+    "709840641262",
+
+appId:
+    "1:709840641262:web:714b09bf661afa159f27ff",
+
+measurementId:
+    "G-7ZRZ3P28YP"
+
+};
+
+if (!firebase.apps.length) {
+
+firebase.initializeApp(
+    firebaseConfig
+);
+
+}
+
+const auth =
+firebase.auth();
+
+const db =
+firebase.firestore();
+
+let currentStudent = null;
+
+/* =====================================================
+HELPERS
+===================================================== */
+
+function normalize(value) {
+
+return String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+}
+
+function normalizeCourseName(value) {
+
+const text =
+    String(value || "")
+        .trim()
+        .replace(/\s+/g, " ");
+
+if (!text) {
+    return "";
+}
+
+return text
+    .toLowerCase()
+    .split(" ")
+    .map(word =>
+
+        word.charAt(0).toUpperCase() +
+        word.slice(1)
+
+    )
+    .join(" ");
+
+}
+
+function getStudentCourse(student) {
+
+return (
+    student.courseName ||
+    student.course ||
+    ""
+);
+
+}
+
+function getStudentCohort(student) {
+
+return (
+    student.cohortName ||
+    student.cohort ||
+    ""
+);
+
+}
+
+function escapeHtml(value) {
+
+return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+function showMessage(
+text,
+type = "success"
+) {
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+message.innerHTML = `
+    <div class="${type}">
+        ${escapeHtml(text)}
+    </div>
+`;
+
+window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+});
+
+setTimeout(() => {
+
+    message.innerHTML = "";
+
+}, 6000);
+
+}
+
+function getTimestampDate(value) {
+
+if (!value) {
+    return null;
+}
+
+if (
+    typeof value.toDate ===
+    "function"
+) {
+
+    return value.toDate();
+}
+
+const date =
+    new Date(value);
+
+if (isNaN(date.getTime())) {
+    return null;
+}
+
+return date;
+
+}
+
+function formatDate(dateString) {
+
+if (!dateString) {
+    return "-";
+}
+
+const date =
+    new Date(
+        dateString +
+        "T00:00:00"
+    );
+
+if (isNaN(date.getTime())) {
+    return dateString;
+}
+
+return date.toLocaleDateString(
+    "en-NG",
+    {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+    }
+);
+
+}
+
+/* =====================================================
+LOAD STUDENT
+===================================================== */
+
+async function loadStudent() {
+
+const user =
+    auth.currentUser;
+
+
+if (!user) {
+
+    throw new Error(
+        "You are not logged in."
+    );
+}
+
+
+const uid =
+    user.uid;
+
+
+console.log(
+    "Attendance UID:",
+    uid
+);
+
+
+const userSnap =
+    await db
+        .collection("users")
+        .doc(uid)
+        .get();
+
+
+if (!userSnap.exists) {
+
+    throw new Error(
+        "Your portal account could not be found."
+    );
+}
+
+
+const userData =
+    userSnap.data();
+
+
+console.log(
+    "Attendance user document:",
+    userData
+);
+
+
+if (
+    userData.role !== "student"
+) {
+
+    throw new Error(
+        "This account is not a student account."
+    );
+}
+
+
+if (
+    userData.status !== "active"
+) {
+
+    throw new Error(
+        "Your student portal account is not active."
+    );
+}
+
+
+if (!userData.studentId) {
+
+    throw new Error(
+        "Your student ID could not be found."
+    );
+}
+
+
+const studentSnap =
+    await db
+        .collection("students")
+        .doc(
+            userData.studentId
+        )
+        .get();
+
+
+if (!studentSnap.exists) {
+
+    throw new Error(
+        "Your student record could not be found."
+    );
+}
+
+
+return {
+
+    id:
+        studentSnap.id,
+
+    ...studentSnap.data(),
+
+    fullName:
+        studentSnap.data().fullName ||
+        userData.fullName,
+
+    email:
+        studentSnap.data().email ||
+        userData.email ||
+        user.email,
+
+    studentId:
+        studentSnap.id
+};
+
+}
+
+/* =====================================================
+LOAD ACTIVE ATTENDANCE
+===================================================== */
+
+async function loadActiveAttendance(
+student
+) {
+
+const container =
+    document.getElementById(
+        "activeAttendance"
+    );
+
+
+container.innerHTML = `
+    <div class="loading">
+        Loading active attendance...
+    </div>
+`;
+
+
+const studentCourse =
+    normalize(
+        getStudentCourse(student)
+    );
+
+
+const studentCohort =
+    normalize(
+        getStudentCohort(student)
+    );
+
+
+if (
+    !studentCourse ||
+    !studentCohort
+) {
+
+    container.innerHTML = `
+        <div class="error">
+            Your course or cohort information is missing.
+        </div>
+    `;
+
+    return;
+}
+
+
+try {
+
+    const snapshot =
+        await db
+            .collection(
+                "attendanceSessions"
+            )
+            .where(
+                "status",
+                "==",
+                "open"
+            )
+            .get();
+
+
+    const matchingSessions = [];
+
+
+    snapshot.forEach(
+        doc => {
+
+            const session = {
+
+                id:
+                    doc.id,
+
+                ...doc.data()
+
+            };
+
+
+            const sessionCourse =
+                normalize(
+                    session.courseName
+                );
+
+
+            const sessionCohort =
+                normalize(
+                    session.cohortName
+                );
+
+
+            if (
+                sessionCourse !==
+                studentCourse ||
+                sessionCohort !==
+                studentCohort
+            ) {
+
+                return;
+            }
+
+
+            const expiry =
+                getTimestampDate(
+                    session.expiresAt
+                );
+
+
+            if (
+                expiry &&
+                expiry.getTime() <=
+                Date.now()
+            ) {
+
+                return;
+            }
+
+
+            matchingSessions.push(
+                session
+            );
+
+        }
+    );
+
+
+    if (
+        !matchingSessions.length
+    ) {
+
+        container.innerHTML = `
+            <div class="empty">
+                There is no active attendance session right now.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    matchingSessions.forEach(
+        session => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "attendance-card";
+
+
+            card.innerHTML = `
+
+                <h3>
+                    ${escapeHtml(
+                        session.classTitle ||
+                        "Class"
+                    )}
+                </h3>
+
+                <div class="info">
+                    <strong>Date:</strong>
+                    ${escapeHtml(
+                        formatDate(
+                            session.attendanceDate
+                        )
+                    )}
+                </div>
+
+                <div class="info">
+                    <strong>Course:</strong>
+                    ${escapeHtml(
+                        normalizeCourseName(
+                            session.courseName
+                        )
+                    )}
+                </div>
+
+                <div class="info">
+                    <strong>Cohort:</strong>
+                    ${escapeHtml(
+                        session.cohortName ||
+                        ""
+                    )}
+                </div>
+
+                <div class="info">
+                    <strong>Attendance duration:</strong>
+                    ${escapeHtml(
+                        session.durationMinutes ||
+                        30
+                    )}
+                    minutes
+                </div>
+
+                <div class="code-box">
+
+                    <input
+                        type="text"
+                        class="code-input attendance-code"
+                        data-session-id="${escapeHtml(
+                            session.id
+                        )}"
+                        placeholder="Enter attendance code"
+                        autocomplete="off"
+                        inputmode="numeric"
+                        maxlength="6"
+                    >
+
+                    <button
+                        class="btn submit-attendance"
+                        type="button"
+                        data-session-id="${escapeHtml(
+                            session.id
+                        )}"
+                    >
+                        Submit Attendance
+                    </button>
+
+                </div>
+            `;
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+} catch (error) {
+
+    console.error(
+        "Active attendance error:",
+        error
+    );
+
+
+    container.innerHTML = `
+        <div class="error">
+            Unable to load active attendance.
+        </div>
+    `;
+}
+
+}
+
+/* =====================================================
+ATTEND BUTTON
+===================================================== */
+
+document
+.getElementById(
+"activeAttendance"
+)
+.addEventListener(
+"click",
+async function(event) {
+
+        const button =
+            event.target.closest(
+                ".submit-attendance"
+            );
+
+
+        if (!button) {
+            return;
+        }
+
+
+        const sessionId =
+            button.dataset.sessionId;
+
+
+        const input =
+            button
+                .parentElement
+                .querySelector(
+                    ".attendance-code"
+                );
+
+
+        if (!input) {
+
+            showMessage(
+                "Attendance code field could not be found.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        await submitAttendance(
+            sessionId,
+            input,
+            button
+        );
+
+    }
+);
+
+/* =====================================================
+SUBMIT ATTENDANCE
+===================================================== */
+
+async function submitAttendance(
+sessionId,
+input,
+button
+) {
+
+const user =
+    auth.currentUser;
+
+
+if (!user) {
+
+    showMessage(
+        "Your login session is not available. Please log in again.",
+        "error"
+    );
+
+    return;
+}
+
+
+const enteredCode =
+    String(
+        input.value || ""
+    ).trim();
+
+
+if (!enteredCode) {
+
+    showMessage(
+        "Please enter the attendance code.",
+        "error"
+    );
+
+    input.focus();
+
+    return;
+}
+
+
+button.disabled = true;
+input.disabled = true;
+
+button.textContent =
+    "Submitting...";
+
+
+try {
+
+    const sessionSnap =
+        await db
+            .collection(
+                "attendanceSessions"
+            )
+            .doc(sessionId)
+            .get();
+
+
+    if (!sessionSnap.exists) {
+
+        throw new Error(
+            "This attendance session no longer exists."
+        );
+    }
+
+
+    const session =
+        sessionSnap.data();
+
+
+    if (
+        session.status !==
+        "open"
+    ) {
+
+        throw new Error(
+            "This attendance session is no longer open."
+        );
+    }
+
+
+    const actualCode =
+        String(
+            session.code || ""
+        ).trim();
+
+
+    if (
+        enteredCode !==
+        actualCode
+    ) {
+
+        throw new Error(
+            "Invalid attendance code."
+        );
+    }
+
+
+    const expiry =
+        getTimestampDate(
+            session.expiresAt
+        );
+
+
+    if (
+        expiry &&
+        expiry.getTime() <=
+        Date.now()
+    ) {
+
+        throw new Error(
+            "This attendance session has expired."
+        );
+    }
+
+
+    const studentCourse =
+        normalize(
+            getStudentCourse(
+                currentStudent
+            )
+        );
+
+
+    const studentCohort =
+        normalize(
+            getStudentCohort(
+                currentStudent
+            )
+        );
+
+
+    if (
+        studentCourse !==
+        normalize(
+            session.courseName
+        )
+    ) {
+
+        throw new Error(
+            "This attendance session does not belong to your course."
+        );
+    }
+
+
+    if (
+        studentCohort !==
+        normalize(
+            session.cohortName
+        )
+    ) {
+
+        throw new Error(
+            "This attendance session does not belong to your cohort."
+        );
+    }
+
+
+    const studentId =
+        currentStudent.studentId;
+
+
+    const recordId =
+        `${sessionId}_${studentId}`;
+
+
+    /*
+     * IMPORTANT FIX
+     *
+     * Do NOT read the attendance record first.
+     *
+     * The previous recordRef.get() could itself be
+     * rejected by the student Firestore rules when
+     * the document did not exist yet.
+     *
+     * We now write directly. The Firestore rules still
+     * require studentUid to match the authenticated user.
+     */
+
+    const recordRef =
+        db
+            .collection(
+                "attendanceRecords"
+            )
+            .doc(recordId);
+
+
+    await recordRef.set({
+
+        sessionId:
+            sessionId,
+
+        studentUid:
+            user.uid,
+
+        studentId:
+            studentId,
+
+        studentName:
+            currentStudent.fullName ||
+            "",
+
+        email:
+            currentStudent.email ||
+            user.email ||
+            "",
+
+        courseId:
+            session.courseId ||
+            "",
+
+        courseName:
+            normalizeCourseName(
+                session.courseName
+            ),
+
+        department:
+            currentStudent.department ||
+            session.department ||
+            "",
+
+        cohortId:
+            session.cohortId ||
+            "",
+
+        cohortName:
+            session.cohortName ||
+            "",
+
+        classId:
+            session.classId ||
+            "",
+
+        classTitle:
+            session.classTitle ||
+            "Class",
+
+        attendanceDate:
+            session.attendanceDate ||
+            "",
+
+        status:
+            "present",
+
+        submittedAt:
+            firebase.firestore
+                .FieldValue
+                .serverTimestamp(),
+
+        createdAt:
+            firebase.firestore
+                .FieldValue
+                .serverTimestamp(),
+
+        createdBy:
+            user.uid
+
+    });
+
+
+    showMessage(
+        "Attendance submitted successfully.",
+        "success"
+    );
+
+
+    input.value =
+        "";
+
+    input.disabled =
+        true;
+
+    button.disabled =
+        true;
+
+    button.textContent =
+        "Submitted";
+
+
+    await loadAttendanceStats(
+        currentStudent
+    );
+
+
+    await loadAttendanceHistory();
+
+
+} catch (error) {
+
+    console.error(
+        "Attendance submission error:",
+        error
+    );
+
+
+    let message =
+        error.message ||
+        "Unable to submit attendance.";
+
+
+    if (
+        error.code ===
+        "permission-denied"
+    ) {
+
+        message =
+            "Firestore permission denied. The attendance record could not be saved.";
+    }
+
+
+    showMessage(
+        message,
+        "error"
+    );
+
+
+    input.disabled =
+        false;
+
+    button.disabled =
+        false;
+
+    button.textContent =
+        "Submit Attendance";
+}
+
+}
+
+/* =====================================================
+ATTENDANCE STATS
+===================================================== */
+
+async function loadAttendanceStats(
+student
+) {
+
+try {
+
+    const studentCourse =
+        normalize(
+            getStudentCourse(
+                student
+            )
+        );
+
+
+    const studentCohort =
+        normalize(
+            getStudentCohort(
+                student
+            )
+        );
+
+
+    const sessionsSnap =
+        await db
+            .collection(
+                "attendanceSessions"
+            )
+            .get();
+
+
+    const finalizedSessions = [];
+
+
+    sessionsSnap.forEach(
+        doc => {
+
+            const session = {
+
+                id:
+                    doc.id,
+
+                ...doc.data()
+
+            };
+
+
+            if (
+                normalize(
+                    session.courseName
+                ) !==
+                studentCourse
+            ) {
+
+                return;
+            }
+
+
+            if (
+                normalize(
+                    session.cohortName
+                ) !==
+                studentCohort
+            ) {
+
+                return;
+            }
+
+
+            if (
+                session.status ===
+                "closed"
+            ) {
+
+                finalizedSessions.push(
+                    session
+                );
+            }
+
+        }
+    );
+
+
+    const recordsSnap =
+        await db
+            .collection(
+                "attendanceRecords"
+            )
+            .where(
+                "studentUid",
+                "==",
+                auth.currentUser.uid
+            )
+            .get();
+
+
+    const presentSessionIds =
+        new Set();
+
+
+    recordsSnap.forEach(
+        doc => {
+
+            const data =
+                doc.data();
+
+
+            if (
+                data.status ===
+                "present"
+            ) {
+
+                presentSessionIds.add(
+                    data.sessionId
+                );
+            }
+
+        }
+    );
+
+
+    const total =
+        finalizedSessions.length;
+
+
+    let present = 0;
+
+
+    finalizedSessions.forEach(
+        session => {
+
+            if (
+                presentSessionIds.has(
+                    session.id
+                )
+            ) {
+
+                present++;
+            }
+
+        }
+    );
+
+
+    const absent =
+        Math.max(
+            0,
+            total - present
+        );
+
+
+    const rate =
+        total > 0
+            ? Math.round(
+                (
+                    present /
+                    total
+                ) * 100
+            )
+            : 0;
+
+
+    document.getElementById(
+        "attendanceRate"
+    ).textContent =
+        `${rate}%`;
+
+
+    document.getElementById(
+        "presentCount"
+    ).textContent =
+        present;
+
+
+    document.getElementById(
+        "absentCount"
+    ).textContent =
+        absent;
+
+
+} catch (error) {
+
+    console.error(
+        "Stats error:",
+        error
+    );
+
+}
+
+}
+
+/* =====================================================
+ATTENDANCE HISTORY
+===================================================== */
+
+async function loadAttendanceHistory() {
+
+const tbody =
+    document.getElementById(
+        "attendanceHistory"
+    );
+
+
+try {
+
+    const snapshot =
+        await db
+            .collection(
+                "attendanceRecords"
+            )
+            .where(
+                "studentUid",
+                "==",
+                auth.currentUser.uid
+            )
+            .get();
+
+
+    if (
+        snapshot.empty
+    ) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td
+                    colspan="4"
+                    class="empty"
+                >
+                    No attendance records yet.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    const records = [];
+
+
+    snapshot.forEach(
+        doc => {
+
+            records.push({
+
+                id:
+                    doc.id,
+
+                ...doc.data()
+
+            });
+
+        }
+    );
+
+
+    records.sort(
+        (a, b) =>
+            String(
+                b.attendanceDate ||
+                ""
+            ).localeCompare(
+                String(
+                    a.attendanceDate ||
+                    ""
+                )
+            )
+    );
+
+
+    tbody.innerHTML = "";
+
+
+    records.forEach(
+        record => {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const status =
+                String(
+                    record.status ||
+                    ""
+                ).toLowerCase();
+
+
+            const statusClass =
+                status ===
+                "present"
+                    ? "present"
+                    : "absent";
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHtml(
+                        formatDate(
+                            record.attendanceDate
+                        )
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        record.classTitle ||
+                        "Class"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        normalizeCourseName(
+                            record.courseName ||
+                            ""
+                        )
+                    )}
+                </td>
+
+                <td class="${statusClass}">
+                    ${escapeHtml(
+                        status
+                            ? status
+                                .charAt(0)
+                                .toUpperCase() +
+                              status.slice(1)
+                            : "-"
+                    )}
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+} catch (error) {
+
+    console.error(
+        "History error:",
+        error
+    );
+
+
+    tbody.innerHTML = `
+        <tr>
+            <td
+                colspan="4"
+                class="error"
+            >
+                Unable to load attendance history.
+            </td>
+        </tr>
+    `;
+}
+
+}
+
+/* =====================================================
+LOGOUT
+===================================================== */
+
+document
+.getElementById(
+"logoutBtn"
+)
+.addEventListener(
+"click",
+async function() {
+
+        try {
+
+            await auth.signOut();
+
+            window.location.href =
+                "../login.html";
+
+        } catch (error) {
+
+            console.error(
+                "Logout error:",
+                error
+            );
+
+        }
+
+    }
+);
+
+/* =====================================================
+AUTH STATE
+===================================================== */
+
+auth.onAuthStateChanged(
+async function(user) {
+
+    console.log(
+        "Attendance auth state:",
+        user
+    );
+
+
+    if (!user) {
+
+        document.getElementById(
+            "activeAttendance"
+        ).innerHTML = `
+            <div class="error">
+                No student account is currently logged in.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    console.log(
+        "Attendance Firebase UID:",
+        user.uid
+    );
+
+
+    try {
+
+        currentStudent =
+            await loadStudent();
+
+
+        console.log(
+            "Attendance student:",
+            currentStudent
+        );
+
+
+        await loadAttendanceStats(
+            currentStudent
+        );
+
+
+        await loadActiveAttendance(
+            currentStudent
+        );
+
+
+        await loadAttendanceHistory();
+
+
+    } catch (error) {
+
+        console.error(
+            "Attendance page error:",
+            error
+        );
+
+
+        showMessage(
+            error.message ||
+            "Unable to load your attendance.",
+            "error"
+        );
+
+    }
+
+}
+
+);
+
+</script></body>
+
+</html>

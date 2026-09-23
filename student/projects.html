@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Projects | STI Academy</title>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#050505;
+    color:#fff;
+    padding:20px;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+
+.header{
+    margin-bottom:20px;
+}
+
+.header h1{
+    font-size:28px;
+    margin-bottom:7px;
+}
+
+.header p{
+    color:#aaa;
+    font-size:14px;
+}
+
+.student-info{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:25px;
+}
+
+.info-card{
+    background:#101010;
+    border:1px solid #242424;
+    border-radius:10px;
+    padding:15px;
+}
+
+.info-card span{
+    display:block;
+    color:#888;
+    font-size:12px;
+    margin-bottom:6px;
+}
+
+.info-card strong{
+    font-size:14px;
+}
+
+.project{
+    background:#101010;
+    border:1px solid #242424;
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:18px;
+}
+
+.project-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.project-title{
+    font-size:20px;
+    margin-bottom:6px;
+}
+
+.project-course{
+    color:#1683ff;
+    font-size:13px;
+}
+
+.badge{
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.active{
+    background:#123e67;
+    color:#65b5ff;
+}
+
+.submitted{
+    background:#183b57;
+    color:#6ebcff;
+}
+
+.graded{
+    background:#163d24;
+    color:#72dc95;
+}
+
+.project-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+    margin:15px 0;
+}
+
+.detail{
+    background:#080808;
+    border:1px solid #242424;
+    border-radius:8px;
+    padding:12px;
+}
+
+.detail span{
+    display:block;
+    color:#888;
+    font-size:11px;
+    margin-bottom:5px;
+}
+
+.detail strong{
+    font-size:13px;
+}
+
+.description,
+.instructions{
+    margin-top:15px;
+}
+
+.description h3,
+.instructions h3{
+    font-size:14px;
+    margin-bottom:7px;
+}
+
+.description p,
+.instructions p{
+    color:#aaa;
+    font-size:13px;
+    line-height:1.6;
+    white-space:pre-wrap;
+}
+
+.submission-box{
+    margin-top:18px;
+    padding:15px;
+    background:#080808;
+    border:1px solid #292929;
+    border-radius:10px;
+}
+
+.submission-box h3{
+    font-size:15px;
+    margin-bottom:10px;
+}
+
+input,
+textarea{
+    width:100%;
+    background:#050505;
+    color:#fff;
+    border:1px solid #303030;
+    border-radius:8px;
+    padding:12px;
+    outline:none;
+    font-size:13px;
+}
+
+input:focus,
+textarea:focus{
+    border-color:#1683ff;
+}
+
+textarea{
+    min-height:90px;
+    resize:vertical;
+    margin-top:10px;
+}
+
+button{
+    border:none;
+    background:#1683ff;
+    color:#fff;
+    padding:11px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+button:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+.submitted-info{
+    color:#aaa;
+    font-size:13px;
+    line-height:1.7;
+}
+
+.submitted-info a{
+    color:#1683ff;
+    text-decoration:none;
+    word-break:break-all;
+}
+
+.grade-box{
+    margin-top:12px;
+    padding:12px;
+    border:1px solid #234d31;
+    background:#0b1c11;
+    border-radius:8px;
+}
+
+.grade-box strong{
+    color:#72dc95;
+}
+
+.feedback{
+    margin-top:8px;
+    color:#aaa;
+    line-height:1.5;
+}
+
+.empty{
+    background:#101010;
+    border:1px solid #242424;
+    border-radius:12px;
+    padding:35px;
+    text-align:center;
+    color:#888;
+}
+
+.loading{
+    text-align:center;
+    color:#888;
+    padding:35px;
+}
+
+.message{
+    display:none;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:15px;
+    font-size:13px;
+}
+
+.success-message{
+    display:block;
+    background:#12361f;
+    color:#8ce0a5;
+}
+
+.error-message{
+    display:block;
+    background:#3d1717;
+    color:#ff9999;
+}
+
+@media(max-width:700px){
+
+    body{
+        padding:12px;
+    }
+
+    .student-info{
+        grid-template-columns:1fr;
+    }
+
+    .project-grid{
+        grid-template-columns:1fr;
+    }
+
+    .project-header{
+        flex-direction:column;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>Projects</h1>
+
+        <p>
+            Complete your assigned projects and submit your work.
+        </p>
+
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="student-info">
+
+        <div class="info-card">
+
+            <span>Student ID</span>
+
+            <strong id="studentId">
+                Loading...
+            </strong>
+
+        </div>
+
+        <div class="info-card">
+
+            <span>Course</span>
+
+            <strong id="studentCourse">
+                Loading...
+            </strong>
+
+        </div>
+
+        <div class="info-card">
+
+            <span>Cohort</span>
+
+            <strong id="studentCohort">
+                Loading...
+            </strong>
+
+        </div>
+
+    </div>
+
+    <div id="projectsContainer">
+
+        <div class="loading">
+            Loading projects...
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+    authDomain: "sti-academy.firebaseapp.com",
+    projectId: "sti-academy",
+    storageBucket: "sti-academy.firebasestorage.app",
+    messagingSenderId: "709840261642",
+    appId: "1:709840261642:web:714b09bf661afa159f27ff",
+    measurementId: "G-7ZRZ3P28YP"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let studentData = null;
+
+let courses = [];
+let cohorts = [];
+let projects = [];
+let submissions = [];
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function escapeHtml(value){
+
+    if(value === null || value === undefined){
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+function showMessage(message,type="success"){
+
+    const box =
+        document.getElementById("message");
+
+    box.textContent = message;
+
+    box.className =
+        "message " +
+        (
+            type === "error"
+                ? "error-message"
+                : "success-message"
+        );
+
+}
+
+
+function formatDate(value){
+
+    if(!value){
+        return "Not set";
+    }
+
+    try{
+
+        let date;
+
+        if(value && typeof value.toDate === "function"){
+            date = value.toDate();
+        }else{
+            date = new Date(value);
+        }
+
+        if(isNaN(date.getTime())){
+            return "Not set";
+        }
+
+        return date.toLocaleString();
+
+    }catch(error){
+
+        return "Not set";
+
+    }
+
+}
+
+
+function normalizeUrl(url){
+
+    if(!url){
+        return "";
+    }
+
+    url = String(url).trim();
+
+    if(
+        url.startsWith("http://") ||
+        url.startsWith("https://")
+    ){
+        return url;
+    }
+
+    return "https://" + url;
+
+}
+
+
+function normalize(value){
+
+    return String(value || "")
+        .trim()
+        .toLowerCase();
+
+}
+
+
+/* =========================
+   COURSE HELPERS
+========================= */
+
+function getCourseName(course){
+
+    return (
+        course.courseName ||
+        course.name ||
+        course.title ||
+        course.course ||
+        ""
+    );
+
+}
+
+
+function getCourseId(course,docId=""){
+
+    return (
+        course.courseId ||
+        course.id ||
+        docId ||
+        ""
+    );
+
+}
+
+
+/* =========================
+   COHORT HELPERS
+========================= */
+
+function getCohortName(cohort){
+
+    return (
+        cohort.cohortName ||
+        cohort.name ||
+        cohort.title ||
+        cohort.cohort ||
+        ""
+    );
+
+}
+
+
+function getCohortId(cohort,docId=""){
+
+    return (
+        cohort.cohortId ||
+        cohort.id ||
+        docId ||
+        ""
+    );
+
+}
+
+
+/* =========================
+   AUTH
+========================= */
+
+auth.onAuthStateChanged(async(user)=>{
+
+    if(!user){
+
+        window.location.href="../login.html";
+
+        return;
+
+    }
+
+    currentUser = user;
+
+    try{
+
+        /*
+         * USER ACCOUNT
+         */
+
+        const userDoc =
+            await db.collection("users")
+            .doc(user.uid)
+            .get();
+
+        if(!userDoc.exists){
+
+            throw new Error(
+                "The users document for this account does not exist."
+            );
+
+        }
+
+        const userData = userDoc.data();
+
+        if(
+            userData.role !== "student" ||
+            userData.status !== "active"
+        ){
+
+            throw new Error(
+                "This account is not an active student account."
+            );
+
+        }
+
+
+        /*
+         * STUDENT RECORD
+         *
+         * Course and cohort information
+         * are read from students/{studentId}.
+         */
+
+        const studentId =
+            userData.studentId || "";
+
+
+        if(!studentId){
+
+            throw new Error(
+                "This student account has no Student ID."
+            );
+
+        }
+
+
+        const studentDoc =
+            await db.collection("students")
+            .doc(studentId)
+            .get();
+
+
+        if(!studentDoc.exists){
+
+            throw new Error(
+                "The student record for " +
+                studentId +
+                " does not exist."
+            );
+
+        }
+
+
+        const studentRecord =
+            studentDoc.data();
+
+
+        /*
+         * Keep account information from users,
+         * while using the student record for
+         * course and cohort information.
+         */
+
+        studentData = {
+
+            ...userData,
+
+            course:
+                studentRecord.course ||
+                userData.course ||
+                "",
+
+            courseId:
+                studentRecord.courseId ||
+                userData.courseId ||
+                "",
+
+            courseName:
+                studentRecord.courseName ||
+                userData.courseName ||
+                "",
+
+            cohort:
+                studentRecord.cohort ||
+                userData.cohort ||
+                "",
+
+            cohortId:
+                studentRecord.cohortId ||
+                userData.cohortId ||
+                "",
+
+            cohortName:
+                studentRecord.cohortName ||
+                userData.cohortName ||
+                ""
+
+        };
+
+
+        document.getElementById("studentId")
+            .textContent =
+            studentData.studentId || "—";
+
+
+        /*
+         * COURSES
+         */
+
+        await loadCourses();
+
+
+        /*
+         * COHORTS
+         */
+
+        await loadCohorts();
+
+
+        /*
+         * DISPLAY COURSE
+         */
+
+        const resolvedCourse =
+            resolveStudentCourse();
+
+        document.getElementById("studentCourse")
+            .textContent =
+            resolvedCourse.name || "—";
+
+
+        /*
+         * DISPLAY COHORT
+         */
+
+        const resolvedCohort =
+            resolveStudentCohort();
+
+        document.getElementById("studentCohort")
+            .textContent =
+            resolvedCohort.name || "—";
+
+
+        /*
+         * SUBMISSIONS
+         */
+
+        await loadSubmissions();
+
+
+        /*
+         * PROJECTS
+         */
+
+        await loadProjects();
+
+    }catch(error){
+
+        console.error(
+            "STI PROJECTS ERROR:",
+            error
+        );
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+        document.getElementById(
+            "projectsContainer"
+        ).innerHTML = `
+            <div class="empty">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+
+    }
+
+});
+
+
+/* =========================
+   COURSES
+========================= */
+
+async function loadCourses(){
+
+    const snapshot =
+        await db.collection("courses")
+        .get();
+
+    courses = [];
+
+    snapshot.forEach(doc=>{
+
+        const data = doc.data();
+
+        courses.push({
+
+            id:doc.id,
+
+            ...data,
+
+            courseId:
+                getCourseId(data,doc.id),
+
+            courseName:
+                getCourseName(data)
+
+        });
+
+    });
+
+}
+
+
+/* =========================
+   RESOLVE STUDENT COURSE
+========================= */
+
+function resolveStudentCourse(){
+
+    const rawCourse =
+        studentData.course || "";
+
+    const rawCourseId =
+        studentData.courseId || "";
+
+    const rawCourseName =
+        studentData.courseName || "";
+
+
+    const possibleValues = [
+
+        rawCourseId,
+        rawCourse,
+        rawCourseName
+
+    ]
+    .filter(Boolean)
+    .map(normalize);
+
+
+    let course =
+        courses.find(item=>{
+
+            const values = [
+
+                item.id,
+                item.courseId,
+                item.courseName,
+                item.name,
+                item.title,
+                item.course
+
+            ]
+            .filter(Boolean)
+            .map(normalize);
+
+            return possibleValues.some(
+                value => values.includes(value)
+            );
+
+        });
+
+
+    if(!course){
+
+        return {
+
+            id:
+                rawCourseId ||
+                rawCourse,
+
+            courseId:
+                rawCourseId ||
+                rawCourse,
+
+            name:
+                rawCourseName ||
+                rawCourse ||
+                rawCourseId ||
+                ""
+
+        };
+
+    }
+
+
+    return {
+
+        id:course.id,
+
+        courseId:
+            course.courseId ||
+            course.id ||
+            "",
+
+        name:
+            course.courseName ||
+            course.name ||
+            course.title ||
+            course.course ||
+            ""
+
+    };
+
+}
+
+
+/* =========================
+   COHORTS
+========================= */
+
+async function loadCohorts(){
+
+    const snapshot =
+        await db.collection("cohorts")
+        .get();
+
+    cohorts = [];
+
+    snapshot.forEach(doc=>{
+
+        const data = doc.data();
+
+        cohorts.push({
+
+            id:doc.id,
+
+            ...data,
+
+            cohortId:
+                getCohortId(data,doc.id),
+
+            cohortName:
+                getCohortName(data),
+
+            courseId:
+                data.courseId ||
+                data.course ||
+                ""
+
+        });
+
+    });
+
+}
+
+
+/* =========================
+   RESOLVE STUDENT COHORT
+========================= */
+
+function resolveStudentCohort(){
+
+    const rawCohort =
+        studentData.cohort || "";
+
+    const rawCohortId =
+        studentData.cohortId || "";
+
+    const rawCohortName =
+        studentData.cohortName || "";
+
+
+    const possibleValues = [
+
+        rawCohortId,
+        rawCohort,
+        rawCohortName
+
+    ]
+    .filter(Boolean)
+    .map(normalize);
+
+
+    let cohort =
+        cohorts.find(item=>{
+
+            const values = [
+
+                item.id,
+                item.cohortId,
+                item.cohortName,
+                item.name,
+                item.title,
+                item.cohort
+
+            ]
+            .filter(Boolean)
+            .map(normalize);
+
+            return possibleValues.some(
+                value => values.includes(value)
+            );
+
+        });
+
+
+    if(!cohort){
+
+        return {
+
+            id:
+                rawCohortId ||
+                rawCohort,
+
+            cohortId:
+                rawCohortId ||
+                rawCohort,
+
+            name:
+                rawCohortName ||
+                rawCohort ||
+                rawCohortId ||
+                ""
+
+        };
+
+    }
+
+
+    return {
+
+        id:cohort.id,
+
+        cohortId:
+            cohort.cohortId ||
+            cohort.id ||
+            "",
+
+        name:
+            cohort.cohortName ||
+            cohort.name ||
+            cohort.title ||
+            cohort.cohort ||
+            ""
+
+    };
+
+}
+
+
+/* =========================
+   STUDENT SUBMISSIONS
+========================= */
+
+async function loadSubmissions(){
+
+    submissions = [];
+
+    const snapshot =
+        await db.collection("projectSubmissions")
+        .where(
+            "studentUid",
+            "==",
+            currentUser.uid
+        )
+        .get();
+
+    snapshot.forEach(doc=>{
+
+        submissions.push({
+
+            id:doc.id,
+
+            ...doc.data()
+
+        });
+
+    });
+
+}
+
+
+/* =========================
+   LOAD PROJECTS
+========================= */
+
+async function loadProjects(){
+
+    const snapshot =
+        await db.collection("projects")
+        .get();
+
+    projects = [];
+
+    const studentCourse =
+        resolveStudentCourse();
+
+    const studentCohort =
+        resolveStudentCohort();
+
+
+    snapshot.forEach(doc=>{
+
+        const data = doc.data();
+
+
+        /*
+         * Only active projects are shown.
+         */
+
+        if(
+            data.status &&
+            normalize(data.status) !== "active"
+        ){
+
+            return;
+
+        }
+
+
+        const projectCourseId =
+            data.courseId || "";
+
+        const projectCourseName =
+            data.courseName ||
+            data.course ||
+            "";
+
+
+        /*
+         * Match course ID against:
+         * - student's courseId
+         * - resolved course ID
+         * - resolved course document ID
+         */
+
+        const courseMatches = [
+
+            studentCourse.courseId,
+            studentCourse.id,
+            studentData.courseId,
+            studentData.course,
+            studentData.courseName
+
+        ]
+        .filter(Boolean)
+        .map(normalize);
+
+
+        const projectCourseValues = [
+
+            projectCourseId,
+            projectCourseName
+
+        ]
+        .filter(Boolean)
+        .map(normalize);
+
+
+        let matchesCourse =
+            projectCourseValues.some(
+                value =>
+                    courseMatches.includes(value)
+            );
+
+
+        /*
+         * Match Course Name directly.
+         */
+
+        if(
+            projectCourseName &&
+            studentCourse.name
+        ){
+
+            if(
+                normalize(projectCourseName) ===
+                normalize(studentCourse.name)
+            ){
+
+                matchesCourse = true;
+
+            }
+
+        }
+
+
+        if(!matchesCourse){
+
+            return;
+
+        }
+
+
+        /*
+         * COHORT
+         */
+
+        const projectCohortId =
+            data.cohortId || "";
+
+        const projectCohortName =
+            data.cohortName ||
+            data.cohort ||
+            "";
+
+
+        /*
+         * No cohort means all students
+         * in that course can see it.
+         */
+
+        if(
+            !projectCohortId &&
+            !projectCohortName
+        ){
+
+            projects.push({
+
+                id:doc.id,
+
+                ...data
+
+            });
+
+            return;
+
+        }
+
+
+        const studentCohortValues = [
+
+            studentCohort.id,
+            studentCohort.cohortId,
+            studentData.cohortId,
+            studentData.cohort,
+            studentData.cohortName,
+            studentCohort.name
+
+        ]
+        .filter(Boolean)
+        .map(normalize);
+
+
+        const projectCohortValues = [
+
+            projectCohortId,
+            projectCohortName
+
+        ]
+        .filter(Boolean)
+        .map(normalize);
+
+
+        const matchesCohort =
+            projectCohortValues.some(
+                value =>
+                    studentCohortValues.includes(value)
+            );
+
+
+        if(matchesCohort){
+
+            projects.push({
+
+                id:doc.id,
+
+                ...data
+
+            });
+
+        }
+
+    });
+
+
+    projects.sort((a,b)=>{
+
+        const aDate =
+            a.deadline
+                ? new Date(a.deadline).getTime()
+                : 0;
+
+        const bDate =
+            b.deadline
+                ? new Date(b.deadline).getTime()
+                : 0;
+
+        return aDate - bDate;
+
+    });
+
+
+    renderProjects();
+
+}
+
+
+/* =========================
+   RENDER PROJECTS
+========================= */
+
+function renderProjects(){
+
+    const container =
+        document.getElementById(
+            "projectsContainer"
+        );
+
+
+    if(!projects.length){
+
+        container.innerHTML = `
+            <div class="empty">
+                There are no projects available for your course yet.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML = "";
+
+
+    projects.forEach(project=>{
+
+        const submission =
+            submissions.find(
+                item =>
+                    item.projectId === project.id
+            );
+
+
+        const title =
+            project.title ||
+            project.projectTitle ||
+            "Untitled Project";
+
+
+        const courseName =
+            project.courseName ||
+            project.course ||
+            resolveStudentCourse().name ||
+            "—";
+
+
+        const totalMarks =
+            project.totalMarks || 100;
+
+
+        let badgeClass = "active";
+        let badgeText = "Active";
+
+
+        if(submission){
+
+            if(
+                submission.graded === true ||
+                (
+                    submission.grade !== undefined &&
+                    submission.grade !== null
+                )
+            ){
+
+                badgeClass = "graded";
+                badgeText = "Graded";
+
+            }else{
+
+                badgeClass = "submitted";
+                badgeText = "Submitted";
+
+            }
+
+        }
+
+
+        const card =
+            document.createElement("div");
+
+        card.className = "project";
+
+
+        let submissionHtml = "";
+
+
+        if(submission){
+
+            const graded =
+                submission.graded === true ||
+                (
+                    submission.grade !== undefined &&
+                    submission.grade !== null
+                );
+
+
+            submissionHtml = `
+
+                <div class="submission-box">
+
+                    <h3>
+                        Your Submission
+                    </h3>
+
+                    <div class="submitted-info">
+
+                        <p>
+                            <strong>Submitted:</strong>
+                            ${escapeHtml(
+                                formatDate(
+                                    submission.submittedAt
+                                )
+                            )}
+                        </p>
+
+                        ${
+                            submission.projectLink
+                            ? `
+                                <p>
+                                    <strong>Project URL:</strong>
+                                    <br>
+
+                                    <a
+                                        href="${escapeHtml(
+                                            normalizeUrl(
+                                                submission.projectLink
+                                            )
+                                        )}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        ${escapeHtml(
+                                            submission.projectLink
+                                        )}
+                                    </a>
+                                </p>
+                            `
+                            : `
+                                <p>
+                                    <strong>Project URL:</strong>
+                                    No URL submitted
+                                </p>
+                            `
+                        }
+
+                        ${
+                            submission.submissionNote
+                            ? `
+                                <p>
+                                    <strong>Your Note:</strong>
+                                    ${escapeHtml(
+                                        submission.submissionNote
+                                    )}
+                                </p>
+                            `
+                            : ""
+                        }
+
+                    </div>
+
+
+                    ${
+                        graded
+                        ? `
+                            <div class="grade-box">
+
+                                <p>
+                                    <strong>
+                                        Grade:
+                                    </strong>
+
+                                    ${escapeHtml(
+                                        submission.grade
+                                    )}
+                                    /
+                                    ${escapeHtml(
+                                        submission.totalMarks ||
+                                        totalMarks
+                                    )}
+
+                                    ${
+                                        submission.percentage !== undefined
+                                        ? `
+                                            (
+                                                ${Number(
+                                                    submission.percentage
+                                                ).toFixed(1)}%
+                                            )
+                                        `
+                                        : ""
+                                    }
+
+                                </p>
+
+
+                                ${
+                                    submission.gradeStatus
+                                    ? `
+                                        <p>
+                                            <strong>
+                                                Result:
+                                            </strong>
+
+                                            ${escapeHtml(
+                                                submission.gradeStatus
+                                            )}
+                                        </p>
+                                    `
+                                    : ""
+                                }
+
+
+                                ${
+                                    submission.feedback
+                                    ? `
+                                        <div class="feedback">
+
+                                            <strong>
+                                                Tutor/Admin Feedback:
+                                            </strong>
+
+                                            <br>
+
+                                            ${escapeHtml(
+                                                submission.feedback
+                                            )}
+
+                                        </div>
+                                    `
+                                    : ""
+                                }
+
+                            </div>
+                        `
+                        : `
+                            <p style="margin-top:10px;color:#888;">
+                                Your project has been submitted and is waiting for grading.
+                            </p>
+                        `
+                    }
+
+                </div>
+
+            `;
+
+        }else{
+
+            submissionHtml = `
+
+                <div class="submission-box">
+
+                    <h3>
+                        Submit Your Project
+                    </h3>
+
+                    <input
+                        type="url"
+                        id="url-${project.id}"
+                        placeholder="Paste your project URL (optional)"
+                    >
+
+                    <textarea
+                        id="note-${project.id}"
+                        placeholder="Add a note about your submission (optional)"
+                    ></textarea>
+
+                    <button
+                        onclick="submitProject('${project.id}')"
+                    >
+                        Submit Project
+                    </button>
+
+                </div>
+
+            `;
+
+        }
+
+
+        card.innerHTML = `
+
+            <div class="project-header">
+
+                <div>
+
+                    <div class="project-title">
+                        ${escapeHtml(title)}
+                    </div>
+
+                    <div class="project-course">
+                        ${escapeHtml(courseName)}
+                    </div>
+
+                </div>
+
+                <span class="badge ${badgeClass}">
+                    ${badgeText}
+                </span>
+
+            </div>
+
+
+            <div class="project-grid">
+
+                <div class="detail">
+
+                    <span>Total Marks</span>
+
+                    <strong>
+                        ${escapeHtml(totalMarks)}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <span>Deadline</span>
+
+                    <strong>
+                        ${escapeHtml(
+                            formatDate(
+                                project.deadline
+                            )
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <span>Cohort</span>
+
+                    <strong>
+                        ${escapeHtml(
+                            project.cohortName ||
+                            "All Cohorts"
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <span>Status</span>
+
+                    <strong>
+                        ${escapeHtml(
+                            project.status ||
+                            "Active"
+                        )}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            ${
+                project.description
+                ? `
+                    <div class="description">
+
+                        <h3>Description</h3>
+
+                        <p>
+                            ${escapeHtml(
+                                project.description
+                            )}
+                        </p>
+
+                    </div>
+                `
+                : ""
+            }
+
+
+            ${
+                project.instructions
+                ? `
+                    <div class="instructions">
+
+                        <h3>Instructions</h3>
+
+                        <p>
+                            ${escapeHtml(
+                                project.instructions
+                            )}
+                        </p>
+
+                    </div>
+                `
+                : ""
+            }
+
+
+            ${submissionHtml}
+
+        `;
+
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+/* =========================
+   SUBMIT PROJECT
+========================= */
+
+async function submitProject(projectId){
+
+    const project =
+        projects.find(
+            item => item.id === projectId
+        );
+
+
+    if(!project){
+
+        showMessage(
+            "Project not found.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const urlInput =
+        document.getElementById(
+            "url-" + projectId
+        );
+
+    const noteInput =
+        document.getElementById(
+            "note-" + projectId
+        );
+
+
+    const projectLink =
+        urlInput
+            ? urlInput.value.trim()
+            : "";
+
+
+    const submissionNote =
+        noteInput
+            ? noteInput.value.trim()
+            : "";
+
+
+    try{
+
+        const existing =
+            submissions.find(
+                item =>
+                    item.projectId === projectId
+            );
+
+
+        if(existing){
+
+            showMessage(
+                "You have already submitted this project.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const resolvedCourse =
+            resolveStudentCourse();
+
+
+        const resolvedCohort =
+            resolveStudentCohort();
+
+
+        const courseName =
+            project.courseName ||
+            project.course ||
+            resolvedCourse.name ||
+            "";
+
+
+        const courseId =
+            project.courseId ||
+            resolvedCourse.courseId ||
+            studentData.courseId ||
+            studentData.course ||
+            "";
+
+
+        const cohortId =
+            project.cohortId ||
+            resolvedCohort.cohortId ||
+            resolvedCohort.id ||
+            "";
+
+
+        await db.collection("projectSubmissions")
+            .add({
+
+                projectId:projectId,
+
+                projectTitle:
+                    project.title ||
+                    project.projectTitle ||
+                    "",
+
+                studentUid:
+                    currentUser.uid,
+
+                studentId:
+                    studentData.studentId || "",
+
+                studentName:
+                    studentData.fullName ||
+                    studentData.name ||
+                    "",
+
+                studentEmail:
+                    studentData.email ||
+                    currentUser.email ||
+                    "",
+
+                courseId:
+                    courseId,
+
+                courseName:
+                    courseName,
+
+                cohortId:
+                    cohortId,
+
+                projectLink:
+                    projectLink || "",
+
+                submissionNote:
+                    submissionNote,
+
+                submittedAt:
+                    firebase.firestore.FieldValue
+                    .serverTimestamp(),
+
+                status:
+                    "submitted"
+
+            });
+
+
+        showMessage(
+            "Project submitted successfully."
+        );
+
+
+        await loadSubmissions();
+
+        renderProjects();
+
+
+    }catch(error){
+
+        console.error(error);
+
+        showMessage(
+            "Unable to submit project: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

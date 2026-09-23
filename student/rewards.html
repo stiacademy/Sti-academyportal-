@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Rewards | STI Academy</title>
+
+    <!-- FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #050505;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           LOADING
+        ========================= */
+
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #050505;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loader-box {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid #242424;
+            border-top-color: #1683ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader-box p {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .topbar {
+            width: 100%;
+            background: #050505;
+            border-bottom: 1px solid #242424;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: #1683ff;
+            color: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .brand h2 {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .brand p {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-email {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .logout-btn {
+            border: 1px solid #333333;
+            background: #101010;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .logout-btn:hover {
+            background: #181818;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .container {
+            width: min(1100px, 94%);
+            margin: 30px auto 50px;
+        }
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            color: #9ca3af;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           STUDENT CARD
+        ========================= */
+
+        .student-card {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 22px;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #1683ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .student-details h3 {
+            font-size: 17px;
+            margin-bottom: 5px;
+        }
+
+        .student-details p {
+            color: #9ca3af;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .student-id {
+            color: #1683ff !important;
+        }
+
+        /* =========================
+           SUMMARY
+        ========================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .summary-card span {
+            display: block;
+            color: #9ca3af;
+            font-size: 12px;
+            margin-bottom: 9px;
+        }
+
+        .summary-card strong {
+            display: block;
+            font-size: 22px;
+        }
+
+        /* =========================
+           SECTION
+        ========================= */
+
+        .section {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #242424;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+        }
+
+        .section-header p {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        /* =========================
+           FILTERS
+        ========================= */
+
+        .filters {
+            padding: 16px 20px;
+            border-bottom: 1px solid #242424;
+            display: grid;
+            grid-template-columns: 1fr 180px;
+            gap: 12px;
+        }
+
+        .filter-input,
+        .filter-select {
+            width: 100%;
+            padding: 11px 12px;
+            background: #080808;
+            color: #ffffff;
+            border: 1px solid #242424;
+            border-radius: 8px;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            border-color: #1683ff;
+        }
+
+        .filter-input::placeholder {
+            color: #777777;
+        }
+
+        .filter-select option {
+            background: #101010;
+            color: #ffffff;
+        }
+
+        /* =========================
+           REWARDS LIST
+        ========================= */
+
+        .rewards-list {
+            padding: 20px;
+            display: grid;
+            gap: 15px;
+        }
+
+        .reward-card {
+            background: #080808;
+            border: 1px solid #242424;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .reward-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .reward-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reward-icon {
+            width: 42px;
+            height: 42px;
+            background: #081a2e;
+            border: 1px solid #0f3d69;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+        }
+
+        .reward-title h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .reward-date {
+            color: #777777;
+            font-size: 12px;
+        }
+
+        .reward-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1683ff;
+            white-space: nowrap;
+        }
+
+        .reward-reason {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 8px;
+            padding: 12px;
+            color: #d1d5db;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .reward-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #3a2a0a;
+            color: #fcd34d;
+            border: 1px solid #5a420c;
+        }
+
+        .status-approved {
+            background: #0b2340;
+            color: #93c5fd;
+            border: 1px solid #123d69;
+        }
+
+        .status-paid {
+            background: #12351f;
+            color: #86efac;
+            border: 1px solid #1f5c34;
+        }
+
+        .status-cancelled {
+            background: #3b1111;
+            color: #fca5a5;
+            border: 1px solid #671d1d;
+        }
+
+        .reward-type {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        /* =========================
+           EMPTY STATE
+        ========================= */
+
+        .empty-state {
+            text-align: center;
+            padding: 55px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #101010;
+            border: 1px solid #242424;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 25px;
+        }
+
+        .empty-state h3 {
+            color: #ffffff;
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        .message {
+            display: none;
+            margin-bottom: 20px;
+            padding: 13px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .message.success {
+            display: block;
+            background: #12351f;
+            color: #86efac;
+            border: 1px solid #1f5c34;
+        }
+
+        .message.error {
+            display: block;
+            background: #3b1111;
+            color: #fca5a5;
+            border: 1px solid #671d1d;
+        }
+
+        .message.info {
+            display: block;
+            background: #0b2340;
+            color: #93c5fd;
+            border: 1px solid #123d69;
+        }
+
+        /* =========================
+           ACCESS DENIED
+        ========================= */
+
+        .access-denied {
+            display: none;
+            max-width: 500px;
+            margin: 70px auto;
+            background: #101010;
+            border: 1px solid #7f1d1d;
+            border-radius: 14px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .access-denied h2 {
+            color: #f87171;
+            margin-bottom: 10px;
+        }
+
+        .access-denied p {
+            color: #9ca3af;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 800px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .student-email {
+                display: none;
+            }
+
+        }
+
+        @media (max-width: 550px) {
+
+            .topbar {
+                padding: 13px 15px;
+            }
+
+            .brand h2 {
+                font-size: 16px;
+            }
+
+            .brand p {
+                font-size: 11px;
+            }
+
+            .brand-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 13px;
+            }
+
+            .container {
+                width: 92%;
+                margin-top: 22px;
+            }
+
+            .page-title h1 {
+                font-size: 24px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .summary-card {
+                padding: 14px;
+            }
+
+            .summary-card strong {
+                font-size: 18px;
+            }
+
+            .section-header {
+                padding: 15px;
+            }
+
+            .filters {
+                padding: 14px;
+            }
+
+            .rewards-list {
+                padding: 14px;
+            }
+
+            .reward-card {
+                padding: 15px;
+            }
+
+            .reward-top {
+                flex-direction: column;
+            }
+
+            .reward-amount {
+                margin-left: 54px;
+            }
+
+            .reward-bottom {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .logout-btn {
+                padding: 9px 11px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- LOADING SCREEN -->
+    <div class="loading-screen" id="loadingScreen">
+
+        <div class="loader-box">
+
+            <div class="spinner"></div>
+
+            <p>Loading rewards...</p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACCESS DENIED -->
+    <div class="access-denied" id="accessDenied">
+
+        <h2>Access Denied</h2>
+
+        <p>
+            You must be logged in as an active STI Academy student
+            to view your rewards.
+        </p>
+
+    </div>
+
+
+    <!-- MAIN APP -->
+    <div id="app" style="display:none;">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <div class="brand">
+
+                <div class="brand-icon">
+                    STI
+                </div>
+
+                <div>
+
+                    <h2>STI Academy</h2>
+
+                    <p>Student Portal</p>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <span
+                    class="student-email"
+                    id="studentEmail"
+                >
+                    Loading...
+                </span>
+
+                <button
+                    class="logout-btn"
+                    onclick="logout()"
+                >
+                    Sign Out
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENT -->
+        <main class="container">
+
+            <div class="page-title">
+
+                <h1>Rewards</h1>
+
+                <p>
+                    View rewards and recognition you have received
+                    from STI Academy.
+                </p>
+
+            </div>
+
+
+            <!-- MESSAGE -->
+            <div
+                class="message"
+                id="message"
+            ></div>
+
+
+            <!-- STUDENT CARD -->
+            <div class="student-card">
+
+                <div class="student-info">
+
+                    <div
+                        class="student-avatar"
+                        id="studentAvatar"
+                    >
+                        S
+                    </div>
+
+                    <div class="student-details">
+
+                        <h3 id="studentName">
+                            Loading...
+                        </h3>
+
+                        <p
+                            class="student-id"
+                            id="studentId"
+                        >
+                            Student ID: --
+                        </p>
+
+                        <p id="studentCourse">
+                            Course: --
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SUMMARY -->
+            <div class="summary-grid">
+
+                <div class="summary-card">
+
+                    <span>
+                        Total Rewards
+                    </span>
+
+                    <strong id="totalRewards">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span>
+                        Pending
+                    </span>
+
+                    <strong id="pendingRewards">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span>
+                        Paid
+                    </span>
+
+                    <strong id="paidRewards">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span>
+                        Total Amount
+                    </span>
+
+                    <strong id="totalAmount">
+                        ₦0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- REWARDS SECTION -->
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2>My Rewards</h2>
+
+                        <p>
+                            Your rewards from STI Academy
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FILTERS -->
+                <div class="filters">
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        class="filter-input"
+                        placeholder="Search rewards..."
+                        oninput="filterRewards()"
+                    >
+
+
+                    <select
+                        id="statusFilter"
+                        class="filter-select"
+                        onchange="filterRewards()"
+                    >
+
+                        <option value="all">
+                            All Statuses
+                        </option>
+
+                        <option value="pending">
+                            Pending
+                        </option>
+
+                        <option value="approved">
+                            Approved
+                        </option>
+
+                        <option value="paid">
+                            Paid
+                        </option>
+
+                        <option value="cancelled">
+                            Cancelled
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- LIST -->
+                <div
+                    class="rewards-list"
+                    id="rewardsList"
+                ></div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script>
+
+        /* =========================
+           FIREBASE
+        ========================= */
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+            authDomain: "sti-academy.firebaseapp.com",
+            projectId: "sti-academy",
+            storageBucket: "sti-academy.firebasestorage.app",
+            messagingSenderId: "709840261642",
+            appId: "1:709840261642:web:714b09bf661afa159f27ff",
+            measurementId: "G-7ZRZ3P28YP"
+        };
+
+
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+
+        const db = firebase.firestore();
+
+
+        /* =========================
+           VARIABLES
+        ========================= */
+
+        let currentUser = null;
+
+        let studentData = null;
+
+        let allRewards = [];
+
+
+        /* =========================
+           AUTH CHECK
+        ========================= */
+
+        auth.onAuthStateChanged(async (user) => {
+
+            if (!user) {
+
+                showAccessDenied();
+
+                return;
+
+            }
+
+
+            currentUser = user;
+
+
+            try {
+
+                const userDoc = await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+                if (!userDoc.exists) {
+
+                    showAccessDenied();
+
+                    return;
+
+                }
+
+
+                studentData = userDoc.data();
+
+
+                if (
+                    studentData.role !== "student" ||
+                    studentData.status !== "active"
+                ) {
+
+                    showAccessDenied();
+
+                    return;
+
+                }
+
+
+                document
+                    .getElementById("loadingScreen")
+                    .style.display = "none";
+
+
+                document
+                    .getElementById("app")
+                    .style.display = "block";
+
+
+                loadStudentInfo();
+
+                await loadRewards();
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                showMessage(
+                    "Unable to load your rewards. Please try again.",
+                    "error"
+                );
+
+                document
+                    .getElementById("loadingScreen")
+                    .style.display = "none";
+
+
+                document
+                    .getElementById("app")
+                    .style.display = "block";
+
+            }
+
+        });
+
+
+        /* =========================
+           STUDENT INFORMATION
+        ========================= */
+
+        function loadStudentInfo() {
+
+            const name =
+                studentData.fullName ||
+                studentData.name ||
+                currentUser.displayName ||
+                "Student";
+
+
+            const email =
+                studentData.email ||
+                currentUser.email ||
+                "";
+
+
+            const studentId =
+                studentData.studentId ||
+                "--";
+
+
+            const course =
+                studentData.course ||
+                "--";
+
+
+            document
+                .getElementById("studentName")
+                .textContent = name;
+
+
+            document
+                .getElementById("studentId")
+                .textContent =
+                "Student ID: " + studentId;
+
+
+            document
+                .getElementById("studentCourse")
+                .textContent =
+                "Course: " + course;
+
+
+            document
+                .getElementById("studentEmail")
+                .textContent = email;
+
+
+            document
+                .getElementById("studentAvatar")
+                .textContent =
+                getInitials(name);
+
+        }
+
+
+        /* =========================
+           LOAD REWARDS
+        ========================= */
+
+        async function loadRewards() {
+
+            try {
+
+                const snapshot = await db
+                    .collection("rewards")
+                    .where(
+                        "studentUid",
+                        "==",
+                        currentUser.uid
+                    )
+                    .get();
+
+
+                allRewards = [];
+
+
+                snapshot.forEach((doc) => {
+
+                    const data = doc.data();
+
+
+                    allRewards.push({
+
+                        id: doc.id,
+
+                        ...data
+
+                    });
+
+                });
+
+
+                allRewards.sort((a, b) => {
+
+                    const dateA =
+                        a.createdAt &&
+                        a.createdAt.toMillis
+                            ? a.createdAt.toMillis()
+                            : 0;
+
+
+                    const dateB =
+                        b.createdAt &&
+                        b.createdAt.toMillis
+                            ? b.createdAt.toMillis()
+                            : 0;
+
+
+                    return dateB - dateA;
+
+                });
+
+
+                updateSummary();
+
+                filterRewards();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Error loading rewards:",
+                    error
+                );
+
+
+                document
+                    .getElementById("rewardsList")
+                    .innerHTML = `
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                !
+                            </div>
+
+                            <h3>
+                                Unable to load rewards
+                            </h3>
+
+                            <p>
+                                Please refresh the page and try again.
+                            </p>
+
+                        </div>
+
+                    `;
+
+            }
+
+        }
+
+
+        /* =========================
+           SUMMARY
+        ========================= */
+
+        function updateSummary() {
+
+            const total =
+                allRewards.length;
+
+
+            const pending =
+                allRewards.filter(
+                    reward =>
+                        normalizeStatus(reward.status)
+                        === "pending"
+                ).length;
+
+
+            const paid =
+                allRewards.filter(
+                    reward =>
+                        normalizeStatus(reward.status)
+                        === "paid"
+                ).length;
+
+
+            const totalAmount =
+                allRewards.reduce(
+                    (sum, reward) => {
+
+                        const amount =
+                            Number(reward.amount) || 0;
+
+                        return sum + amount;
+
+                    },
+                    0
+                );
+
+
+            document
+                .getElementById("totalRewards")
+                .textContent = total;
+
+
+            document
+                .getElementById("pendingRewards")
+                .textContent = pending;
+
+
+            document
+                .getElementById("paidRewards")
+                .textContent = paid;
+
+
+            document
+                .getElementById("totalAmount")
+                .textContent =
+                formatCurrency(totalAmount);
+
+        }
+
+
+        /* =========================
+           FILTER
+        ========================= */
+
+        function filterRewards() {
+
+            const search =
+                document
+                    .getElementById("searchInput")
+                    .value
+                    .trim()
+                    .toLowerCase();
+
+
+            const status =
+                document
+                    .getElementById("statusFilter")
+                    .value;
+
+
+            const filtered =
+                allRewards.filter((reward) => {
+
+                    const type =
+                        String(
+                            reward.type || ""
+                        ).toLowerCase();
+
+
+                    const reason =
+                        String(
+                            reward.reason || ""
+                        ).toLowerCase();
+
+
+                    const rewardStatus =
+                        normalizeStatus(
+                            reward.status
+                        );
+
+
+                    const matchesSearch =
+                        !search ||
+                        type.includes(search) ||
+                        reason.includes(search);
+
+
+                    const matchesStatus =
+                        status === "all" ||
+                        rewardStatus === status;
+
+
+                    return (
+                        matchesSearch &&
+                        matchesStatus
+                    );
+
+                });
+
+
+            renderRewards(filtered);
+
+        }
+
+
+        /* =========================
+           RENDER REWARDS
+        ========================= */
+
+        function renderRewards(rewards) {
+
+            const container =
+                document.getElementById(
+                    "rewardsList"
+                );
+
+
+            if (!rewards.length) {
+
+                container.innerHTML = `
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            🎁
+                        </div>
+
+                        <h3>
+                            No rewards yet
+                        </h3>
+
+                        <p>
+                            Keep participating and performing well.
+                            Your rewards will appear here when awarded.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                rewards.map(
+                    reward => rewardCard(reward)
+                ).join("");
+
+        }
+
+
+        /* =========================
+           REWARD CARD
+        ========================= */
+
+        function rewardCard(reward) {
+
+            const type =
+                reward.type ||
+                "Reward";
+
+
+            const reason =
+                reward.reason ||
+                "No reason provided.";
+
+
+            const amount =
+                Number(reward.amount) || 0;
+
+
+            const status =
+                normalizeStatus(
+                    reward.status
+                );
+
+
+            const date =
+                formatDate(
+                    reward.createdAt
+                );
+
+
+            const icon =
+                getRewardIcon(type);
+
+
+            return `
+
+                <div class="reward-card">
+
+                    <div class="reward-top">
+
+                        <div class="reward-title">
+
+                            <div class="reward-icon">
+                                ${icon}
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    ${escapeHtml(
+                                        capitalize(type)
+                                    )}
+                                </h3>
+
+                                <div class="reward-date">
+                                    ${date}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="reward-amount">
+                            ${formatCurrency(amount)}
+                        </div>
+
+                    </div>
+
+
+                    <div class="reward-reason">
+
+                        ${escapeHtml(reason)}
+
+                    </div>
+
+
+                    <div class="reward-bottom">
+
+                        <span class="reward-type">
+
+                            STI Academy Reward
+
+                        </span>
+
+
+                        <span
+                            class="status status-${status}"
+                        >
+
+                            ${capitalize(status)}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* =========================
+           HELPERS
+        ========================= */
+
+        function normalizeStatus(status) {
+
+            const value =
+                String(
+                    status || "pending"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            return value;
+
+        }
+
+
+        function formatCurrency(amount) {
+
+            return "₦" +
+                Number(amount || 0)
+                    .toLocaleString(
+                        "en-NG",
+                        {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2
+                        }
+                    );
+
+        }
+
+
+        function capitalize(value) {
+
+            if (!value) {
+                return "";
+            }
+
+
+            return String(value)
+                .charAt(0)
+                .toUpperCase() +
+                String(value)
+                    .slice(1);
+
+        }
+
+
+        function formatDate(timestamp) {
+
+            if (!timestamp) {
+
+                return "Date unavailable";
+
+            }
+
+
+            try {
+
+                let date;
+
+
+                if (
+                    timestamp.toDate
+                ) {
+
+                    date =
+                        timestamp.toDate();
+
+                }
+
+                else if (
+                    timestamp.seconds
+                ) {
+
+                    date =
+                        new Date(
+                            timestamp.seconds * 1000
+                        );
+
+                }
+
+                else {
+
+                    date =
+                        new Date(timestamp);
+
+                }
+
+
+                if (
+                    isNaN(date.getTime())
+                ) {
+
+                    return "Date unavailable";
+
+                }
+
+
+                return date.toLocaleDateString(
+                    "en-NG",
+                    {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric"
+                    }
+                );
+
+            }
+
+            catch (error) {
+
+                return "Date unavailable";
+
+            }
+
+        }
+
+
+        function getInitials(name) {
+
+            const parts =
+                String(name || "Student")
+                    .trim()
+                    .split(/\s+/);
+
+
+            if (parts.length === 1) {
+
+                return parts[0]
+                    .charAt(0)
+                    .toUpperCase();
+
+            }
+
+
+            return (
+                parts[0].charAt(0) +
+                parts[parts.length - 1]
+                    .charAt(0)
+            ).toUpperCase();
+
+        }
+
+
+        function getRewardIcon(type) {
+
+            const value =
+                String(type || "")
+                    .toLowerCase();
+
+
+            if (
+                value.includes("student")
+            ) {
+                return "🏆";
+            }
+
+
+            if (
+                value.includes("referral")
+            ) {
+                return "🤝";
+            }
+
+
+            if (
+                value.includes("giveaway")
+            ) {
+                return "🎁";
+            }
+
+
+            if (
+                value.includes("performance")
+            ) {
+                return "⭐";
+            }
+
+
+            if (
+                value.includes("project")
+            ) {
+                return "💻";
+            }
+
+
+            if (
+                value.includes("academic")
+            ) {
+                return "📚";
+            }
+
+
+            return "🏅";
+
+        }
+
+
+        function escapeHtml(value) {
+
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+        }
+
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        function showMessage(
+            message,
+            type = "info"
+        ) {
+
+            const element =
+                document.getElementById(
+                    "message"
+                );
+
+
+            element.textContent = message;
+
+
+            element.className =
+                "message " + type;
+
+
+            setTimeout(() => {
+
+                element.className =
+                    "message";
+
+            }, 5000);
+
+        }
+
+
+        /* =========================
+           ACCESS DENIED
+        ========================= */
+
+        function showAccessDenied() {
+
+            document
+                .getElementById("loadingScreen")
+                .style.display = "none";
+
+
+            document
+                .getElementById("app")
+                .style.display = "none";
+
+
+            document
+                .getElementById("accessDenied")
+                .style.display = "block";
+
+        }
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        function logout() {
+
+            auth.signOut()
+                .then(() => {
+
+                    window.location.href =
+                        "login.html";
+
+                })
+                .catch((error) => {
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+
+                    showMessage(
+                        "Unable to sign out. Please try again.",
+                        "error"
+                    );
+
+                });
+
+        }
+
+    </script>
+
+</body>
+
+</html>

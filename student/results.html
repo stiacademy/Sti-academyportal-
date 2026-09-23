@@ -1,0 +1,2083 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+«»
+
+<title>My Results | STI Academy</title><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script><style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #000;
+        color: #fff;
+    }
+
+    .header {
+        background: #050505;
+        border-bottom: 1px solid #1683ff;
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .back-btn {
+        color: #1683ff;
+        text-decoration: none;
+        font-size: 24px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .container {
+        width: 94%;
+        max-width: 1100px;
+        margin: 25px auto 50px;
+    }
+
+    .welcome {
+        margin-bottom: 20px;
+    }
+
+    .welcome h2 {
+        margin: 0 0 7px;
+        font-size: 24px;
+    }
+
+    .welcome p {
+        margin: 0;
+        color: #888;
+        line-height: 1.5;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns:
+            repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+
+    .summary-card {
+        background: #0b0b0b;
+        border: 1px solid #222;
+        border-radius: 12px;
+        padding: 18px;
+    }
+
+    .summary-label {
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .summary-blue {
+        color: #1683ff;
+    }
+
+    .summary-green {
+        color: #37e878;
+    }
+
+    .summary-yellow {
+        color: #ffd43b;
+    }
+
+    .summary-red {
+        color: #ff5c5c;
+    }
+
+    .card {
+        background: #0b0b0b;
+        border: 1px solid #222;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .card h2 {
+        margin: 0 0 18px;
+        color: #1683ff;
+        font-size: 19px;
+    }
+
+    .result-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .result-item {
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 10px;
+        padding: 16px;
+    }
+
+    .result-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 12px;
+    }
+
+    .result-title {
+        font-size: 16px;
+        font-weight: bold;
+        line-height: 1.4;
+    }
+
+    .result-type {
+        color: #888;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .passed {
+        background: #063b1c;
+        color: #37e878;
+    }
+
+    .failed {
+        background: #3b0808;
+        color: #ff5c5c;
+    }
+
+    .pending {
+        background: #332800;
+        color: #ffd43b;
+    }
+
+    .graded {
+        background: #092d4f;
+        color: #66b5ff;
+    }
+
+    .result-details {
+        display: grid;
+        grid-template-columns:
+            repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .detail {
+        background: #080808;
+        border-radius: 7px;
+        padding: 10px;
+        border: 1px solid #1d1d1d;
+    }
+
+    .detail-label {
+        color: #777;
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .feedback {
+        margin-top: 12px;
+        padding: 12px;
+        background: #080808;
+        border-left: 3px solid #1683ff;
+        border-radius: 5px;
+        color: #aaa;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .empty {
+        text-align: center;
+        padding: 35px 15px;
+        color: #777;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: #888;
+    }
+
+    .error {
+        background: #250909;
+        border: 1px solid #5c1111;
+        color: #ff6b6b;
+        padding: 15px;
+        border-radius: 8px;
+        line-height: 1.5;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .section-header h2 {
+        margin: 0;
+    }
+
+    .count {
+        color: #888;
+        font-size: 12px;
+    }
+
+    .overall-box {
+        background: #101010;
+        border: 1px solid #222;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 20px;
+    }
+
+    .overall-title {
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .overall-score {
+        font-size: 32px;
+        font-weight: bold;
+        color: #1683ff;
+    }
+
+    .bar {
+        height: 8px;
+        background: #222;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 12px;
+    }
+
+    .bar-fill {
+        height: 100%;
+        width: 0%;
+        background: #1683ff;
+        transition: width 0.5s ease;
+    }
+
+    .refresh-btn {
+        width: 100%;
+        padding: 13px;
+        background: #1683ff;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .refresh-btn:hover {
+        background: #087de0;
+    }
+
+    @media (max-width: 800px) {
+
+        .summary-grid {
+            grid-template-columns:
+                repeat(2, 1fr);
+        }
+
+        .result-details {
+            grid-template-columns:
+                repeat(2, 1fr);
+        }
+
+    }
+
+    @media (max-width: 500px) {
+
+        .container {
+            width: 92%;
+        }
+
+        .summary-grid {
+            grid-template-columns:
+                repeat(2, 1fr);
+        }
+
+        .summary-card {
+            padding: 14px;
+        }
+
+        .summary-value {
+            font-size: 21px;
+        }
+
+        .result-top {
+            flex-direction: column;
+        }
+
+        .result-details {
+            grid-template-columns: 1fr 1fr;
+        }
+
+    }
+
+</style></head><body><div class="header"><a
+    href="dashboard.html"
+    class="back-btn"
+>
+    ←
+</a>
+
+<h1>
+    My Results
+</h1>
+
+</div><div class="container"><div
+    id="loading"
+    class="loading"
+>
+    Loading your results...
+</div>
+
+
+<div
+    id="error"
+    class="error"
+    style="display:none;"
+></div>
+
+
+<div
+    id="content"
+    style="display:none;"
+>
+
+    <div class="welcome">
+
+        <h2 id="studentName">
+            My Academic Results
+        </h2>
+
+        <p>
+            View your exam, test, assignment and
+            project grades in one place.
+        </p>
+
+    </div>
+
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Total Results
+            </div>
+
+            <div
+                id="totalResults"
+                class="summary-value summary-blue"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Passed
+            </div>
+
+            <div
+                id="passedResults"
+                class="summary-value summary-green"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Failed
+            </div>
+
+            <div
+                id="failedResults"
+                class="summary-value summary-red"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Pending
+            </div>
+
+            <div
+                id="pendingResults"
+                class="summary-value summary-yellow"
+            >
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="section-header">
+
+            <h2>
+                Overall Performance
+            </h2>
+
+        </div>
+
+
+        <div class="overall-box">
+
+            <div class="overall-title">
+                Graded Results Average
+            </div>
+
+            <div
+                id="overallPercentage"
+                class="overall-score"
+            >
+                0.0%
+            </div>
+
+            <div class="bar">
+
+                <div
+                    id="overallBar"
+                    class="bar-fill"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="section-header">
+
+            <h2>
+                Exam Results
+            </h2>
+
+            <span
+                id="examCount"
+                class="count"
+            >
+                0 results
+            </span>
+
+        </div>
+
+
+        <div
+            id="examResults"
+            class="result-list"
+        ></div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="section-header">
+
+            <h2>
+                Test Results
+            </h2>
+
+            <span
+                id="testCount"
+                class="count"
+            >
+                0 results
+            </span>
+
+        </div>
+
+
+        <div
+            id="testResults"
+            class="result-list"
+        ></div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="section-header">
+
+            <h2>
+                Assignment Results
+            </h2>
+
+            <span
+                id="assignmentCount"
+                class="count"
+            >
+                0 results
+            </span>
+
+        </div>
+
+
+        <div
+            id="assignmentResults"
+            class="result-list"
+        ></div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="section-header">
+
+            <h2>
+                Project Results
+            </h2>
+
+            <span
+                id="projectCount"
+                class="count"
+            >
+                0 results
+            </span>
+
+        </div>
+
+
+        <div
+            id="projectResults"
+            class="result-list"
+        ></div>
+
+    </div>
+
+
+    <button
+        class="refresh-btn"
+        onclick="loadAllResults()"
+    >
+        Refresh Results
+    </button>
+
+</div>
+
+</div><script>
+
+    const firebaseConfig = {
+
+        apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+        authDomain: "sti-academy.firebaseapp.com",
+
+        projectId: "sti-academy",
+
+        storageBucket: "sti-academy.firebasestorage.app",
+
+        messagingSenderId: "709840261642",
+
+        appId: "1:709840261642:web:714b09bf661afa159f27ff",
+
+        measurementId: "G-7ZRZ3P28YP"
+
+    };
+
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+
+    const auth =
+        firebase.auth();
+
+    const db =
+        firebase.firestore();
+
+
+    let currentUser = null;
+
+    let studentData = null;
+
+    let allResults = [];
+
+
+    function showError(message) {
+
+        document.getElementById(
+            "loading"
+        ).style.display = "none";
+
+
+        document.getElementById(
+            "content"
+        ).style.display = "none";
+
+
+        const error =
+            document.getElementById(
+                "error"
+            );
+
+        error.textContent =
+            message;
+
+        error.style.display =
+            "block";
+
+    }
+
+
+    function timestampToDate(timestamp) {
+
+        if (!timestamp) {
+            return null;
+        }
+
+
+        if (
+            timestamp.toDate
+        ) {
+
+            return timestamp.toDate();
+
+        }
+
+
+        if (
+            timestamp.seconds
+        ) {
+
+            return new Date(
+                timestamp.seconds * 1000
+            );
+
+        }
+
+
+        const date =
+            new Date(
+                timestamp
+            );
+
+
+        return isNaN(
+            date.getTime()
+        )
+            ? null
+            : date;
+
+    }
+
+
+    function formatDate(timestamp) {
+
+        const date =
+            timestampToDate(
+                timestamp
+            );
+
+
+        if (!date) {
+            return "-";
+        }
+
+
+        return date.toLocaleDateString(
+            undefined,
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+    }
+
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return "";
+
+        }
+
+
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    function firstValue(
+        object,
+        fields,
+        fallback = ""
+    ) {
+
+        for (
+            const field of fields
+        ) {
+
+            if (
+                object &&
+                object[field] !==
+                    undefined &&
+                object[field] !==
+                    null &&
+                object[field] !==
+                    ""
+            ) {
+
+                return object[field];
+
+            }
+
+        }
+
+
+        return fallback;
+
+    }
+
+
+    function getStudentUid() {
+
+        return currentUser.uid;
+
+    }
+
+
+    function getStudentId() {
+
+        return firstValue(
+            studentData,
+            [
+                "studentId",
+                "id"
+            ],
+            ""
+        );
+
+    }
+
+
+    function getPercentage(
+        item
+    ) {
+
+        const percentage =
+            firstValue(
+                item,
+                [
+                    "percentage",
+                    "percent",
+                    "scorePercentage"
+                ],
+                null
+            );
+
+
+        if (
+            percentage !== null &&
+            percentage !== ""
+        ) {
+
+            const number =
+                Number(
+                    percentage
+                );
+
+
+            return isNaN(
+                number
+            )
+                ? null
+                : number;
+
+        }
+
+
+        const score =
+            firstValue(
+                item,
+                [
+                    "totalScore",
+                    "score",
+                    "marksObtained",
+                    "marks"
+                ],
+                null
+            );
+
+
+        const total =
+            firstValue(
+                item,
+                [
+                    "totalMarks",
+                    "maxMarks",
+                    "maximumMarks"
+                ],
+                null
+            );
+
+
+        if (
+            score !== null &&
+            total !== null &&
+            Number(total) > 0
+        ) {
+
+            return (
+                Number(score) /
+                Number(total)
+            ) * 100;
+
+        }
+
+
+        return null;
+
+    }
+
+
+    function getScoreText(
+        item
+    ) {
+
+        const score =
+            firstValue(
+                item,
+                [
+                    "totalScore",
+                    "score",
+                    "marksObtained"
+                ],
+                null
+            );
+
+
+        const total =
+            firstValue(
+                item,
+                [
+                    "totalMarks",
+                    "maxMarks",
+                    "maximumMarks"
+                ],
+                null
+            );
+
+
+        if (
+            score !== null &&
+            total !== null
+        ) {
+
+            return `${score} / ${total}`;
+
+        }
+
+
+        if (
+            score !== null
+        ) {
+
+            return String(
+                score
+            );
+
+        }
+
+
+        return "Pending";
+
+    }
+
+
+    function getStatus(
+        item,
+        type
+    ) {
+
+        const rawStatus =
+            String(
+                firstValue(
+                    item,
+                    [
+                        "status",
+                        "result"
+                    ],
+                    ""
+                )
+            ).toLowerCase();
+
+
+        if (
+            rawStatus ===
+                "passed" ||
+            rawStatus ===
+                "pass"
+        ) {
+
+            return "Passed";
+
+        }
+
+
+        if (
+            rawStatus ===
+                "failed" ||
+            rawStatus ===
+                "fail"
+        ) {
+
+            return "Failed";
+
+        }
+
+
+        if (
+            rawStatus ===
+                "pending" ||
+            rawStatus ===
+                "in progress" ||
+            rawStatus ===
+                "ungraded"
+        ) {
+
+            return "Pending";
+
+        }
+
+
+        if (
+            item.graded ===
+                false
+        ) {
+
+            return "Pending";
+
+        }
+
+
+        const percentage =
+            getPercentage(
+                item
+            );
+
+
+        const passMark =
+            Number(
+                firstValue(
+                    item,
+                    [
+                        "passMark"
+                    ],
+                    50
+                )
+            );
+
+
+        if (
+            percentage !== null
+        ) {
+
+            return percentage >=
+                passMark
+                ? "Passed"
+                : "Failed";
+
+        }
+
+
+        return type ===
+            "assignment" ||
+            type ===
+            "project"
+            ? "Pending"
+            : "Pending";
+
+    }
+
+
+    function getTitle(
+        item,
+        type
+    ) {
+
+        return firstValue(
+            item,
+            [
+                "examTitle",
+                "testTitle",
+                "assignmentTitle",
+                "projectTitle",
+                "title",
+                "name"
+            ],
+            type
+        );
+
+    }
+
+
+    function getCourse(
+        item
+    ) {
+
+        return firstValue(
+            item,
+            [
+                "course",
+                "courseName"
+            ],
+            "-"
+        );
+
+    }
+
+
+    function getDate(
+        item
+    ) {
+
+        return firstValue(
+            item,
+            [
+                "gradedAt",
+                "submittedAt",
+                "completedAt",
+                "updatedAt",
+                "createdAt"
+            ],
+            null
+        );
+
+    }
+
+
+    function getFeedback(
+        item
+    ) {
+
+        return firstValue(
+            item,
+            [
+                "feedback",
+                "teacherFeedback",
+                "tutorFeedback",
+                "comments",
+                "remark"
+            ],
+            ""
+        );
+
+    }
+
+
+    function normalizeResult(
+        item,
+        type
+    ) {
+
+        return {
+
+            ...item,
+
+            resultType:
+                type,
+
+            title:
+                getTitle(
+                    item,
+                    type
+                ),
+
+            course:
+                getCourse(
+                    item
+                ),
+
+            percentage:
+                getPercentage(
+                    item
+                ),
+
+            scoreText:
+                getScoreText(
+                    item
+                ),
+
+            status:
+                getStatus(
+                    item,
+                    type
+                ),
+
+            date:
+                getDate(
+                    item
+                ),
+
+            feedback:
+                getFeedback(
+                    item
+                )
+
+        };
+
+    }
+
+
+    async function getOwnCollection(
+        collectionName
+    ) {
+
+        /*
+         * We query using studentUid because
+         * exam/test submissions use this field.
+         */
+
+        try {
+
+            const snap =
+                await db
+                    .collection(
+                        collectionName
+                    )
+                    .where(
+                        "studentUid",
+                        "==",
+                        getStudentUid()
+                    )
+                    .get();
+
+
+            return snap.docs.map(
+                doc => ({
+
+                    id:
+                        doc.id,
+
+                    ...doc.data()
+
+                })
+            );
+
+        }
+        catch (
+            error
+        ) {
+
+            /*
+             * Some older STI documents may
+             * use studentId instead of studentUid.
+             */
+
+            try {
+
+                const studentId =
+                    getStudentId();
+
+
+                if (!studentId) {
+                    return [];
+                }
+
+
+                const snap =
+                    await db
+                        .collection(
+                            collectionName
+                        )
+                        .where(
+                            "studentId",
+                            "==",
+                            studentId
+                        )
+                        .get();
+
+
+                return snap.docs.map(
+                    doc => ({
+
+                        id:
+                            doc.id,
+
+                        ...doc.data()
+
+                    })
+                );
+
+            }
+            catch (
+                fallbackError
+            ) {
+
+                console.warn(
+                    collectionName,
+                    fallbackError
+                );
+
+
+                return [];
+
+            }
+
+        }
+
+    }
+
+
+    async function loadExamResults() {
+
+        const data =
+            await getOwnCollection(
+                "examSubmissions"
+            );
+
+
+        return data
+            .filter(
+                item =>
+                    item.submitted ===
+                        true ||
+                    item.status ===
+                        "Passed" ||
+                    item.status ===
+                        "Failed" ||
+                    item.graded ===
+                        true
+            )
+            .map(
+                item =>
+                    normalizeResult(
+                        item,
+                        "Exam"
+                    )
+            );
+
+    }
+
+
+    async function loadTestResults() {
+
+        const data =
+            await getOwnCollection(
+                "testSubmissions"
+            );
+
+
+        return data.map(
+            item =>
+                normalizeResult(
+                    item,
+                    "Test"
+                )
+        );
+
+    }
+
+
+    async function loadAssignmentResults() {
+
+        const data =
+            await getOwnCollection(
+                "assignmentSubmissions"
+            );
+
+
+        return data.map(
+            item =>
+                normalizeResult(
+                    item,
+                    "Assignment"
+                )
+        );
+
+    }
+
+
+    async function loadProjectResults() {
+
+        const data =
+            await getOwnCollection(
+                "projectSubmissions"
+            );
+
+
+        return data.map(
+            item =>
+                normalizeResult(
+                    item,
+                    "Project"
+                )
+        );
+
+    }
+
+
+    function renderEmpty(
+        container,
+        message
+    ) {
+
+        container.innerHTML =
+            `
+            <div class="empty">
+                ${escapeHtml(
+                    message
+                )}
+            </div>
+            `;
+
+    }
+
+
+    function renderResults(
+        containerId,
+        results
+    ) {
+
+        const container =
+            document.getElementById(
+                containerId
+            );
+
+
+        container.innerHTML =
+            "";
+
+
+        if (
+            !results.length
+        ) {
+
+            renderEmpty(
+                container,
+                "No results available yet."
+            );
+
+            return;
+
+        }
+
+
+        results.sort(
+            (
+                a,
+                b
+            ) => {
+
+                const dateA =
+                    timestampToDate(
+                        a.date
+                    );
+
+                const dateB =
+                    timestampToDate(
+                        b.date
+                    );
+
+
+                if (
+                    !dateA &&
+                    !dateB
+                ) {
+
+                    return 0;
+
+                }
+
+
+                if (!dateA) {
+                    return 1;
+                }
+
+
+                if (!dateB) {
+                    return -1;
+                }
+
+
+                return (
+                    dateB.getTime() -
+                    dateA.getTime()
+                );
+
+            }
+        );
+
+
+        results.forEach(
+            result => {
+
+                const statusClass =
+                    result.status
+                        .toLowerCase()
+                        .replace(
+                            /\s+/g,
+                            "-"
+                        );
+
+
+                let percentageText =
+                    "Pending";
+
+
+                if (
+                    result.percentage !==
+                        null &&
+                    result.percentage !==
+                        undefined
+                ) {
+
+                    percentageText =
+                        `${Number(
+                            result.percentage
+                        ).toFixed(1)}%`;
+
+                }
+
+
+                const feedback =
+                    result.feedback
+                        ? `
+                            <div class="feedback">
+                                <strong>
+                                    Feedback:
+                                </strong>
+                                ${escapeHtml(
+                                    result.feedback
+                                )}
+                            </div>
+                          `
+                        : "";
+
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "result-item";
+
+
+                item.innerHTML =
+                    `
+                    <div class="result-top">
+
+                        <div>
+
+                            <div class="result-title">
+                                ${escapeHtml(
+                                    result.title
+                                )}
+                            </div>
+
+                            <div class="result-type">
+                                ${escapeHtml(
+                                    result.course
+                                )}
+                                ·
+                                ${escapeHtml(
+                                    result.resultType
+                                )}
+
+                                ${
+                                    result.date
+                                        ? " · " +
+                                          escapeHtml(
+                                              formatDate(
+                                                  result.date
+                                              )
+                                          )
+                                        : ""
+                                }
+                            </div>
+
+                        </div>
+
+
+                        <span
+                            class="status ${statusClass}"
+                        >
+                            ${escapeHtml(
+                                result.status
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="result-details">
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Score
+                            </div>
+
+                            <div class="detail-value">
+                                ${escapeHtml(
+                                    result.scoreText
+                                )}
+                            </div>
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Percentage
+                            </div>
+
+                            <div class="detail-value">
+                                ${escapeHtml(
+                                    percentageText
+                                )}
+                            </div>
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Type
+                            </div>
+
+                            <div class="detail-value">
+                                ${escapeHtml(
+                                    result.resultType
+                                )}
+                            </div>
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Status
+                            </div>
+
+                            <div class="detail-value">
+                                ${escapeHtml(
+                                    result.status
+                                )}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    ${feedback}
+                    `;
+
+
+                container.appendChild(
+                    item
+                );
+
+            }
+        );
+
+    }
+
+
+    function updateSummary() {
+
+        const graded =
+            allResults.filter(
+                result =>
+                    result.status ===
+                        "Passed" ||
+                    result.status ===
+                        "Failed"
+            );
+
+
+        const passed =
+            allResults.filter(
+                result =>
+                    result.status ===
+                    "Passed"
+            ).length;
+
+
+        const failed =
+            allResults.filter(
+                result =>
+                    result.status ===
+                    "Failed"
+            ).length;
+
+
+        const pending =
+            allResults.filter(
+                result =>
+                    result.status ===
+                    "Pending"
+            ).length;
+
+
+        document.getElementById(
+            "totalResults"
+        ).textContent =
+            allResults.length;
+
+
+        document.getElementById(
+            "passedResults"
+        ).textContent =
+            passed;
+
+
+        document.getElementById(
+            "failedResults"
+        ).textContent =
+            failed;
+
+
+        document.getElementById(
+            "pendingResults"
+        ).textContent =
+            pending;
+
+
+        let average =
+            0;
+
+
+        if (
+            graded.length
+        ) {
+
+            const percentages =
+                graded
+                    .map(
+                        result =>
+                            Number(
+                                result.percentage
+                            )
+                    )
+                    .filter(
+                        value =>
+                            !isNaN(
+                                value
+                            )
+                    );
+
+
+            if (
+                percentages.length
+            ) {
+
+                average =
+                    percentages.reduce(
+                        (
+                            total,
+                            value
+                        ) =>
+                            total + value,
+                        0
+                    ) /
+                    percentages.length;
+
+            }
+
+        }
+
+
+        document.getElementById(
+            "overallPercentage"
+        ).textContent =
+            `${average.toFixed(1)}%`;
+
+
+        document.getElementById(
+            "overallBar"
+        ).style.width =
+            `${Math.max(
+                0,
+                Math.min(
+                    average,
+                    100
+                )
+            )}%`;
+
+    }
+
+
+    async function loadAllResults() {
+
+        const loading =
+            document.getElementById(
+                "loading"
+            );
+
+
+        const content =
+            document.getElementById(
+                "content"
+            );
+
+
+        const error =
+            document.getElementById(
+                "error"
+            );
+
+
+        loading.style.display =
+            "block";
+
+
+        content.style.display =
+            "none";
+
+
+        error.style.display =
+            "none";
+
+
+        try {
+
+            const [
+                exams,
+                tests,
+                assignments,
+                projects
+            ] = await Promise.all([
+                loadExamResults(),
+                loadTestResults(),
+                loadAssignmentResults(),
+                loadProjectResults()
+            ]);
+
+
+            allResults = [
+                ...exams,
+                ...tests,
+                ...assignments,
+                ...projects
+            ];
+
+
+            renderResults(
+                "examResults",
+                exams
+            );
+
+
+            renderResults(
+                "testResults",
+                tests
+            );
+
+
+            renderResults(
+                "assignmentResults",
+                assignments
+            );
+
+
+            renderResults(
+                "projectResults",
+                projects
+            );
+
+
+            document.getElementById(
+                "examCount"
+            ).textContent =
+                `${exams.length} result${
+                    exams.length === 1
+                        ? ""
+                        : "s"
+                }`;
+
+
+            document.getElementById(
+                "testCount"
+            ).textContent =
+                `${tests.length} result${
+                    tests.length === 1
+                        ? ""
+                        : "s"
+                }`;
+
+
+            document.getElementById(
+                "assignmentCount"
+            ).textContent =
+                `${assignments.length} result${
+                    assignments.length === 1
+                        ? ""
+                        : "s"
+                }`;
+
+
+            document.getElementById(
+                "projectCount"
+            ).textContent =
+                `${projects.length} result${
+                    projects.length === 1
+                        ? ""
+                        : "s"
+                }`;
+
+
+            updateSummary();
+
+
+            loading.style.display =
+                "none";
+
+
+            content.style.display =
+                "block";
+
+        }
+        catch (
+            loadError
+        ) {
+
+            console.error(
+                loadError
+            );
+
+
+            loading.style.display =
+                "none";
+
+
+            showError(
+                "Unable to load your results. " +
+                loadError.message
+            );
+
+        }
+
+    }
+
+
+    async function loadStudent() {
+
+        try {
+
+            const userSnap =
+                await db
+                    .collection(
+                        "users"
+                    )
+                    .doc(
+                        currentUser.uid
+                    )
+                    .get();
+
+
+            if (
+                userSnap.exists
+            ) {
+
+                studentData =
+                    userSnap.data();
+
+            }
+
+
+            /*
+             * Some STI student records may
+             * contain additional information
+             * in the students collection.
+             */
+
+            try {
+
+                const studentSnap =
+                    await db
+                        .collection(
+                            "students"
+                        )
+                        .doc(
+                            currentUser.uid
+                        )
+                        .get();
+
+
+                if (
+                    studentSnap.exists
+                ) {
+
+                    studentData = {
+
+                        ...studentData,
+
+                        ...studentSnap.data()
+
+                    };
+
+                }
+
+            }
+            catch (
+                ignored
+            ) {}
+
+
+            const name =
+                firstValue(
+                    studentData,
+                    [
+                        "fullName",
+                        "studentName",
+                        "name"
+                    ],
+                    "Student"
+                );
+
+
+            document.getElementById(
+                "studentName"
+            ).textContent =
+                `${name}'s Results`;
+
+        }
+        catch (
+            error
+        ) {
+
+            console.warn(
+                "Could not load student profile:",
+                error
+            );
+
+        }
+
+    }
+
+
+    auth.onAuthStateChanged(
+        async user => {
+
+            if (!user) {
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            currentUser =
+                user;
+
+
+            try {
+
+                await loadStudent();
+
+                await loadAllResults();
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                showError(
+                    "Failed to load results. " +
+                    error.message
+                );
+
+            }
+
+        }
+    );
+
+</script></body></html>

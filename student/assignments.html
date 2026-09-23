@@ -1,0 +1,3633 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Assignments | STI Academy</title>
+
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #080808;
+            border-bottom: 1px solid #222;
+            padding: 18px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1100px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: 800;
+            color: #168cff;
+        }
+
+        .student-info {
+            text-align: right;
+        }
+
+        .student-name {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .student-id {
+            color: #999;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px 20px 50px;
+        }
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h1 {
+            font-size: 30px;
+            margin-bottom: 7px;
+        }
+
+        .page-title p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .message {
+            display: none;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(22, 140, 255, 0.12);
+            border: 1px solid rgba(22, 140, 255, 0.4);
+            color: #66b5ff;
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(255, 70, 70, 0.10);
+            border: 1px solid rgba(255, 70, 70, 0.35);
+            color: #ff8585;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .assignment-card {
+            background: #0d0d0d;
+            border: 1px solid #242424;
+            border-radius: 14px;
+            padding: 20px;
+            transition: 0.2s ease;
+        }
+
+        .assignment-card:hover {
+            border-color: #168cff;
+            transform: translateY(-2px);
+        }
+
+        .assignment-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .assignment-title {
+            font-size: 18px;
+            font-weight: 750;
+            line-height: 1.3;
+        }
+
+        .status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 9px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .status.pending {
+            background: rgba(255, 193, 7, 0.12);
+            color: #ffc107;
+        }
+
+        .status.submitted {
+            background: rgba(0, 200, 120, 0.12);
+            color: #36d996;
+        }
+
+        .status.closed {
+            background: rgba(255, 80, 80, 0.12);
+            color: #ff8585;
+        }
+
+        .status.overdue {
+            background: rgba(255, 100, 0, 0.12);
+            color: #ff9b54;
+        }
+
+        .assignment-description {
+            color: #aaa;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .meta-item {
+            background: #131313;
+            border-radius: 9px;
+            padding: 10px;
+        }
+
+        .meta-label {
+            display: block;
+            color: #777;
+            font-size: 10px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .meta-value {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .deadline-danger {
+            color: #ff7373;
+        }
+
+        .deadline-normal {
+            color: #66b5ff;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: 9px;
+            padding: 12px 15px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            background: #168cff;
+            color: #ffffff;
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #0879e8;
+        }
+
+        .btn:disabled {
+            background: #292929;
+            color: #777;
+            cursor: not-allowed;
+        }
+
+        .result-btn {
+            background: #168cff;
+        }
+
+        .result-btn:hover {
+            background: #0879e8;
+        }
+
+        .score-preview {
+            margin-bottom: 12px;
+            padding: 11px 12px;
+            background: #111;
+            border: 1px solid #252525;
+            border-radius: 9px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .score-preview strong {
+            color: #fff;
+        }
+
+        .awaiting {
+            color: #ffc107;
+        }
+
+        .graded {
+            color: #36d996;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 70px 20px;
+            color: #777;
+            border: 1px dashed #292929;
+            border-radius: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 25px 15px;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            background: #0c0c0c;
+            border: 1px solid #292929;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #242424;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+        .modal-header p {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .close-btn {
+            border: none;
+            background: transparent;
+            color: #aaa;
+            font-size: 25px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .question {
+            background: #121212;
+            border: 1px solid #242424;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .question-number {
+            color: #168cff;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 11px 12px;
+            border: 1px solid #292929;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            background: #0d0d0d;
+        }
+
+        .option:hover {
+            border-color: #168cff;
+        }
+
+        .option input {
+            margin-top: 3px;
+            accent-color: #168cff;
+        }
+
+        .option-text {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            resize: vertical;
+            background: #090909;
+            color: #ffffff;
+            border: 1px solid #303030;
+            border-radius: 9px;
+            padding: 13px;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #168cff;
+        }
+
+        .modal-footer {
+            padding: 18px 20px;
+            border-top: 1px solid #242424;
+        }
+
+        .submit-warning {
+            color: #888;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 13px;
+        }
+
+        .submit-btn {
+            background: #168cff;
+        }
+
+        .submit-btn:hover {
+            background: #0879e8;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .result-box {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 9px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .result-box.success {
+            display: block;
+            background: rgba(0, 200, 120, 0.1);
+            border: 1px solid rgba(0, 200, 120, 0.3);
+            color: #5ee0a5;
+        }
+
+        .result-box.error {
+            display: block;
+            background: rgba(255, 70, 70, 0.1);
+            border: 1px solid rgba(255, 70, 70, 0.3);
+            color: #ff8585;
+        }
+
+
+        /* =========================================
+           RESULT VIEW
+        ========================================= */
+
+        .result-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .result-stat {
+            background: #121212;
+            border: 1px solid #292929;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .result-stat-label {
+            color: #777;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .result-stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .result-stat-value.blue {
+            color: #168cff;
+        }
+
+        .result-stat-value.green {
+            color: #36d996;
+        }
+
+        .result-stat-value.yellow {
+            color: #ffc107;
+        }
+
+        .feedback-box {
+            background: #101010;
+            border: 1px solid #292929;
+            border-left: 3px solid #168cff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .feedback-title {
+            color: #168cff;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .feedback-text {
+            color: #ccc;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .answer-section {
+            margin-top: 20px;
+        }
+
+        .answer-section-title {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .answer-card {
+            background: #121212;
+            border: 1px solid #292929;
+            border-radius: 11px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .answer-card.correct {
+            border-color: rgba(0, 200, 120, 0.35);
+        }
+
+        .answer-card.incorrect {
+            border-color: rgba(255, 80, 80, 0.35);
+        }
+
+        .answer-card.manual {
+            border-color: rgba(255, 193, 7, 0.35);
+        }
+
+        .answer-question {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .answer-row {
+            margin-top: 9px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .answer-label {
+            color: #777;
+            font-size: 11px;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .answer-value {
+            color: #ddd;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .answer-result {
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .answer-result.correct-text {
+            color: #36d996;
+        }
+
+        .answer-result.incorrect-text {
+            color: #ff8585;
+        }
+
+        .answer-result.manual-text {
+            color: #ffc107;
+        }
+
+        .back-btn {
+            background: #202020;
+            margin-top: 12px;
+        }
+
+        .back-btn:hover {
+            background: #292929;
+        }
+
+
+        @media (max-width: 600px) {
+
+            .header-inner {
+                align-items: flex-start;
+            }
+
+            .page-title h1 {
+                font-size: 25px;
+            }
+
+            .assignments-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                padding: 10px;
+            }
+
+            .modal-body {
+                padding: 14px;
+            }
+
+            .modal-header {
+                padding: 16px;
+            }
+
+            .result-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <header class="header">
+
+        <div class="header-inner">
+
+            <div class="logo">
+                STI Academy
+            </div>
+
+            <div class="student-info">
+
+                <div
+                    class="student-name"
+                    id="studentName"
+                >
+                    Loading...
+                </div>
+
+                <div
+                    class="student-id"
+                    id="studentId"
+                >
+                    -
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+
+        <div class="page-title">
+
+            <h1>Assignments</h1>
+
+            <p>
+                Complete your assignments and submit your answers before the deadline.
+            </p>
+
+        </div>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+        <div
+            id="loading"
+            class="loading"
+        >
+            Loading assignments...
+        </div>
+
+
+        <div
+            id="assignmentsContainer"
+            class="assignments-grid"
+            style="display:none;"
+        ></div>
+
+
+    </main>
+
+
+    <!-- ASSIGNMENT MODAL -->
+
+    <div
+        id="assignmentModal"
+        class="modal"
+    >
+
+        <div class="modal-box">
+
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2 id="modalTitle">
+                        Assignment
+                    </h2>
+
+                    <p id="modalCourse">
+                        -
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="close-btn"
+                    onclick="closeModal()"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <div
+                id="modalBody"
+                class="modal-body"
+            ></div>
+
+
+            <div class="modal-footer">
+
+                <div
+                    id="submitWarning"
+                    class="submit-warning"
+                >
+                    Make sure your answers are correct before submitting.
+                    Once submitted, you cannot submit the same assignment again.
+                </div>
+
+
+                <button
+                    type="button"
+                    id="submitButton"
+                    class="btn submit-btn"
+                    onclick="submitAssignment()"
+                >
+                    Submit Assignment
+                </button>
+
+
+                <div
+                    id="submitResult"
+                    class="result-box"
+                ></div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        /* =========================================
+           FIREBASE CONFIGURATION
+        ========================================= */
+
+        const firebaseConfig = {
+
+            apiKey:
+                "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+            authDomain:
+                "sti-academy.firebaseapp.com",
+
+            projectId:
+                "sti-academy",
+
+            storageBucket:
+                "sti-academy.firebasestorage.app",
+
+            messagingSenderId:
+                "709840641262",
+
+            appId:
+                "1:709840641262:web:714b09bf661afa159f27ff",
+
+            measurementId:
+                "G-7ZRZ3P28YP"
+
+        };
+
+
+        firebase.initializeApp(firebaseConfig);
+
+
+        const auth =
+            firebase.auth();
+
+        const db =
+            firebase.firestore();
+
+
+        /* =========================================
+           GLOBAL VARIABLES
+        ========================================= */
+
+        let currentUser = null;
+
+        let currentUserData = null;
+
+        let currentStudentData = null;
+
+        let allAssignments = [];
+
+        let allSubmissions = [];
+
+        let currentAssignment = null;
+
+
+        /* =========================================
+           DOM HELPERS
+        ========================================= */
+
+        const loading =
+            document.getElementById("loading");
+
+        const assignmentsContainer =
+            document.getElementById("assignmentsContainer");
+
+        const message =
+            document.getElementById("message");
+
+        const assignmentModal =
+            document.getElementById("assignmentModal");
+
+        const modalTitle =
+            document.getElementById("modalTitle");
+
+        const modalCourse =
+            document.getElementById("modalCourse");
+
+        const modalBody =
+            document.getElementById("modalBody");
+
+        const submitButton =
+            document.getElementById("submitButton");
+
+        const submitResult =
+            document.getElementById("submitResult");
+
+        const submitWarning =
+            document.getElementById("submitWarning");
+
+
+        /* =========================================
+           SHOW MESSAGE
+        ========================================= */
+
+        function showMessage(text, type = "error") {
+
+            message.textContent = text;
+
+            message.className =
+                "message " + type;
+
+        }
+
+
+        function clearMessage() {
+
+            message.textContent = "";
+
+            message.className = "message";
+
+        }
+
+
+        /* =========================================
+           ESCAPE HTML
+        ========================================= */
+
+        function escapeHtml(value) {
+
+            if (value === null || value === undefined) {
+                return "";
+            }
+
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+        }
+
+
+        /* =========================================
+           DATE HELPERS
+        ========================================= */
+
+        function convertTimestamp(value) {
+
+            if (!value) {
+                return null;
+            }
+
+            if (
+                value &&
+                typeof value.toDate === "function"
+            ) {
+                return value.toDate();
+            }
+
+            if (value instanceof Date) {
+                return value;
+            }
+
+            if (
+                typeof value === "string" ||
+                typeof value === "number"
+            ) {
+
+                const date =
+                    new Date(value);
+
+                if (!isNaN(date.getTime())) {
+                    return date;
+                }
+
+            }
+
+            return null;
+
+        }
+
+
+        function formatDate(value) {
+
+            const date =
+                convertTimestamp(value);
+
+            if (!date) {
+                return "No date";
+            }
+
+            return date.toLocaleString(
+                "en-NG",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+        }
+
+
+        /* =========================================
+           DEADLINE
+        ========================================= */
+
+        function getDeadlineStatus(deadline) {
+
+            const date =
+                convertTimestamp(deadline);
+
+            if (!date) {
+
+                return {
+                    text: "No deadline",
+                    className: "deadline-normal"
+                };
+
+            }
+
+            const now =
+                new Date();
+
+            const difference =
+                date.getTime() - now.getTime();
+
+            if (difference <= 0) {
+
+                return {
+                    text: "Deadline passed",
+                    className: "deadline-danger"
+                };
+
+            }
+
+            const hours =
+                Math.floor(
+                    difference / (1000 * 60 * 60)
+                );
+
+            if (hours < 24) {
+
+                return {
+                    text:
+                        `${hours} hour${hours === 1 ? "" : "s"} left`,
+                    className: "deadline-danger"
+                };
+
+            }
+
+            const days =
+                Math.floor(hours / 24);
+
+            return {
+                text:
+                    `${days} day${days === 1 ? "" : "s"} left`,
+                className: "deadline-normal"
+            };
+
+        }
+
+
+        /* =========================================
+           NORMALIZE VALUE
+        ========================================= */
+
+        function normalize(value) {
+
+            if (value === null || value === undefined) {
+                return "";
+            }
+
+            return String(value)
+                .trim()
+                .toLowerCase();
+
+        }
+
+
+        /* =========================================
+           CHECK ANSWER
+        ========================================= */
+
+        function checkObjectiveAnswer(
+            selectedAnswer,
+            correctAnswer,
+            options = []
+        ) {
+
+            if (
+                selectedAnswer === null ||
+                selectedAnswer === undefined ||
+                selectedAnswer === ""
+            ) {
+                return false;
+            }
+
+            if (
+                correctAnswer === null ||
+                correctAnswer === undefined
+            ) {
+                return false;
+            }
+
+
+            const selected =
+                normalize(selectedAnswer);
+
+            const correct =
+                normalize(correctAnswer);
+
+
+            if (selected === correct) {
+                return true;
+            }
+
+
+            const letters = [
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f"
+            ];
+
+
+            const correctIndex =
+                letters.indexOf(correct);
+
+
+            if (
+                correctIndex >= 0 &&
+                options[correctIndex] !== undefined
+            ) {
+
+                if (
+                    normalize(options[correctIndex]) === selected
+                ) {
+                    return true;
+                }
+
+            }
+
+
+            const numericCorrect =
+                Number(correctAnswer);
+
+            if (
+                !isNaN(numericCorrect) &&
+                options[numericCorrect] !== undefined
+            ) {
+
+                if (
+                    normalize(options[numericCorrect]) === selected
+                ) {
+                    return true;
+                }
+
+            }
+
+
+            const selectedIndex =
+                letters.indexOf(selected);
+
+            if (
+                selectedIndex >= 0 &&
+                options[selectedIndex] !== undefined
+            ) {
+
+                if (
+                    normalize(options[selectedIndex]) === correct
+                ) {
+                    return true;
+                }
+
+            }
+
+
+            return false;
+
+        }
+
+
+        /* =========================================
+           AUTH STATE
+        ========================================= */
+
+        auth.onAuthStateChanged(
+            async function(user) {
+
+                try {
+
+                    if (!user) {
+
+                        window.location.href =
+                            "login.html";
+
+                        return;
+
+                    }
+
+
+                    currentUser = user;
+
+
+                    const userDoc =
+                        await db
+                            .collection("users")
+                            .doc(user.uid)
+                            .get();
+
+
+                    if (!userDoc.exists) {
+
+                        throw new Error(
+                            "Your student account could not be found."
+                        );
+
+                    }
+
+
+                    currentUserData =
+                        userDoc.data();
+
+
+                    if (
+                        currentUserData.role !== "student"
+                    ) {
+
+                        throw new Error(
+                            "This page is only available to students."
+                        );
+
+                    }
+
+
+                    if (
+                        currentUserData.status !== "active"
+                    ) {
+
+                        throw new Error(
+                            "Your account is not currently active."
+                        );
+
+                    }
+
+
+                    const studentId =
+                        currentUserData.studentId;
+
+
+                    if (!studentId) {
+
+                        throw new Error(
+                            "Your student ID could not be found."
+                        );
+
+                    }
+
+
+                    const studentDoc =
+                        await db
+                            .collection("students")
+                            .doc(studentId)
+                            .get();
+
+
+                    if (!studentDoc.exists) {
+
+                        throw new Error(
+                            "Your student record could not be found."
+                        );
+
+                    }
+
+
+                    currentStudentData =
+                        studentDoc.data();
+
+
+                    document.getElementById(
+                        "studentName"
+                    ).textContent =
+                        currentStudentData.fullName ||
+                        currentUserData.fullName ||
+                        user.displayName ||
+                        "Student";
+
+
+                    document.getElementById(
+                        "studentId"
+                    ).textContent =
+                        studentId;
+
+
+                    await loadAssignments();
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Authentication error:",
+                        error
+                    );
+
+                    loading.style.display =
+                        "none";
+
+                    showMessage(
+                        error.message ||
+                        "Unable to load your student account."
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =========================================
+           LOAD ASSIGNMENTS
+        ========================================= */
+
+        async function loadAssignments() {
+
+            loading.style.display =
+                "block";
+
+            assignmentsContainer.style.display =
+                "none";
+
+            clearMessage();
+
+
+            try {
+
+                const snapshot =
+                    await db
+                        .collection("assignments")
+                        .get();
+
+
+                allAssignments =
+                    snapshot.docs.map(
+                        doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        })
+                    );
+
+
+                allAssignments.sort(
+                    function(a, b) {
+
+                        const aDate =
+                            convertTimestamp(
+                                a.createdAt
+                            );
+
+                        const bDate =
+                            convertTimestamp(
+                                b.createdAt
+                            );
+
+                        if (!aDate && !bDate) {
+                            return 0;
+                        }
+
+                        if (!aDate) {
+                            return 1;
+                        }
+
+                        if (!bDate) {
+                            return -1;
+                        }
+
+                        return bDate - aDate;
+
+                    }
+                );
+
+
+                const submissionsSnapshot =
+                    await db
+                        .collection("assignmentSubmissions")
+                        .where(
+                            "studentUid",
+                            "==",
+                            currentUser.uid
+                        )
+                        .get();
+
+
+                allSubmissions =
+                    submissionsSnapshot.docs.map(
+                        doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        })
+                    );
+
+
+                renderAssignments();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Error loading assignments:",
+                    error
+                );
+
+                loading.style.display =
+                    "none";
+
+                showMessage(
+                    "Unable to load assignments. " +
+                    (error.message || "")
+                );
+
+            }
+
+        }
+
+
+        /* =========================================
+           FIND STUDENT SUBMISSION
+        ========================================= */
+
+        function findSubmission(assignmentId) {
+
+            return allSubmissions.find(
+                submission =>
+                    submission.assignmentId === assignmentId
+            ) || null;
+
+        }
+
+
+        /* =========================================
+           GET DISPLAY SCORE
+        ========================================= */
+
+        function getSubmissionScore(submission) {
+
+            if (!submission) {
+                return "Not submitted";
+            }
+
+            const score =
+                Number(submission.score);
+
+            const totalMarks =
+                Number(submission.totalMarks);
+
+            if (
+                Number.isFinite(score) &&
+                Number.isFinite(totalMarks) &&
+                totalMarks > 0
+            ) {
+
+                return `${score}/${totalMarks}`;
+
+            }
+
+            return "Awaiting grading";
+
+        }
+
+
+        /* =========================================
+           RENDER ASSIGNMENTS
+        ========================================= */
+
+        function renderAssignments() {
+
+            loading.style.display =
+                "none";
+
+            assignmentsContainer.innerHTML =
+                "";
+
+
+            const studentCourse =
+                normalize(
+                    currentStudentData.course ||
+                    currentUserData.course
+                );
+
+            const studentCohort =
+                normalize(
+                    currentStudentData.cohort ||
+                    currentUserData.cohort
+                );
+
+
+            const visibleAssignments =
+                allAssignments.filter(
+                    function(assignment) {
+
+                        const assignmentCourse =
+                            normalize(
+                                assignment.course
+                            );
+
+                        const assignmentCohort =
+                            normalize(
+                                assignment.cohort
+                            );
+
+
+                        if (
+                            assignmentCourse &&
+                            studentCourse &&
+                            assignmentCourse !== studentCourse
+                        ) {
+                            return false;
+                        }
+
+
+                        if (
+                            assignmentCohort &&
+                            studentCohort &&
+                            assignmentCohort !== studentCohort
+                        ) {
+                            return false;
+                        }
+
+
+                        return true;
+
+                    }
+                );
+
+
+            if (visibleAssignments.length === 0) {
+
+                assignmentsContainer.innerHTML = `
+                    <div class="empty" style="grid-column: 1 / -1;">
+                        <h3 style="margin-bottom:8px;color:#fff;">
+                            No assignments available
+                        </h3>
+                        <p>
+                            There are currently no assignments available for your course.
+                        </p>
+                    </div>
+                `;
+
+                assignmentsContainer.style.display =
+                    "grid";
+
+                return;
+
+            }
+
+
+            visibleAssignments.forEach(
+                function(assignment) {
+
+                    const submission =
+                        findSubmission(
+                            assignment.id
+                        );
+
+
+                    const assignmentStatus =
+                        normalize(
+                            assignment.status || "active"
+                        );
+
+
+                    const deadline =
+                        convertTimestamp(
+                            assignment.deadline
+                        );
+
+
+                    const deadlinePassed =
+                        deadline &&
+                        deadline.getTime() < Date.now();
+
+
+                    let statusText =
+                        "Pending";
+
+                    let statusClass =
+                        "pending";
+
+                    let buttonText =
+                        "Open Assignment";
+
+                    let buttonDisabled =
+                        false;
+
+                    let buttonAction =
+                        `openAssignment('${escapeHtml(
+                            assignment.id
+                        )}')`;
+
+
+                    if (submission) {
+
+                        statusText =
+                            "Submitted";
+
+                        statusClass =
+                            "submitted";
+
+                        buttonText =
+                            "View Result";
+
+                        buttonDisabled =
+                            false;
+
+                        buttonAction =
+                            `viewResult('${escapeHtml(
+                                submission.id
+                            )}')`;
+
+                    }
+
+                    else if (
+                        assignmentStatus !== "active"
+                    ) {
+
+                        statusText =
+                            "Closed";
+
+                        statusClass =
+                            "closed";
+
+                        buttonText =
+                            "Assignment Closed";
+
+                        buttonDisabled =
+                            true;
+
+                    }
+
+                    else if (deadlinePassed) {
+
+                        statusText =
+                            "Overdue";
+
+                        statusClass =
+                            "overdue";
+
+                        buttonText =
+                            "Deadline Passed";
+
+                        buttonDisabled =
+                            true;
+
+                    }
+
+
+                    const deadlineInfo =
+                        getDeadlineStatus(
+                            assignment.deadline
+                        );
+
+
+                    const questions =
+                        Array.isArray(
+                            assignment.questions
+                        )
+                            ? assignment.questions.length
+                            : (
+                                Number(
+                                    assignment.questionCount
+                                ) || 0
+                            );
+
+
+                    const totalMarks =
+                        Number(
+                            assignment.totalMarks ??
+                            assignment.marks ??
+                            0
+                        );
+
+
+                    const description =
+                        assignment.description ||
+                        assignment.instructions ||
+                        "Complete the questions below and submit your answers.";
+
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    card.className =
+                        "assignment-card";
+
+
+                    let resultPreview =
+                        "";
+
+
+                    if (submission) {
+
+                        const submissionStatus =
+                            normalize(
+                                submission.status
+                            );
+
+
+                        const graded =
+                            submissionStatus === "graded";
+
+
+                        if (graded) {
+
+                            const score =
+                                Number(
+                                    submission.score
+                                ) || 0;
+
+                            const submissionTotal =
+                                Number(
+                                    submission.totalMarks
+                                ) || totalMarks;
+
+                            const percentage =
+                                Number(
+                                    submission.percentage
+                                );
+
+
+                            resultPreview = `
+                                <div class="score-preview">
+                                    <strong>Result:</strong>
+                                    ${score}/${submissionTotal}
+                                    ${
+                                        Number.isFinite(
+                                            percentage
+                                        )
+                                            ? ` • ${percentage.toFixed(1)}%`
+                                            : ""
+                                    }
+                                    <span class="graded">
+                                        • Graded
+                                    </span>
+                                </div>
+                            `;
+
+                        }
+
+                        else {
+
+                            resultPreview = `
+                                <div class="score-preview">
+                                    <strong>Status:</strong>
+                                    <span class="awaiting">
+                                        Awaiting grading
+                                    </span>
+                                </div>
+                            `;
+
+                        }
+
+                    }
+
+
+                    card.innerHTML = `
+
+                        <div class="assignment-top">
+
+                            <div class="assignment-title">
+                                ${escapeHtml(
+                                    assignment.title ||
+                                    "Untitled Assignment"
+                                )}
+                            </div>
+
+                            <span class="status ${statusClass}">
+                                ${statusText}
+                            </span>
+
+                        </div>
+
+
+                        <div class="assignment-description">
+                            ${escapeHtml(description)}
+                        </div>
+
+
+                        <div class="meta">
+
+                            <div class="meta-item">
+
+                                <span class="meta-label">
+                                    Course
+                                </span>
+
+                                <span class="meta-value">
+                                    ${escapeHtml(
+                                        assignment.course ||
+                                        "N/A"
+                                    )}
+                                </span>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <span class="meta-label">
+                                    Questions
+                                </span>
+
+                                <span class="meta-value">
+                                    ${questions}
+                                </span>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <span class="meta-label">
+                                    Marks
+                                </span>
+
+                                <span class="meta-value">
+                                    ${totalMarks}
+                                </span>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <span class="meta-label">
+                                    Deadline
+                                </span>
+
+                                <span
+                                    class="meta-value ${deadlineInfo.className}"
+                                >
+                                    ${escapeHtml(
+                                        deadlineInfo.text
+                                    )}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        ${resultPreview}
+
+
+                        <button
+                            type="button"
+                            class="btn ${
+                                submission
+                                    ? "result-btn"
+                                    : ""
+                            }"
+                            ${
+                                buttonDisabled
+                                    ? "disabled"
+                                    : ""
+                            }
+                            onclick="${buttonAction}"
+                        >
+                            ${buttonText}
+                        </button>
+
+                    `;
+
+
+                    assignmentsContainer.appendChild(
+                        card
+                    );
+
+                }
+            );
+
+
+            assignmentsContainer.style.display =
+                "grid";
+
+        }
+
+
+        /* =========================================
+           OPEN ASSIGNMENT
+        ========================================= */
+
+        function openAssignment(assignmentId) {
+
+            const assignment =
+                allAssignments.find(
+                    item =>
+                        item.id === assignmentId
+                );
+
+
+            if (!assignment) {
+
+                showMessage(
+                    "Assignment could not be found."
+                );
+
+                return;
+
+            }
+
+
+            const existingSubmission =
+                findSubmission(
+                    assignmentId
+                );
+
+
+            if (existingSubmission) {
+
+                viewResult(
+                    existingSubmission.id
+                );
+
+                return;
+
+            }
+
+
+            const assignmentStatus =
+                normalize(
+                    assignment.status || "active"
+                );
+
+
+            if (assignmentStatus !== "active") {
+
+                showMessage(
+                    "This assignment is closed."
+                );
+
+                return;
+
+            }
+
+
+            const deadline =
+                convertTimestamp(
+                    assignment.deadline
+                );
+
+
+            if (
+                deadline &&
+                deadline.getTime() < Date.now()
+            ) {
+
+                showMessage(
+                    "The deadline for this assignment has passed."
+                );
+
+                return;
+
+            }
+
+
+            currentAssignment =
+                assignment;
+
+
+            modalTitle.textContent =
+                assignment.title ||
+                "Assignment";
+
+
+            modalCourse.textContent =
+                `${assignment.course || "N/A"}${
+                    assignment.cohort
+                        ? " • " + assignment.cohort
+                        : ""
+                }`;
+
+
+            submitResult.className =
+                "result-box";
+
+            submitResult.textContent =
+                "";
+
+
+            submitWarning.style.display =
+                "block";
+
+
+            submitButton.style.display =
+                "block";
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                "Submit Assignment";
+
+
+            renderQuestions(
+                assignment.questions || []
+            );
+
+
+            assignmentModal.classList.add(
+                "active"
+            );
+
+
+            document.body.style.overflow =
+                "hidden";
+
+        }
+
+
+        /* =========================================
+           RENDER QUESTIONS
+        ========================================= */
+
+        function renderQuestions(questions) {
+
+            modalBody.innerHTML =
+                "";
+
+
+            if (!Array.isArray(questions) || questions.length === 0) {
+
+                modalBody.innerHTML = `
+
+                    <div class="empty">
+
+                        <h3 style="color:#fff;margin-bottom:8px;">
+                            No questions found
+                        </h3>
+
+                        <p>
+                            This assignment does not contain any questions yet.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            questions.forEach(
+                function(question, index) {
+
+                    const questionNumber =
+                        question.number ||
+                        question.questionNumber ||
+                        index + 1;
+
+
+                    const questionText =
+                        question.question ||
+                        question.text ||
+                        question.title ||
+                        "";
+
+
+                    const type =
+                        normalize(
+                            question.type ||
+                            question.questionType ||
+                            "written"
+                        );
+
+
+                    const options =
+                        Array.isArray(
+                            question.options
+                        )
+                            ? question.options
+                            : [];
+
+
+                    const marks =
+                        Number(
+                            question.marks ??
+                            question.points ??
+                            1
+                        );
+
+
+                    const questionDiv =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    questionDiv.className =
+                        "question";
+
+
+                    let answerHTML =
+                        "";
+
+
+                    const objective =
+                        type === "objective" ||
+                        type === "multiplechoice" ||
+                        type === "multiple_choice" ||
+                        type === "mcq" ||
+                        type === "choice" ||
+                        type === "multiple choice";
+
+
+                    if (
+                        objective &&
+                        options.length > 0
+                    ) {
+
+                        answerHTML =
+                            options.map(
+                                function(option, optionIndex) {
+
+                                    const letter =
+                                        String.fromCharCode(
+                                            65 + optionIndex
+                                        );
+
+
+                                    return `
+
+                                        <label class="option">
+
+                                            <input
+                                                type="radio"
+                                                name="question_${escapeHtml(
+                                                    question.id ||
+                                                    question.questionId ||
+                                                    index
+                                                )}"
+                                                value="${escapeHtml(
+                                                    letter
+                                                )}"
+                                                data-option-text="${escapeHtml(
+                                                    option
+                                                )}"
+                                                data-question-index="${index}"
+                                            >
+
+                                            <span class="option-text">
+                                                <strong>
+                                                    ${letter}.
+                                                </strong>
+                                                ${escapeHtml(option)}
+                                            </span>
+
+                                        </label>
+
+                                    `;
+
+                                }
+                            ).join("");
+
+                    }
+
+                    else {
+
+                        answerHTML = `
+
+                            <textarea
+                                data-question-index="${index}"
+                                placeholder="Enter your answer here..."
+                            ></textarea>
+
+                        `;
+
+                    }
+
+
+                    questionDiv.innerHTML = `
+
+                        <div class="question-number">
+                            QUESTION ${escapeHtml(
+                                questionNumber
+                            )}
+                            •
+                            ${marks} mark${marks === 1 ? "" : "s"}
+                        </div>
+
+
+                        <div class="question-text">
+                            ${escapeHtml(
+                                questionText
+                            )}
+                        </div>
+
+
+                        <div>
+                            ${answerHTML}
+                        </div>
+
+                    `;
+
+
+                    modalBody.appendChild(
+                        questionDiv
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =========================================
+           COLLECT ANSWERS
+        ========================================= */
+
+        function collectAnswers() {
+
+            if (!currentAssignment) {
+                throw new Error(
+                    "No assignment is currently open."
+                );
+            }
+
+
+            const questions =
+                Array.isArray(
+                    currentAssignment.questions
+                )
+                    ? currentAssignment.questions
+                    : [];
+
+
+            if (questions.length === 0) {
+
+                throw new Error(
+                    "This assignment has no questions."
+                );
+
+            }
+
+
+            const answers = [];
+
+
+            let objectiveScore =
+                0;
+
+            let totalMarks =
+                0;
+
+            let hasManualGrading =
+                false;
+
+
+            questions.forEach(
+                function(question, index) {
+
+                    const questionNumber =
+                        question.number ||
+                        question.questionNumber ||
+                        index + 1;
+
+
+                    const questionId =
+                        question.id ||
+                        question.questionId ||
+                        String(index + 1);
+
+
+                    const questionText =
+                        question.question ||
+                        question.text ||
+                        question.title ||
+                        "";
+
+
+                    const type =
+                        normalize(
+                            question.type ||
+                            question.questionType ||
+                            "written"
+                        );
+
+
+                    const marks =
+                        Number(
+                            question.marks ??
+                            question.points ??
+                            1
+                        );
+
+
+                    totalMarks +=
+                        marks;
+
+
+                    const objective =
+                        type === "objective" ||
+                        type === "multiplechoice" ||
+                        type === "multiple_choice" ||
+                        type === "mcq" ||
+                        type === "choice" ||
+                        type === "multiple choice";
+
+
+                    let answer =
+                        "";
+
+                    let isCorrect =
+                        false;
+
+                    let awardedMarks =
+                        0;
+
+
+                    if (objective) {
+
+                        const selected =
+                            document.querySelector(
+                                `input[name="question_${CSS.escape(
+                                    questionId
+                                )}"]:checked`
+                            );
+
+
+                        const selectedFallback =
+                            document.querySelector(
+                                `input[data-question-index="${index}"]:checked`
+                            );
+
+
+                        const selectedInput =
+                            selected ||
+                            selectedFallback;
+
+
+                        if (selectedInput) {
+
+                            answer =
+                                selectedInput.value;
+
+                            const optionText =
+                                selectedInput.getAttribute(
+                                    "data-option-text"
+                                );
+
+
+                            isCorrect =
+                                checkObjectiveAnswer(
+                                    answer,
+                                    question.correctAnswer ??
+                                    question.answer ??
+                                    question.correct ??
+                                    "",
+                                    question.options || []
+                                );
+
+
+                            if (!isCorrect && optionText) {
+
+                                isCorrect =
+                                    checkObjectiveAnswer(
+                                        optionText,
+                                        question.correctAnswer ??
+                                        question.answer ??
+                                        question.correct ??
+                                        "",
+                                        question.options || []
+                                    );
+
+                            }
+
+
+                            if (isCorrect) {
+
+                                awardedMarks =
+                                    marks;
+
+                                objectiveScore +=
+                                    marks;
+
+                            }
+
+                        }
+
+                    }
+
+                    else {
+
+                        const textarea =
+                            document.querySelector(
+                                `textarea[data-question-index="${index}"]`
+                            );
+
+
+                        if (textarea) {
+
+                            answer =
+                                textarea.value.trim();
+
+                        }
+
+
+                        hasManualGrading =
+                            true;
+
+                    }
+
+
+                    answers.push({
+
+                        questionId:
+                            questionId,
+
+                        questionNumber:
+                            questionNumber,
+
+                        question:
+                            questionText,
+
+                        type:
+                            type,
+
+                        answer:
+                            answer,
+
+                        answerText:
+                            answer,
+
+                        selectedOption:
+                            objective
+                                ? answer
+                                : null,
+
+                        correctAnswer:
+                            question.correctAnswer ??
+                            question.answer ??
+                            question.correct ??
+                            null,
+
+                        marks:
+                            marks,
+
+                        awardedMarks:
+                            awardedMarks,
+
+                        isCorrect:
+                            objective
+                                ? isCorrect
+                                : null,
+
+                        feedback:
+                            ""
+
+                    });
+
+                }
+            );
+
+
+            const unanswered =
+                answers.filter(
+                    answer =>
+                        !String(
+                            answer.answer || ""
+                        ).trim()
+                );
+
+
+            if (unanswered.length > 0) {
+
+                throw new Error(
+                    `Please answer all questions before submitting. ` +
+                    `${unanswered.length} question${
+                        unanswered.length === 1
+                            ? ""
+                            : "s"
+                    } unanswered.`
+                );
+
+            }
+
+
+            return {
+
+                answers:
+                    answers,
+
+                objectiveScore:
+                    objectiveScore,
+
+                totalMarks:
+                    totalMarks,
+
+                hasManualGrading:
+                    hasManualGrading
+
+            };
+
+        }
+
+
+        /* =========================================
+           SUBMIT ASSIGNMENT
+        ========================================= */
+
+        async function submitAssignment() {
+
+            if (!currentAssignment) {
+
+                showSubmitResult(
+                    "No assignment is currently open.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (!currentUser) {
+
+                showSubmitResult(
+                    "Your login session has expired. Please log in again.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            submitButton.disabled =
+                true;
+
+            submitButton.textContent =
+                "Submitting...";
+
+
+            try {
+
+                const existingSnapshot =
+                    await db
+                        .collection("assignmentSubmissions")
+                        .where(
+                            "assignmentId",
+                            "==",
+                            currentAssignment.id
+                        )
+                        .where(
+                            "studentUid",
+                            "==",
+                            currentUser.uid
+                        )
+                        .limit(1)
+                        .get();
+
+
+                if (!existingSnapshot.empty) {
+
+                    throw new Error(
+                        "You have already submitted this assignment."
+                    );
+
+                }
+
+
+                const deadline =
+                    convertTimestamp(
+                        currentAssignment.deadline
+                    );
+
+
+                if (
+                    deadline &&
+                    deadline.getTime() < Date.now()
+                ) {
+
+                    throw new Error(
+                        "The deadline for this assignment has passed."
+                    );
+
+                }
+
+
+                const result =
+                    collectAnswers();
+
+
+                const initialScore =
+                    result.objectiveScore;
+
+
+                const percentage =
+                    result.totalMarks > 0
+                        ? (
+                            initialScore /
+                            result.totalMarks
+                        ) * 100
+                        : 0;
+
+
+                const studentEmail =
+                    currentStudentData.email ||
+                    currentUserData.email ||
+                    currentUser.email ||
+                    "";
+
+
+                const studentName =
+                    currentStudentData.fullName ||
+                    currentUserData.fullName ||
+                    currentUser.displayName ||
+                    "Student";
+
+
+                const studentId =
+                    currentStudentData.studentId ||
+                    currentUserData.studentId ||
+                    "";
+
+
+                const submissionData = {
+
+                    assignmentId:
+                        currentAssignment.id,
+
+                    assignmentTitle:
+                        currentAssignment.title ||
+                        "Untitled Assignment",
+
+                    studentUid:
+                        currentUser.uid,
+
+                    studentId:
+                        studentId,
+
+                    studentName:
+                        studentName,
+
+                    email:
+                        studentEmail,
+
+                    studentEmail:
+                        studentEmail,
+
+                    course:
+                        currentAssignment.course ||
+                        currentStudentData.course ||
+                        currentUserData.course ||
+                        "",
+
+                    cohort:
+                        currentAssignment.cohort ||
+                        currentStudentData.cohort ||
+                        currentUserData.cohort ||
+                        "",
+
+                    answers:
+                        result.answers,
+
+                    objectiveScore:
+                        result.objectiveScore,
+
+                    manualScore:
+                        0,
+
+                    score:
+                        initialScore,
+
+                    totalMarks:
+                        result.totalMarks,
+
+                    percentage:
+                        percentage,
+
+                    status:
+                        result.hasManualGrading
+                            ? "pending_grading"
+                            : "graded",
+
+                    feedback:
+                        "",
+
+                    submittedAt:
+                        firebase.firestore.FieldValue.serverTimestamp(),
+
+                    gradedAt:
+                        result.hasManualGrading
+                            ? null
+                            : firebase.firestore.FieldValue.serverTimestamp(),
+
+                    gradedBy:
+                        result.hasManualGrading
+                            ? null
+                            : "automatic",
+
+                    gradedByEmail:
+                        result.hasManualGrading
+                            ? null
+                            : ""
+
+                };
+
+
+                const submissionRef =
+                    await db
+                        .collection("assignmentSubmissions")
+                        .add(
+                            submissionData
+                        );
+
+
+                console.log(
+                    "Assignment submitted:",
+                    submissionRef.id
+                );
+
+
+                allSubmissions.push({
+
+                    id:
+                        submissionRef.id,
+
+                    ...submissionData,
+
+                    submittedAt:
+                        new Date(),
+
+                    gradedAt:
+                        result.hasManualGrading
+                            ? null
+                            : new Date()
+
+                });
+
+
+                showSubmitResult(
+                    result.hasManualGrading
+                        ? "Assignment submitted successfully. Your written answers are waiting for grading."
+                        : "Assignment submitted successfully.",
+                    "success"
+                );
+
+
+                submitButton.disabled =
+                    true;
+
+                submitButton.textContent =
+                    "Assignment Submitted";
+
+
+                setTimeout(
+                    function() {
+
+                        closeModal();
+
+                        renderAssignments();
+
+                        showMessage(
+                            "Your assignment was submitted successfully.",
+                            "success"
+                        );
+
+                    },
+                    1200
+                );
+
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Assignment submission error:",
+                    error
+                );
+
+
+                submitButton.disabled =
+                    false;
+
+                submitButton.textContent =
+                    "Submit Assignment";
+
+
+                let errorMessage =
+                    error.message ||
+                    "Unable to submit assignment.";
+
+
+                if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    errorMessage =
+                        "Submission was blocked by Firestore permissions. " +
+                        "The student submission rule must allow your account to create " +
+                        "its own assignment submission.";
+
+                }
+
+
+                showSubmitResult(
+                    errorMessage,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        /* =========================================
+           VIEW RESULT
+        ========================================= */
+
+        async function viewResult(submissionId) {
+
+            if (!submissionId) {
+
+                showMessage(
+                    "The submission could not be found."
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * Fetch the submission directly from
+                 * Firestore every time the student opens
+                 * the result.
+                 *
+                 * This means if an admin grades the work
+                 * after submission, the student will see
+                 * the latest score and feedback.
+                 */
+
+                const submissionDoc =
+                    await db
+                        .collection("assignmentSubmissions")
+                        .doc(submissionId)
+                        .get();
+
+
+                if (!submissionDoc.exists) {
+
+                    throw new Error(
+                        "This submission could not be found."
+                    );
+
+                }
+
+
+                const submission =
+                    {
+                        id: submissionDoc.id,
+                        ...submissionDoc.data()
+                    };
+
+
+                /*
+                 * Security check on the client side.
+                 * Firestore rules also enforce this.
+                 */
+
+                if (
+                    submission.studentUid !==
+                    currentUser.uid
+                ) {
+
+                    throw new Error(
+                        "You are not allowed to view this submission."
+                    );
+
+                }
+
+
+                /*
+                 * Find the assignment so we can use
+                 * its questions where necessary.
+                 */
+
+                const assignment =
+                    allAssignments.find(
+                        item =>
+                            item.id ===
+                            submission.assignmentId
+                    );
+
+
+                renderResult(
+                    submission,
+                    assignment || null
+                );
+
+
+                assignmentModal.classList.add(
+                    "active"
+                );
+
+                document.body.style.overflow =
+                    "hidden";
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Error loading result:",
+                    error
+                );
+
+                showMessage(
+                    error.message ||
+                    "Unable to load your result."
+                );
+
+            }
+
+        }
+
+
+        /* =========================================
+           RENDER RESULT
+        ========================================= */
+
+        function renderResult(
+            submission,
+            assignment
+        ) {
+
+            currentAssignment =
+                null;
+
+
+            modalTitle.textContent =
+                submission.assignmentTitle ||
+                (assignment
+                    ? assignment.title
+                    : "Assignment Result");
+
+
+            modalCourse.textContent =
+                `${submission.course || "N/A"}${
+                    submission.cohort
+                        ? " • " + submission.cohort
+                        : ""
+                }`;
+
+
+            submitWarning.style.display =
+                "none";
+
+
+            submitButton.style.display =
+                "none";
+
+
+            submitResult.className =
+                "result-box";
+
+
+            submitResult.textContent =
+                "";
+
+
+            const status =
+                normalize(
+                    submission.status
+                );
+
+
+            const isGraded =
+                status === "graded";
+
+
+            const score =
+                Number(
+                    submission.score
+                );
+
+
+            const totalMarks =
+                Number(
+                    submission.totalMarks
+                );
+
+
+            const percentage =
+                Number(
+                    submission.percentage
+                );
+
+
+            let scoreText =
+                "Pending";
+
+
+            if (
+                Number.isFinite(score) &&
+                Number.isFinite(totalMarks)
+            ) {
+
+                scoreText =
+                    `${score}/${totalMarks}`;
+
+            }
+
+
+            let percentageText =
+                "Pending";
+
+
+            if (
+                Number.isFinite(percentage)
+            ) {
+
+                percentageText =
+                    `${percentage.toFixed(1)}%`;
+
+            }
+
+
+            const statusText =
+                isGraded
+                    ? "Graded"
+                    : "Awaiting Grading";
+
+
+            const statusClass =
+                isGraded
+                    ? "green"
+                    : "yellow";
+
+
+            const feedback =
+                submission.feedback ||
+                "";
+
+
+            const answers =
+                Array.isArray(
+                    submission.answers
+                )
+                    ? submission.answers
+                    : [];
+
+
+            let html = `
+
+                <div class="result-summary">
+
+                    <div class="result-stat">
+
+                        <div class="result-stat-label">
+                            Score
+                        </div>
+
+                        <div class="result-stat-value blue">
+                            ${escapeHtml(
+                                scoreText
+                            )}
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-stat">
+
+                        <div class="result-stat-label">
+                            Percentage
+                        </div>
+
+                        <div class="result-stat-value blue">
+                            ${escapeHtml(
+                                percentageText
+                            )}
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-stat">
+
+                        <div class="result-stat-label">
+                            Status
+                        </div>
+
+                        <div class="result-stat-value ${statusClass}">
+                            ${statusText}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            if (feedback) {
+
+                html += `
+
+                    <div class="feedback-box">
+
+                        <div class="feedback-title">
+                            Feedback
+                        </div>
+
+                        <div class="feedback-text">
+                            ${escapeHtml(
+                                feedback
+                            )}
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+            else if (isGraded) {
+
+                html += `
+
+                    <div class="feedback-box">
+
+                        <div class="feedback-title">
+                            Feedback
+                        </div>
+
+                        <div class="feedback-text">
+                            No feedback was provided for this assignment.
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+            else {
+
+                html += `
+
+                    <div class="feedback-box">
+
+                        <div class="feedback-title">
+                            Grading Status
+                        </div>
+
+                        <div class="feedback-text">
+                            Your assignment has been submitted successfully.
+                            Your result will be updated here after grading is completed.
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+
+            html += `
+
+                <div class="answer-section">
+
+                    <div class="answer-section-title">
+                        Your Answers
+                    </div>
+
+            `;
+
+
+            if (answers.length === 0) {
+
+                html += `
+
+                    <div class="empty">
+                        No answer details were found for this submission.
+                    </div>
+
+                `;
+
+            }
+
+            else {
+
+                answers.forEach(
+                    function(answer, index) {
+
+                        const questionNumber =
+                            answer.questionNumber ||
+                            index + 1;
+
+
+                        const questionText =
+                            answer.question ||
+                            "";
+
+
+                        const studentAnswer =
+                            answer.answer ||
+                            answer.answerText ||
+                            "No answer";
+
+
+                        const marks =
+                            Number(
+                                answer.marks
+                            ) || 0;
+
+
+                        const awardedMarks =
+                            Number(
+                                answer.awardedMarks
+                            ) || 0;
+
+
+                        const objective =
+                            answer.type === "objective" ||
+                            answer.type === "multiplechoice" ||
+                            answer.type === "multiple_choice" ||
+                            answer.type === "mcq" ||
+                            answer.type === "choice" ||
+                            answer.type === "multiple choice";
+
+
+                        let cardClass =
+                            "manual";
+
+
+                        let resultText =
+                            "Awaiting manual grading";
+
+
+                        let resultClass =
+                            "manual-text";
+
+
+                        if (objective) {
+
+                            if (
+                                answer.isCorrect === true
+                            ) {
+
+                                cardClass =
+                                    "correct";
+
+                                resultText =
+                                    `Correct • ${awardedMarks}/${marks} mark${marks === 1 ? "" : "s"}`;
+
+                                resultClass =
+                                    "correct-text";
+
+                            }
+
+                            else if (
+                                answer.isCorrect === false
+                            ) {
+
+                                cardClass =
+                                    "incorrect";
+
+                                resultText =
+                                    `Incorrect • ${awardedMarks}/${marks} mark${marks === 1 ? "" : "s"}`;
+
+                                resultClass =
+                                    "incorrect-text";
+
+                            }
+
+                            else {
+
+                                cardClass =
+                                    "manual";
+
+                                resultText =
+                                    "Awaiting grading";
+
+                                resultClass =
+                                    "manual-text";
+
+                            }
+
+                        }
+
+                        else if (isGraded) {
+
+                            cardClass =
+                                "manual";
+
+                            resultText =
+                                `${awardedMarks}/${marks} mark${marks === 1 ? "" : "s"} awarded`;
+
+                            resultClass =
+                                "correct-text";
+
+                        }
+
+
+                        html += `
+
+                            <div class="answer-card ${cardClass}">
+
+                                <div class="question-number">
+                                    QUESTION ${escapeHtml(
+                                        questionNumber
+                                    )}
+                                </div>
+
+
+                                <div class="answer-question">
+                                    ${escapeHtml(
+                                        questionText
+                                    )}
+                                </div>
+
+
+                                <div class="answer-row">
+
+                                    <span class="answer-label">
+                                        Your Answer
+                                    </span>
+
+                                    <div class="answer-value">
+                                        ${escapeHtml(
+                                            studentAnswer
+                                        )}
+                                    </div>
+
+                                </div>
+
+                        `;
+
+
+                        /*
+                         * Show correct answer for objective
+                         * questions.
+                         */
+
+                        if (
+                            objective &&
+                            isGraded &&
+                            answer.correctAnswer !== null &&
+                            answer.correctAnswer !== undefined &&
+                            String(
+                                answer.correctAnswer
+                            ).trim() !== ""
+                        ) {
+
+                            html += `
+
+                                <div class="answer-row">
+
+                                    <span class="answer-label">
+                                        Correct Answer
+                                    </span>
+
+                                    <div class="answer-value">
+                                        ${escapeHtml(
+                                            getCorrectAnswerDisplay(
+                                                answer
+                                            )
+                                        )}
+                                    </div>
+
+                                </div>
+
+                            `;
+
+                        }
+
+
+                        /*
+                         * Show per-question feedback
+                         * if the admin/tutor saved one.
+                         */
+
+                        if (
+                            answer.feedback &&
+                            String(
+                                answer.feedback
+                            ).trim() !== ""
+                        ) {
+
+                            html += `
+
+                                <div class="answer-row">
+
+                                    <span class="answer-label">
+                                        Feedback
+                                    </span>
+
+                                    <div class="answer-value">
+                                        ${escapeHtml(
+                                            answer.feedback
+                                        )}
+                                    </div>
+
+                                </div>
+
+                            `;
+
+                        }
+
+
+                        html += `
+
+                                <div class="answer-result ${resultClass}">
+                                    ${escapeHtml(
+                                        resultText
+                                    )}
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }
+                );
+
+            }
+
+
+            html += `
+
+                </div>
+
+            `;
+
+
+            modalBody.innerHTML =
+                html;
+
+        }
+
+
+        /* =========================================
+           CORRECT ANSWER DISPLAY
+        ========================================= */
+
+        function getCorrectAnswerDisplay(answer) {
+
+            const correct =
+                answer.correctAnswer;
+
+
+            const options =
+                Array.isArray(
+                    answer.options
+                )
+                    ? answer.options
+                    : [];
+
+
+            const letters = [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F"
+            ];
+
+
+            const normalized =
+                normalize(correct);
+
+
+            const index =
+                letters
+                    .map(
+                        letter =>
+                            letter.toLowerCase()
+                    )
+                    .indexOf(
+                        normalized
+                    );
+
+
+            if (
+                index >= 0 &&
+                options[index] !== undefined
+            ) {
+
+                return `${letters[index]}. ${options[index]}`;
+
+            }
+
+
+            const numeric =
+                Number(correct);
+
+
+            if (
+                !isNaN(numeric) &&
+                options[numeric] !== undefined
+            ) {
+
+                return `${letters[numeric] || ""}${
+                    letters[numeric]
+                        ? ". "
+                        : ""
+                }${options[numeric]}`;
+
+            }
+
+
+            return String(correct);
+
+        }
+
+
+        /* =========================================
+           SHOW SUBMIT RESULT
+        ========================================= */
+
+        function showSubmitResult(
+            text,
+            type
+        ) {
+
+            submitResult.textContent =
+                text;
+
+            submitResult.className =
+                "result-box " + type;
+
+        }
+
+
+        /* =========================================
+           CLOSE MODAL
+        ========================================= */
+
+        function closeModal() {
+
+            assignmentModal.classList.remove(
+                "active"
+            );
+
+            document.body.style.overflow =
+                "";
+
+            currentAssignment =
+                null;
+
+            modalBody.innerHTML =
+                "";
+
+            submitResult.textContent =
+                "";
+
+            submitResult.className =
+                "result-box";
+
+            submitWarning.style.display =
+                "block";
+
+            submitButton.style.display =
+                "block";
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                "Submit Assignment";
+
+        }
+
+
+        /* =========================================
+           CLOSE WHEN CLICKING OUTSIDE
+        ========================================= */
+
+        assignmentModal.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target ===
+                    assignmentModal
+                ) {
+
+                    closeModal();
+
+                }
+
+            }
+        );
+
+
+        /* =========================================
+           ESC KEY
+        ========================================= */
+
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Escape" &&
+                    assignmentModal.classList.contains(
+                        "active"
+                    )
+                ) {
+
+                    closeModal();
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Referrals | STI Academy</title>
+
+    <!-- FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+
+        body{
+            background:#000;
+            color:#fff;
+            min-height:100vh;
+        }
+
+
+        .container{
+            max-width:1200px;
+            margin:auto;
+            padding:25px;
+        }
+
+
+        /* HEADER */
+
+        .header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            flex-wrap:wrap;
+            margin-bottom:25px;
+        }
+
+
+        .header h1{
+            font-size:28px;
+        }
+
+
+        .header p{
+            color:#999;
+            margin-top:6px;
+            font-size:14px;
+        }
+
+
+        .back-btn{
+            background:#1683ff;
+            color:#fff;
+            border:none;
+            padding:11px 18px;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+
+        .back-btn:hover{
+            opacity:.9;
+        }
+
+
+        /* PROFILE */
+
+        .profile-card{
+            background:#111;
+            border:1px solid #222;
+            border-radius:14px;
+            padding:20px;
+            margin-bottom:20px;
+        }
+
+
+        .profile-card h2{
+            font-size:19px;
+            margin-bottom:8px;
+        }
+
+
+        .profile-card p{
+            color:#999;
+            font-size:14px;
+        }
+
+
+        .student-id{
+            display:inline-block;
+            margin-top:12px;
+            padding:8px 12px;
+            border-radius:7px;
+            background:#1683ff18;
+            border:1px solid #1683ff44;
+            color:#1683ff;
+            font-size:13px;
+            font-weight:bold;
+        }
+
+
+        /* REFERRAL CODE */
+
+        .code-card{
+            background:#111;
+            border:1px solid #222;
+            border-radius:14px;
+            padding:20px;
+            margin-bottom:20px;
+        }
+
+
+        .code-title{
+            color:#999;
+            font-size:13px;
+            margin-bottom:10px;
+        }
+
+
+        .code-row{
+            display:flex;
+            gap:10px;
+            align-items:center;
+        }
+
+
+        .code{
+            flex:1;
+            background:#080808;
+            border:1px solid #333;
+            border-radius:8px;
+            padding:13px;
+            color:#1683ff;
+            font-size:17px;
+            font-weight:bold;
+            letter-spacing:1px;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+
+
+        .copy-btn{
+            background:#1683ff;
+            color:#fff;
+            border:none;
+            border-radius:8px;
+            padding:13px 16px;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+
+        /* STATS */
+
+        .stats{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:15px;
+            margin-bottom:25px;
+        }
+
+
+        .stat-card{
+            background:#111;
+            border:1px solid #222;
+            border-radius:12px;
+            padding:20px;
+        }
+
+
+        .stat-card span{
+            display:block;
+            color:#999;
+            font-size:13px;
+            margin-bottom:10px;
+        }
+
+
+        .stat-card strong{
+            font-size:27px;
+            color:#1683ff;
+        }
+
+
+        /* HISTORY */
+
+        .section{
+            background:#111;
+            border:1px solid #222;
+            border-radius:14px;
+            overflow:hidden;
+        }
+
+
+        .section-header{
+            padding:20px;
+            border-bottom:1px solid #222;
+        }
+
+
+        .section-header h2{
+            font-size:19px;
+        }
+
+
+        .section-header p{
+            color:#888;
+            font-size:13px;
+            margin-top:5px;
+        }
+
+
+        .table-wrapper{
+            overflow-x:auto;
+        }
+
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            min-width:850px;
+        }
+
+
+        th,
+        td{
+            padding:15px;
+            text-align:left;
+            border-bottom:1px solid #222;
+        }
+
+
+        th{
+            color:#888;
+            font-size:12px;
+            font-weight:normal;
+        }
+
+
+        td{
+            font-size:14px;
+        }
+
+
+        tr:last-child td{
+            border-bottom:none;
+        }
+
+
+        .student-name{
+            font-weight:bold;
+        }
+
+
+        .student-id-small{
+            color:#777;
+            font-size:12px;
+            margin-top:4px;
+        }
+
+
+        .status{
+            display:inline-block;
+            padding:5px 9px;
+            border-radius:20px;
+            font-size:11px;
+            font-weight:bold;
+        }
+
+
+        .successful{
+            background:#003322;
+            color:#00d084;
+        }
+
+
+        .pending{
+            background:#332200;
+            color:#ffb000;
+        }
+
+
+        .paid{
+            background:#003322;
+            color:#00d084;
+        }
+
+
+        .unpaid{
+            background:#330000;
+            color:#ff5555;
+        }
+
+
+        .empty{
+            text-align:center;
+            padding:45px 20px;
+            color:#777;
+        }
+
+
+        .empty strong{
+            display:block;
+            color:#aaa;
+            margin-bottom:7px;
+        }
+
+
+        /* LOADING */
+
+        .loading{
+            text-align:center;
+            padding:40px;
+            color:#777;
+        }
+
+
+        /* MESSAGE */
+
+        .message{
+            position:fixed;
+            top:20px;
+            right:20px;
+            background:#111;
+            border:1px solid #333;
+            border-left:4px solid #1683ff;
+            padding:15px 18px;
+            border-radius:8px;
+            display:none;
+            z-index:2000;
+            max-width:320px;
+        }
+
+
+        .message.show{
+            display:block;
+        }
+
+
+        .message.error{
+            border-left-color:#ff4444;
+        }
+
+
+        /* MOBILE */
+
+        @media(max-width:800px){
+
+            .container{
+                padding:15px;
+            }
+
+
+            .stats{
+                grid-template-columns:repeat(2,1fr);
+            }
+
+
+            .header h1{
+                font-size:23px;
+            }
+
+        }
+
+
+        @media(max-width:500px){
+
+            .stats{
+                gap:10px;
+            }
+
+
+            .stat-card{
+                padding:15px;
+            }
+
+
+            .stat-card strong{
+                font-size:22px;
+            }
+
+
+            .code-row{
+                flex-direction:column;
+                align-items:stretch;
+            }
+
+
+            .copy-btn{
+                width:100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <div>
+
+            <h1>My Referrals</h1>
+
+            <p>
+                Track the students you have referred to STI Academy.
+            </p>
+
+        </div>
+
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            Back
+        </button>
+
+    </div>
+
+
+
+    <!-- STUDENT PROFILE -->
+
+    <div class="profile-card">
+
+        <h2 id="studentName">
+            Loading...
+        </h2>
+
+        <p id="studentEmail">
+            Loading...
+        </p>
+
+        <span
+            class="student-id"
+            id="studentId"
+        >
+            Loading...
+        </span>
+
+    </div>
+
+
+
+    <!-- REFERRAL CODE -->
+
+    <div class="code-card">
+
+        <div class="code-title">
+            Your Referral Code
+        </div>
+
+
+        <div class="code-row">
+
+            <div
+                class="code"
+                id="referralCode"
+            >
+                Loading...
+            </div>
+
+
+            <button
+                class="copy-btn"
+                onclick="copyReferralCode()"
+            >
+                Copy
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+
+        <div class="stat-card">
+
+            <span>
+                Total Referrals
+            </span>
+
+            <strong id="totalReferrals">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span>
+                Successful Referrals
+            </span>
+
+            <strong id="successfulReferrals">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span>
+                Pending Referrals
+            </span>
+
+            <strong id="pendingReferrals">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span>
+                Total Rewards
+            </span>
+
+            <strong id="totalRewards">
+                ₦0
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- REFERRAL HISTORY -->
+
+    <div class="section">
+
+
+        <div class="section-header">
+
+            <h2>
+                Referral History
+            </h2>
+
+            <p>
+                Your referral records and rewards.
+            </p>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Referred Student
+                        </th>
+
+                        <th>
+                            Course
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Reward
+                        </th>
+
+                        <th>
+                            Reward Status
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="referralsTable">
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="loading"
+                        >
+                            Loading referrals...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- MESSAGE -->
+
+<div
+    id="message"
+    class="message"
+></div>
+
+
+
+<script>
+
+
+/* =========================
+   FIREBASE
+========================= */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840261642",
+
+    appId:
+        "1:709840261642:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+firebase.initializeApp(
+    firebaseConfig
+);
+
+
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.firestore();
+
+
+
+/* =========================
+   VARIABLES
+========================= */
+
+let currentUser = null;
+
+let studentData = null;
+
+let studentRecord = null;
+
+let referrals = [];
+
+
+
+/* =========================
+   AUTH
+========================= */
+
+auth.onAuthStateChanged(
+    async user => {
+
+        if(!user){
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+
+        currentUser = user;
+
+
+        try{
+
+            await loadStudent();
+
+
+        }catch(error){
+
+            console.error(error);
+
+            showMessage(
+                error.message,
+                "error"
+            );
+
+        }
+
+    }
+);
+
+
+
+/* =========================
+   LOAD STUDENT
+========================= */
+
+async function loadStudent(){
+
+    const userDoc =
+        await db
+        .collection("users")
+        .doc(currentUser.uid)
+        .get();
+
+
+    if(!userDoc.exists){
+
+        showMessage(
+            "Student account not found.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    studentData =
+        userDoc.data();
+
+
+    document.getElementById(
+        "studentName"
+    ).textContent =
+        studentData.fullName ||
+        studentData.name ||
+        "Student";
+
+
+    document.getElementById(
+        "studentEmail"
+    ).textContent =
+        studentData.email ||
+        currentUser.email ||
+        "";
+
+
+    const studentId =
+        studentData.studentId ||
+        "";
+
+
+    document.getElementById(
+        "studentId"
+    ).textContent =
+        studentId ||
+        "Student ID unavailable";
+
+
+    /*
+       The Student ID is used as the
+       referral code because the Admin
+       Referrals page identifies the
+       referring student by Student ID.
+    */
+
+    document.getElementById(
+        "referralCode"
+    ).textContent =
+        studentId ||
+        "Unavailable";
+
+
+    await loadStudentRecord(
+        studentId
+    );
+
+
+    await loadReferrals();
+
+}
+
+
+
+/* =========================
+   LOAD STUDENT RECORD
+========================= */
+
+async function loadStudentRecord(
+    studentId
+){
+
+    if(!studentId){
+        return;
+    }
+
+
+    const studentDoc =
+        await db
+        .collection("students")
+        .doc(studentId)
+        .get();
+
+
+    if(studentDoc.exists){
+
+        studentRecord =
+            studentDoc.data();
+
+    }
+
+}
+
+
+
+/* =========================
+   LOAD REFERRALS
+========================= */
+
+async function loadReferrals(){
+
+    try{
+
+        const snapshot =
+            await db
+            .collection("referrals")
+            .where(
+                "referrerUid",
+                "==",
+                currentUser.uid
+            )
+            .get();
+
+
+        referrals = [];
+
+
+        snapshot.forEach(doc => {
+
+            referrals.push({
+
+                id: doc.id,
+
+                ...doc.data()
+
+            });
+
+        });
+
+
+        referrals.sort(
+            (a,b) => {
+
+                const dateA =
+                    a.createdAt &&
+                    a.createdAt.toMillis
+                        ? a.createdAt.toMillis()
+                        : 0;
+
+
+                const dateB =
+                    b.createdAt &&
+                    b.createdAt.toMillis
+                        ? b.createdAt.toMillis()
+                        : 0;
+
+
+                return dateB - dateA;
+
+            }
+        );
+
+
+        updateStats();
+
+        renderReferrals();
+
+
+    }catch(error){
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+
+/* =========================
+   UPDATE STATS
+========================= */
+
+function updateStats(){
+
+    const total =
+        referrals.length;
+
+
+    const successful =
+        referrals.filter(
+            referral =>
+                String(
+                    referral.status || ""
+                ).toLowerCase()
+                === "successful"
+        ).length;
+
+
+    const pending =
+        referrals.filter(
+            referral =>
+                String(
+                    referral.status || ""
+                ).toLowerCase()
+                === "pending"
+        ).length;
+
+
+    let rewards = 0;
+
+
+    referrals.forEach(
+        referral => {
+
+            const amount =
+                Number(
+                    referral.rewardAmount || 0
+                );
+
+
+            /*
+               Only count rewards attached
+               to successful referrals.
+            */
+
+            if(
+                String(
+                    referral.status || ""
+                ).toLowerCase()
+                === "successful"
+            ){
+
+                rewards += amount;
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "totalReferrals"
+    ).textContent =
+        total;
+
+
+    document.getElementById(
+        "successfulReferrals"
+    ).textContent =
+        successful;
+
+
+    document.getElementById(
+        "pendingReferrals"
+    ).textContent =
+        pending;
+
+
+    document.getElementById(
+        "totalRewards"
+    ).textContent =
+        formatMoney(rewards);
+
+}
+
+
+
+/* =========================
+   RENDER REFERRALS
+========================= */
+
+function renderReferrals(){
+
+    const table =
+        document.getElementById(
+            "referralsTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    if(referrals.length === 0){
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="empty"
+                >
+
+                    <strong>
+                        No referrals yet
+                    </strong>
+
+                    Your referral records will appear here.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    referrals.forEach(
+        referral => {
+
+            const row =
+                document.createElement("tr");
+
+
+            const date =
+                referral.createdAt &&
+                referral.createdAt.toDate
+                    ? formatDate(
+                        referral.createdAt.toDate()
+                    )
+                    : "—";
+
+
+            const status =
+                String(
+                    referral.status ||
+                    "pending"
+                ).toLowerCase();
+
+
+            const rewardStatus =
+                String(
+                    referral.rewardStatus ||
+                    "unpaid"
+                ).toLowerCase();
+
+
+            let statusClass =
+                "pending";
+
+
+            let statusText =
+                "Pending";
+
+
+            if(status === "successful"){
+
+                statusClass =
+                    "successful";
+
+                statusText =
+                    "Successful";
+
+            }
+
+
+            let rewardClass =
+                "unpaid";
+
+
+            let rewardText =
+                "Unpaid";
+
+
+            if(rewardStatus === "paid"){
+
+                rewardClass =
+                    "paid";
+
+                rewardText =
+                    "Paid";
+
+            }
+
+
+            row.innerHTML = `
+
+                <td>
+
+                    <div class="student-name">
+
+                        ${escapeHtml(
+                            referral.referredName ||
+                            "Unnamed Student"
+                        )}
+
+                    </div>
+
+
+                    <div class="student-id-small">
+
+                        ${escapeHtml(
+                            referral.referredStudentId ||
+                            ""
+                        )}
+
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(
+                        referral.courseName ||
+                        "—"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${date}
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="status ${statusClass}"
+                    >
+
+                        ${statusText}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    ${formatMoney(
+                        Number(
+                            referral.rewardAmount ||
+                            0
+                        )
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="status ${rewardClass}"
+                    >
+
+                        ${rewardText}
+
+                    </span>
+
+                </td>
+
+            `;
+
+
+            table.appendChild(row);
+
+        }
+    );
+
+}
+
+
+
+/* =========================
+   COPY REFERRAL CODE
+========================= */
+
+async function copyReferralCode(){
+
+    const code =
+        document.getElementById(
+            "referralCode"
+        ).textContent.trim();
+
+
+    if(
+        !code ||
+        code === "Unavailable"
+    ){
+
+        showMessage(
+            "Referral code is unavailable.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        await navigator.clipboard.writeText(
+            code
+        );
+
+
+        showMessage(
+            "Referral code copied."
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+        showMessage(
+            "Could not copy referral code.",
+            "error"
+        );
+
+    }
+
+}
+
+
+
+/* =========================
+   FORMAT MONEY
+========================= */
+
+function formatMoney(amount){
+
+    return "₦" +
+        Number(amount || 0)
+        .toLocaleString(
+            "en-NG"
+        );
+
+}
+
+
+
+/* =========================
+   FORMAT DATE
+========================= */
+
+function formatDate(date){
+
+    if(!date){
+        return "—";
+    }
+
+
+    return date.toLocaleDateString(
+        "en-NG",
+        {
+            day:"numeric",
+            month:"short",
+            year:"numeric"
+        }
+    );
+
+}
+
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(value){
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+function showMessage(
+    message,
+    type = "success"
+){
+
+    const box =
+        document.getElementById(
+            "message"
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.className =
+        "message show " +
+        (
+            type === "error"
+                ? "error"
+                : ""
+        );
+
+
+    setTimeout(() => {
+
+        box.classList.remove(
+            "show"
+        );
+
+    },4000);
+
+}
+
+
+
+/* =========================
+   BACK BUTTON
+========================= */
+
+function goBack(){
+
+    window.history.back();
+
+}
+
+</script>
+
+
+</body>
+
+</html>

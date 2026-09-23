@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Course | STI Academy</title>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+        }
+
+
+        .dashboard {
+            min-height: 100vh;
+            display: flex;
+        }
+
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 240px;
+            background: #090909;
+            border-right: 1px solid #1b1b1b;
+            padding: 25px 15px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 20;
+        }
+
+
+        .logo {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+
+        .logo-box {
+            width: 48px;
+            height: 48px;
+            background: #087cff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: auto;
+            box-shadow: 0 0 25px rgba(8, 124, 255, 0.25);
+        }
+
+
+        .logo h2 {
+            margin-top: 10px;
+            font-size: 17px;
+        }
+
+
+        .logo p {
+            color: #777;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+
+        .menu-title {
+            color: #555;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 10px 10px;
+        }
+
+
+        .nav-link {
+            display: block;
+            color: #aaa;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+
+        .nav-link:hover {
+            background: #111;
+            color: white;
+        }
+
+
+        .nav-link.active {
+            background: #087cff;
+            color: white;
+        }
+
+
+        .logout {
+            margin-top: 25px;
+            color: #ff5c5c;
+            cursor: pointer;
+        }
+
+
+        /* MAIN */
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 30px;
+        }
+
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+
+        .topbar h1 {
+            font-size: 26px;
+        }
+
+
+        .topbar p {
+            color: #777;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+
+        .student-badge {
+            border: 1px solid #222;
+            background: #0b0b0b;
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+
+        /* COURSE HERO */
+
+        .course-hero {
+            background:
+                linear-gradient(
+                    135deg,
+                    #07182b,
+                    #090909
+                );
+
+            border: 1px solid #12365d;
+
+            border-radius: 16px;
+
+            padding: 30px;
+
+            margin-bottom: 20px;
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+
+        .course-hero::after {
+            content: "";
+
+            position: absolute;
+
+            width: 220px;
+            height: 220px;
+
+            background: rgba(
+                8,
+                124,
+                255,
+                0.08
+            );
+
+            border-radius: 50%;
+
+            right: -70px;
+            top: -70px;
+        }
+
+
+        .course-label {
+            color: #087cff;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+
+        .course-hero h2 {
+            font-size: 30px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+
+        .course-hero p {
+            color: #aaa;
+            line-height: 1.7;
+            max-width: 800px;
+            position: relative;
+            z-index: 1;
+        }
+
+
+        /* COURSE INFO */
+
+        .course-info {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 12px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .info-card {
+            background: #0b0b0b;
+
+            border: 1px solid #1c1c1c;
+
+            border-radius: 12px;
+
+            padding: 18px;
+        }
+
+
+        .info-card span {
+            display: block;
+
+            color: #666;
+
+            font-size: 11px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .info-card strong {
+            font-size: 15px;
+        }
+
+
+        /* SECTIONS */
+
+        .section {
+            background: #0b0b0b;
+
+            border: 1px solid #1c1c1c;
+
+            border-radius: 14px;
+
+            padding: 24px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .section h3 {
+            font-size: 18px;
+
+            margin-bottom: 15px;
+
+            color: white;
+        }
+
+
+        .section p {
+            color: #aaa;
+
+            line-height: 1.8;
+
+            font-size: 14px;
+
+            white-space: pre-wrap;
+        }
+
+
+        /* LEARNING BOX */
+
+        .learning-box {
+            background: #080808;
+
+            border: 1px solid #171717;
+
+            border-radius: 10px;
+
+            padding: 18px;
+        }
+
+
+        .learning-box p {
+            color: #ccc;
+        }
+
+
+        /* SKILL BOX */
+
+        .skill-box {
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(8, 124, 255, 0.09),
+                    #080808
+                );
+
+            border: 1px solid #16385d;
+
+            border-radius: 10px;
+
+            padding: 18px;
+        }
+
+
+        /* FUN FACT */
+
+        .fun-fact {
+            background: #080808;
+
+            border-left: 3px solid #087cff;
+
+            border-radius: 8px;
+
+            padding: 18px;
+        }
+
+
+        .fun-fact-title {
+            color: #087cff;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .fun-fact p {
+            color: #ccc;
+        }
+
+
+        /* COURSE STATUS */
+
+        .status-box {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+
+            background: #080808;
+
+            border: 1px solid #171717;
+
+            border-radius: 10px;
+
+            padding: 18px;
+        }
+
+
+        .status-label {
+            color: #666;
+
+            font-size: 11px;
+
+            margin-bottom: 6px;
+        }
+
+
+        .status-value {
+            font-size: 14px;
+
+            font-weight: bold;
+
+            color: #087cff;
+        }
+
+
+        /* LOADING */
+
+        .loading {
+            text-align: center;
+
+            padding: 60px 20px;
+
+            color: #777;
+        }
+
+
+        .loading strong {
+            display: block;
+
+            color: #aaa;
+
+            margin-bottom: 8px;
+        }
+
+
+        /* ERROR */
+
+        .error-box {
+            background: #110808;
+
+            border: 1px solid #4a1b1b;
+
+            color: #ff8585;
+
+            border-radius: 12px;
+
+            padding: 20px;
+
+            line-height: 1.6;
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 70px;
+
+                padding: 20px 8px;
+            }
+
+
+            .logo h2,
+            .logo p,
+            .menu-title {
+                display: none;
+            }
+
+
+            .nav-link {
+                text-align: center;
+
+                font-size: 0;
+            }
+
+
+            .nav-link::first-letter {
+                font-size: 18px;
+            }
+
+
+            .main {
+                margin-left: 70px;
+
+                width:
+                    calc(
+                        100% - 70px
+                    );
+
+                padding: 20px;
+            }
+
+
+            .course-info {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .sidebar {
+                position: fixed;
+
+                width: 100%;
+
+                height: 62px;
+
+                top: auto;
+
+                bottom: 0;
+
+                left: 0;
+
+                right: 0;
+
+                border-right: none;
+
+                border-top: 1px solid #1b1b1b;
+
+                padding: 7px;
+
+                z-index: 20;
+
+                overflow: hidden;
+            }
+
+
+            .logo,
+            .menu-title {
+                display: none;
+            }
+
+
+            .sidebar nav {
+                display: flex;
+
+                justify-content:
+                    space-around;
+
+                overflow-x: auto;
+            }
+
+
+            .nav-link {
+                margin: 0;
+
+                padding: 10px;
+
+                text-align: center;
+
+                font-size: 11px;
+
+                white-space: nowrap;
+            }
+
+
+            .logout {
+                display: none;
+            }
+
+
+            .main {
+                margin-left: 0;
+
+                width: 100%;
+
+                padding: 18px;
+
+                padding-bottom: 85px;
+            }
+
+
+            .topbar {
+                display: block;
+            }
+
+
+            .topbar h1 {
+                font-size: 22px;
+            }
+
+
+            .student-badge {
+                display: inline-block;
+
+                margin-top: 12px;
+            }
+
+
+            .course-hero {
+                padding: 22px;
+            }
+
+
+            .course-hero h2 {
+                font-size: 24px;
+            }
+
+
+            .course-info {
+                grid-template-columns: 1fr;
+
+                gap: 10px;
+            }
+
+
+            .section {
+                padding: 18px;
+            }
+
+
+            .status-box {
+                display: block;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="dashboard">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+
+        <div class="logo">
+
+            <div class="logo-box">
+                STI
+            </div>
+
+            <h2>
+                STI Academy
+            </h2>
+
+            <p>
+                Student Portal
+            </p>
+
+        </div>
+
+
+        <nav>
+
+
+            <div class="menu-title">
+                Main
+            </div>
+
+
+            <a
+                href="dashboard.html"
+                class="nav-link"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                href="course.html"
+                class="nav-link active"
+            >
+                Course
+            </a>
+
+
+            <a
+                href="classes.html"
+                class="nav-link"
+            >
+                Classes
+            </a>
+
+
+            <a
+                href="timetable.html"
+                class="nav-link"
+            >
+                Timetable
+            </a>
+
+
+            <a
+                href="attendance.html"
+                class="nav-link"
+            >
+                Attendance
+            </a>
+
+
+            <div class="menu-title">
+                Academic
+            </div>
+
+
+            <a
+                href="assignments.html"
+                class="nav-link"
+            >
+                Assignments
+            </a>
+
+
+            <a
+                href="student-tests.html"
+                class="nav-link"
+            >
+                Tests
+            </a>
+
+
+            <a
+                href="student-exams.html"
+                class="nav-link"
+            >
+                Exams
+            </a>
+
+
+            <a
+                href="projects.html"
+                class="nav-link"
+            >
+                Projects
+            </a>
+
+
+            <a
+                href="results.html"
+                class="nav-link"
+            >
+                Results
+            </a>
+
+
+            <a
+                href="rankings.html"
+                class="nav-link"
+            >
+                Rankings
+            </a>
+
+
+            <div class="menu-title">
+                Account
+            </div>
+
+
+            <a
+                href="payment.html"
+                class="nav-link"
+            >
+                Payments
+            </a>
+
+
+            <a
+                href="referrals.html"
+                class="nav-link"
+            >
+                Referrals
+            </a>
+
+
+            <a
+                href="rewards.html"
+                class="nav-link"
+            >
+                Rewards
+            </a>
+
+
+            <a
+                href="certificate.html"
+                class="nav-link"
+            >
+                Certificate
+            </a>
+
+
+            <div class="menu-title">
+                More
+            </div>
+
+
+            <a
+                href="announcements.html"
+                class="nav-link"
+            >
+                Announcements
+            </a>
+
+
+            <a
+                href="support.html"
+                class="nav-link"
+            >
+                Support
+            </a>
+
+
+            <a
+                href="settings.html"
+                class="nav-link"
+            >
+                Settings
+            </a>
+
+
+            <a
+                href="profile.html"
+                class="nav-link"
+            >
+                Profile
+            </a>
+
+
+            <a
+                href="#"
+                class="nav-link logout"
+                id="logoutButton"
+            >
+                Logout
+            </a>
+
+
+        </nav>
+
+    </aside>
+
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <div class="topbar">
+
+
+            <div>
+
+                <h1>
+                    My Course
+                </h1>
+
+                <p>
+                    Everything you need to know about your course.
+                </p>
+
+            </div>
+
+
+            <div
+                class="student-badge"
+                id="studentId"
+            >
+                Student ID: Loading...
+            </div>
+
+
+        </div>
+
+
+
+        <!-- COURSE CONTENT -->
+
+        <div id="courseContainer">
+
+
+            <div class="loading">
+
+                <strong>
+                    Loading your course...
+                </strong>
+
+                Please wait while we retrieve your course information.
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =====================================================
+   FIREBASE
+===================================================== */
+
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840641262",
+
+    appId:
+        "1:709840641262:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+firebase.initializeApp(
+    firebaseConfig
+);
+
+
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.firestore();
+
+
+const courseContainer =
+    document.getElementById(
+        "courseContainer"
+    );
+
+
+
+/* =====================================================
+   AUTH
+===================================================== */
+
+
+auth.onAuthStateChanged(
+    async function(user) {
+
+        console.log(
+            "Course Auth State:",
+            user ? user.uid : "NO USER"
+        );
+
+
+        if (!user) {
+
+            courseContainer.innerHTML = `
+
+                <div class="error-box">
+
+                    <strong>
+                        Login session not found
+                    </strong>
+
+                    <br><br>
+
+                    Please return to the student dashboard and try again.
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        try {
+
+
+            /* =============================================
+               LOAD USER
+            ============================================= */
+
+
+            const userDoc =
+                await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+            if (!userDoc.exists) {
+
+                showError(
+                    "Your portal account document was not found."
+                );
+
+                return;
+
+            }
+
+
+            const userData =
+                userDoc.data();
+
+
+
+            /* =============================================
+               VERIFY STUDENT
+            ============================================= */
+
+
+            if (
+                userData.role !==
+                "student"
+            ) {
+
+                showError(
+                    "This account is not registered as a student account."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                userData.status !==
+                "active"
+            ) {
+
+                showError(
+                    "Your student portal account is currently inactive."
+                );
+
+                return;
+
+            }
+
+
+
+            /* =============================================
+               STUDENT ID
+            ============================================= */
+
+
+            const studentId =
+                userData.studentId;
+
+
+            if (!studentId) {
+
+                showError(
+                    "Student ID is missing from your portal account."
+                );
+
+                return;
+
+            }
+
+
+            document.getElementById(
+                "studentId"
+            ).textContent =
+                "Student ID: " +
+                studentId;
+
+
+
+            /* =============================================
+               LOAD STUDENT RECORD
+            ============================================= */
+
+
+            const studentDoc =
+                await db
+                    .collection("students")
+                    .doc(studentId)
+                    .get();
+
+
+            if (!studentDoc.exists) {
+
+                showError(
+                    "Your student record could not be found."
+                );
+
+                return;
+
+            }
+
+
+            const student =
+                studentDoc.data();
+
+
+
+            /* =============================================
+               GET STUDENT COURSE
+            ============================================= */
+
+
+            const studentCourseName =
+                student.courseName ||
+                student.course ||
+                "";
+
+
+            const studentCourseId =
+                student.courseId ||
+                "";
+
+
+
+            if (
+                !studentCourseName &&
+                !studentCourseId
+            ) {
+
+                showError(
+                    "No course has been assigned to your student account yet."
+                );
+
+                return;
+
+            }
+
+
+
+            /* =============================================
+               FIND COURSE
+            ============================================= */
+
+
+            let course = null;
+
+
+
+            /*
+             * First try course ID if the
+             * student record has one.
+             */
+
+            // FIND STUDENT'S COURSE
+let courseData = null;
+
+if (studentCourseId) {
+    // First search using the courseId FIELD
+    const courseQuery = await db
+        .collection("courses")
+        .where("courseId", "==", studentCourseId)
+        .limit(1)
+        .get();
+
+    if (!courseQuery.empty) {
+        const courseDoc = courseQuery.docs[0];
+
+        courseData = {
+            id: courseDoc.id,
+            ...courseDoc.data()
+        };
+    }
+}
+
+// Fallback: search by course name
+if (!courseData && studentCourseName) {
+    const coursesSnapshot = await db
+        .collection("courses")
+        .get();
+
+    const matchingCourse = coursesSnapshot.docs.find(doc => {
+        const data = doc.data();
+
+        const courseName = String(data.courseName || "")
+            .trim()
+            .toLowerCase();
+
+        const studentName = String(studentCourseName || "")
+            .trim()
+            .toLowerCase();
+
+        return courseName === studentName;
+    });
+
+    if (matchingCourse) {
+        courseData = {
+            id: matchingCourse.id,
+            ...matchingCourse.data()
+        };
+    }
+}   
+
+
+            /*
+             * If no course was found by ID,
+             * search by course name.
+             */
+
+            if (!course && studentCourseName) {
+
+                const snapshot =
+                    await db
+                        .collection("courses")
+                        .get();
+
+
+                const wantedCourse =
+                    studentCourseName
+                        .trim()
+                        .toLowerCase();
+
+
+                snapshot.forEach(
+                    function(doc) {
+
+                        if (course) {
+                            return;
+                        }
+
+
+                        const data =
+                            doc.data();
+
+
+                        const courseName =
+                            String(
+                                data.courseName ||
+                                ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        const courseId =
+                            String(
+                                data.courseId ||
+                                doc.id ||
+                                ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        if (
+                            courseName ===
+                            wantedCourse
+                            ||
+                            courseId ===
+                            wantedCourse
+                        ) {
+
+                            course = {
+
+                                id:
+                                    doc.id,
+
+                                ...data
+
+                            };
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+
+            if (!course) {
+
+                showError(
+                    "Your assigned course could not be found in the course records."
+                );
+
+                return;
+
+            }
+
+
+
+            /* =============================================
+               DISPLAY COURSE
+            ============================================= */
+
+
+            renderCourse(
+                course,
+                student,
+                userData
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Course page error:",
+                error
+            );
+
+
+            showError(
+                "Unable to load your course: " +
+                error.message
+            );
+
+        }
+
+    }
+);
+
+
+
+/* =====================================================
+   RENDER COURSE
+===================================================== */
+
+
+function renderCourse(
+    course,
+    student,
+    userData
+) {
+
+
+    const courseName =
+        course.courseName ||
+        student.courseName ||
+        student.course ||
+        "Your Course";
+
+
+    const department =
+        course.department ||
+        student.department ||
+        "—";
+
+
+    const duration =
+        course.durationValue
+        ?
+        `${course.durationValue} ${
+            course.durationUnit || ""
+        }`
+        :
+        course.duration ||
+        "—";
+
+
+    const monthlyFee =
+        formatMoney(
+            course.monthlyFee
+        );
+
+
+    const totalFee =
+        formatMoney(
+            course.totalFee
+        );
+
+
+    const status =
+        course.status ||
+        "active";
+
+
+
+    courseContainer.innerHTML = `
+
+
+        <!-- COURSE HERO -->
+
+
+        <section class="course-hero">
+
+
+            <div class="course-label">
+                Your Course
+            </div>
+
+
+            <h2>
+                ${escapeHtml(courseName)}
+            </h2>
+
+
+            <p>
+                ${escapeHtml(
+                    course.description ||
+                    "Welcome to your STI Academy course. Explore your course information and begin your learning journey."
+                )}
+            </p>
+
+
+        </section>
+
+
+
+        <!-- COURSE INFORMATION -->
+
+
+        <section class="course-info">
+
+
+            <div class="info-card">
+
+                <span>
+                    DEPARTMENT
+                </span>
+
+                <strong>
+                    ${escapeHtml(department)}
+                </strong>
+
+            </div>
+
+
+
+            <div class="info-card">
+
+                <span>
+                    DURATION
+                </span>
+
+                <strong>
+                    ${escapeHtml(duration)}
+                </strong>
+
+            </div>
+
+
+
+            <div class="info-card">
+
+                <span>
+                    MONTHLY FEE
+                </span>
+
+                <strong>
+                    ${monthlyFee}
+                </strong>
+
+            </div>
+
+
+
+            <div class="info-card">
+
+                <span>
+                    TOTAL COURSE FEE
+                </span>
+
+                <strong>
+                    ${totalFee}
+                </strong>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ABOUT -->
+
+
+        <section class="section">
+
+
+            <h3>
+                About This Course
+            </h3>
+
+
+            <p>
+
+                ${escapeHtml(
+                    course.aboutCourse ||
+                    course.description ||
+                    "Course information will be available here."
+                )}
+
+            </p>
+
+
+        </section>
+
+
+
+        <!-- WHAT YOU LEARN -->
+
+
+        <section class="section">
+
+
+            <h3>
+                What You'll Learn
+            </h3>
+
+
+            <div class="learning-box">
+
+                <p>
+
+                    ${escapeHtml(
+                        course.whatYouLearn ||
+                        "Your course learning topics will be displayed here."
+                    )}
+
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- WHAT YOU CAN DO -->
+
+
+        <section class="section">
+
+
+            <h3>
+                What You Can Do With This Skill
+            </h3>
+
+
+            <div class="skill-box">
+
+                <p>
+
+                    ${escapeHtml(
+                        course.whatYouCanDo ||
+                        "Information about what you can do with this skill will be displayed here."
+                    )}
+
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- FUN FACT -->
+
+
+        <section class="section">
+
+
+            <div class="fun-fact">
+
+
+                <div class="fun-fact-title">
+                    Fun Fact
+                </div>
+
+
+                <p>
+
+                    ${escapeHtml(
+                        course.funFact ||
+                        "A fun fact about your course will appear here."
+                    )}
+
+                </p>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- COURSE STATUS -->
+
+
+        <section class="section">
+
+
+            <h3>
+                Course Status
+            </h3>
+
+
+            <div class="status-box">
+
+
+                <div>
+
+                    <div class="status-label">
+                        COURSE
+                    </div>
+
+                    <div class="status-value">
+                        ${escapeHtml(courseName)}
+                    </div>
+
+                </div>
+
+
+
+                <div>
+
+                    <div class="status-label">
+                        STATUS
+                    </div>
+
+                    <div class="status-value">
+                        ${escapeHtml(
+                            capitalize(status)
+                        )}
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+    `;
+
+}
+
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+
+function showError(message) {
+
+    courseContainer.innerHTML = `
+
+        <div class="error-box">
+
+            ${escapeHtml(message)}
+
+        </div>
+
+    `;
+
+}
+
+
+
+/* =====================================================
+   FORMAT MONEY
+===================================================== */
+
+
+function formatMoney(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        return "—";
+
+    }
+
+
+    const number =
+        Number(value);
+
+
+    if (isNaN(number)) {
+
+        return "—";
+
+    }
+
+
+    return "₦" +
+        number.toLocaleString(
+            "en-NG"
+        );
+
+}
+
+
+
+/* =====================================================
+   CAPITALIZE
+===================================================== */
+
+
+function capitalize(value) {
+
+    const text =
+        String(value || "");
+
+
+    if (!text) {
+        return "";
+    }
+
+
+    return (
+        text.charAt(0).toUpperCase() +
+        text.slice(1)
+    );
+
+}
+
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+
+function escapeHtml(value) {
+
+    return String(value || "")
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+
+document
+    .getElementById(
+        "logoutButton"
+    )
+    .addEventListener(
+        "click",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            try {
+
+                await auth.signOut();
+
+
+                window.location.href =
+                    "../login.html";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+</script>
+
+
+</body>
+
+</html>

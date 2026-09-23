@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Support | STI Academy</title>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+        }
+
+
+        .dashboard {
+            min-height: 100vh;
+            display: flex;
+        }
+
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 240px;
+            background: #090909;
+            border-right: 1px solid #1b1b1b;
+            padding: 25px 15px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+
+        .logo {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+
+        .logo-box {
+            width: 48px;
+            height: 48px;
+            background: #087cff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: auto;
+            box-shadow: 0 0 25px rgba(8, 124, 255, 0.25);
+        }
+
+
+        .logo h2 {
+            margin-top: 10px;
+            font-size: 17px;
+        }
+
+
+        .logo p {
+            color: #777;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+
+        .menu-title {
+            color: #555;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 10px 10px;
+        }
+
+
+        .nav-link {
+            display: block;
+            color: #aaa;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+
+        .nav-link:hover {
+            background: #111;
+            color: white;
+        }
+
+
+        .nav-link.active {
+            background: #087cff;
+            color: white;
+        }
+
+
+        .logout {
+            margin-top: 25px;
+            color: #ff5c5c;
+            cursor: pointer;
+        }
+
+
+        /* MAIN */
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 30px;
+        }
+
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+
+        .topbar h1 {
+            font-size: 26px;
+        }
+
+
+        .topbar p {
+            color: #777;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+
+        .student-badge {
+            border: 1px solid #222;
+            background: #0b0b0b;
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+
+        /* SUPPORT INTRO */
+
+        .support-intro {
+            background: linear-gradient(
+                135deg,
+                #07182b,
+                #090909
+            );
+
+            border: 1px solid #12365d;
+
+            border-radius: 14px;
+
+            padding: 25px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .support-intro h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+
+        .support-intro p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+
+        /* SECTIONS */
+
+        .section {
+            background: #0b0b0b;
+            border: 1px solid #1c1c1c;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+
+
+        .section h3 {
+            font-size: 17px;
+            margin-bottom: 18px;
+        }
+
+
+        /* FORM */
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+
+        .form-group label {
+            display: block;
+            color: #aaa;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+
+            width: 100%;
+
+            background: #080808;
+
+            border: 1px solid #222;
+
+            border-radius: 8px;
+
+            padding: 13px;
+
+            color: white;
+
+            font-family: Arial, sans-serif;
+
+            font-size: 14px;
+
+            outline: none;
+
+        }
+
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+
+            border-color: #087cff;
+
+        }
+
+
+        .form-group textarea {
+
+            min-height: 150px;
+
+            resize: vertical;
+
+            line-height: 1.6;
+
+        }
+
+
+        .form-group select option {
+
+            background: #090909;
+
+            color: white;
+
+        }
+
+
+        .submit-button {
+
+            background: #087cff;
+
+            color: white;
+
+            border: none;
+
+            border-radius: 8px;
+
+            padding: 13px 22px;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        .submit-button:hover {
+            background: #066de0;
+        }
+
+
+        .submit-button:disabled {
+
+            background: #333;
+
+            color: #777;
+
+            cursor: not-allowed;
+
+        }
+
+
+        /* MESSAGE */
+
+        .message {
+
+            display: none;
+
+            padding: 13px;
+
+            border-radius: 8px;
+
+            margin-bottom: 20px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+        }
+
+
+        .message.success {
+
+            display: block;
+
+            background: #092b18;
+
+            border: 1px solid #155d32;
+
+            color: #5ee28a;
+
+        }
+
+
+        .message.error {
+
+            display: block;
+
+            background: #2b0909;
+
+            border: 1px solid #641818;
+
+            color: #ff7777;
+
+        }
+
+
+        /* REQUEST CARDS */
+
+        .request-card {
+
+            background: #080808;
+
+            border: 1px solid #1b1b1b;
+
+            border-radius: 10px;
+
+            padding: 18px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .request-top {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            gap: 15px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .request-subject {
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+        }
+
+
+        .request-category {
+
+            color: #087cff;
+
+            font-size: 11px;
+
+            margin-top: 5px;
+
+        }
+
+
+        .status {
+
+            padding: 5px 9px;
+
+            border-radius: 20px;
+
+            font-size: 10px;
+
+            white-space: nowrap;
+
+        }
+
+
+        .status-pending {
+
+            background: #2c2305;
+
+            color: #e9c84a;
+
+        }
+
+
+        .status-progress {
+
+            background: #071d36;
+
+            color: #4ea1ff;
+
+        }
+
+
+        .status-resolved {
+
+            background: #082714;
+
+            color: #54d980;
+
+        }
+
+
+        .status-closed {
+
+            background: #1c1c1c;
+
+            color: #999;
+
+        }
+
+
+        .request-description {
+
+            color: #aaa;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+            white-space: pre-wrap;
+
+        }
+
+
+        .response {
+
+            margin-top: 15px;
+
+            padding: 14px;
+
+            background: #07182b;
+
+            border-left: 3px solid #087cff;
+
+            border-radius: 5px;
+
+        }
+
+
+        .response-title {
+
+            color: #087cff;
+
+            font-size: 11px;
+
+            font-weight: bold;
+
+            margin-bottom: 7px;
+
+        }
+
+
+        .response-text {
+
+            color: #bbb;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+            white-space: pre-wrap;
+
+        }
+
+
+        .request-date {
+
+            color: #555;
+
+            font-size: 10px;
+
+            margin-top: 14px;
+
+        }
+
+
+        .empty {
+
+            color: #666;
+
+            font-size: 13px;
+
+            text-align: center;
+
+            padding: 25px 10px;
+
+        }
+
+
+        .loading {
+
+            color: #777;
+
+            font-size: 13px;
+
+            text-align: center;
+
+            padding: 25px;
+
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 70px;
+                padding: 20px 8px;
+            }
+
+
+            .logo h2,
+            .logo p,
+            .menu-title {
+                display: none;
+            }
+
+
+            .nav-link {
+                text-align: center;
+                font-size: 0;
+            }
+
+
+            .nav-link::first-letter {
+                font-size: 18px;
+            }
+
+
+            .main {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+                padding: 20px;
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .sidebar {
+                position: fixed;
+                width: 100%;
+                height: 62px;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                border-right: none;
+                border-top: 1px solid #1b1b1b;
+                padding: 7px;
+                z-index: 10;
+                overflow: hidden;
+            }
+
+
+            .logo,
+            .menu-title {
+                display: none;
+            }
+
+
+            .sidebar nav {
+                display: flex;
+                justify-content: space-around;
+                overflow-x: auto;
+            }
+
+
+            .nav-link {
+                margin: 0;
+                padding: 10px;
+                text-align: center;
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+
+            .logout {
+                display: none;
+            }
+
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 18px;
+                padding-bottom: 85px;
+            }
+
+
+            .topbar {
+                display: block;
+            }
+
+
+            .topbar h1 {
+                font-size: 22px;
+            }
+
+
+            .student-badge {
+                display: inline-block;
+                margin-top: 12px;
+            }
+
+
+            .request-top {
+                display: block;
+            }
+
+
+            .status {
+                display: inline-block;
+                margin-top: 10px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="dashboard">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+
+        <div class="logo">
+
+            <div class="logo-box">
+                STI
+            </div>
+
+            <h2>
+                STI Academy
+            </h2>
+
+            <p>
+                Student Portal
+            </p>
+
+        </div>
+
+
+        <nav>
+
+
+            <div class="menu-title">
+                Main
+            </div>
+
+
+            <a
+                href="dashboard.html"
+                class="nav-link"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                href="course.html"
+                class="nav-link"
+            >
+                Course
+            </a>
+
+
+            <a
+                href="classes.html"
+                class="nav-link"
+            >
+                Classes
+            </a>
+
+
+            <a
+                href="timetable.html"
+                class="nav-link"
+            >
+                Timetable
+            </a>
+
+
+            <a
+                href="attendance.html"
+                class="nav-link"
+            >
+                Attendance
+            </a>
+
+
+            <div class="menu-title">
+                Academic
+            </div>
+
+
+            <a
+                href="assignments.html"
+                class="nav-link"
+            >
+                Assignments
+            </a>
+
+
+            <a
+                href="student-tests.html"
+                class="nav-link"
+            >
+                Tests
+            </a>
+
+
+            <a
+                href="student-exams.html"
+                class="nav-link"
+            >
+                Exams
+            </a>
+
+
+            <a
+                href="projects.html"
+                class="nav-link"
+            >
+                Projects
+            </a>
+
+
+            <a
+                href="results.html"
+                class="nav-link"
+            >
+                Results
+            </a>
+
+
+            <a
+                href="rankings.html"
+                class="nav-link"
+            >
+                Rankings
+            </a>
+
+
+            <div class="menu-title">
+                Account
+            </div>
+
+
+            <a
+                href="payment.html"
+                class="nav-link"
+            >
+                Payments
+            </a>
+
+
+            <a
+                href="referrals.html"
+                class="nav-link"
+            >
+                Referrals
+            </a>
+
+
+            <a
+                href="rewards.html"
+                class="nav-link"
+            >
+                Rewards
+            </a>
+
+
+            <a
+                href="certificate.html"
+                class="nav-link"
+            >
+                Certificate
+            </a>
+
+
+            <div class="menu-title">
+                More
+            </div>
+
+
+            <a
+                href="announcements.html"
+                class="nav-link"
+            >
+                Announcements
+            </a>
+
+
+            <a
+                href="support.html"
+                class="nav-link active"
+            >
+                Support
+            </a>
+
+
+            <a
+                href="settings.html"
+                class="nav-link"
+            >
+                Settings
+            </a>
+
+
+            <a
+                href="profile.html"
+                class="nav-link"
+            >
+                Profile
+            </a>
+
+
+            <a
+                href="#"
+                class="nav-link logout"
+                id="logoutButton"
+            >
+                Logout
+            </a>
+
+
+        </nav>
+
+    </aside>
+
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <div class="topbar">
+
+
+            <div>
+
+                <h1>
+                    Support
+                </h1>
+
+                <p>
+                    Get help with your STI Academy student portal.
+                </p>
+
+            </div>
+
+
+            <div
+                class="student-badge"
+                id="studentId"
+            >
+                Student ID: Loading...
+            </div>
+
+
+        </div>
+
+
+
+        <!-- INTRO -->
+
+        <section class="support-intro">
+
+
+            <h2>
+                How can we help?
+            </h2>
+
+
+            <p>
+
+                If you have an issue with your course,
+                classes, assignments, payments, account
+                or anything related to your STI Academy
+                experience, submit a support request below.
+
+            </p>
+
+
+        </section>
+
+
+
+        <!-- MESSAGE -->
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+
+        <!-- SUBMIT REQUEST -->
+
+        <section class="section">
+
+
+            <h3>
+                Submit a Support Request
+            </h3>
+
+
+            <form id="supportForm">
+
+
+                <div class="form-group">
+
+                    <label for="category">
+                        Category
+                    </label>
+
+
+                    <select
+                        id="category"
+                        required
+                    >
+
+                        <option value="">
+                            Select a category
+                        </option>
+
+                        <option value="Academic">
+                            Academic
+                        </option>
+
+                        <option value="Course">
+                            Course
+                        </option>
+
+                        <option value="Classes">
+                            Classes
+                        </option>
+
+                        <option value="Assignments">
+                            Assignments
+                        </option>
+
+                        <option value="Payment">
+                            Payment
+                        </option>
+
+                        <option value="Account">
+                            Account
+                        </option>
+
+                        <option value="Technical">
+                            Technical Issue
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="subject">
+                        Subject
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="subject"
+                        placeholder="What do you need help with?"
+                        maxlength="150"
+                        required
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="description">
+                        Describe Your Issue
+                    </label>
+
+
+                    <textarea
+                        id="description"
+                        placeholder="Explain your issue clearly..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                    id="submitButton"
+                >
+                    Submit Request
+                </button>
+
+
+            </form>
+
+
+        </section>
+
+
+
+        <!-- MY REQUESTS -->
+
+        <section class="section">
+
+
+            <h3>
+                My Support Requests
+            </h3>
+
+
+            <div
+                id="requests"
+            >
+
+                <div class="loading">
+                    Loading support requests...
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+
+<script>
+
+
+    /* =====================================================
+       FIREBASE
+    ===================================================== */
+
+
+    const firebaseConfig = {
+
+        apiKey:
+            "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+        authDomain:
+            "sti-academy.firebaseapp.com",
+
+        projectId:
+            "sti-academy",
+
+        storageBucket:
+            "sti-academy.firebasestorage.app",
+
+        messagingSenderId:
+            "709840641262",
+
+        appId:
+            "1:709840641262:web:714b09bf661afa159f27ff",
+
+        measurementId:
+            "G-7ZRZ3P28YP"
+
+    };
+
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+
+    const auth =
+        firebase.auth();
+
+
+    const db =
+        firebase.firestore();
+
+
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+
+    const status =
+        document.getElementById(
+            "message"
+        );
+
+
+    const requestsContainer =
+        document.getElementById(
+            "requests"
+        );
+
+
+    const submitButton =
+        document.getElementById(
+            "submitButton"
+        );
+
+
+
+    /* =====================================================
+       STUDENT DATA
+    ===================================================== */
+
+
+    let currentUser = null;
+
+    let studentId = "";
+
+    let studentData = {};
+
+
+
+    /* =====================================================
+       MESSAGE
+    ===================================================== */
+
+
+    function showMessage(
+        text,
+        type
+    ) {
+
+        status.textContent =
+            text;
+
+        status.className =
+            "message " +
+            type;
+
+    }
+
+
+
+    /* =====================================================
+       DATE FORMAT
+    ===================================================== */
+
+
+    function formatDate(
+        timestamp
+    ) {
+
+        if (!timestamp) {
+
+            return "Date unavailable";
+
+        }
+
+
+        let date;
+
+
+        if (
+            timestamp.toDate
+        ) {
+
+            date =
+                timestamp.toDate();
+
+        } else {
+
+            date =
+                new Date(timestamp);
+
+        }
+
+
+        return date.toLocaleString(
+            "en-NG",
+            {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit"
+            }
+        );
+
+    }
+
+
+
+    /* =====================================================
+       ESCAPE HTML
+    ===================================================== */
+
+
+    function escapeHtml(
+        value
+    ) {
+
+        return String(
+            value || ""
+        )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+    }
+
+
+
+    /* =====================================================
+       STATUS CLASS
+    ===================================================== */
+
+
+    function getStatusClass(
+        value
+    ) {
+
+        const statusValue =
+            String(
+                value || "pending"
+            )
+            .toLowerCase();
+
+
+        if (
+            statusValue ===
+            "in progress"
+            ||
+            statusValue ===
+            "in_progress"
+        ) {
+
+            return "status-progress";
+
+        }
+
+
+        if (
+            statusValue ===
+            "resolved"
+        ) {
+
+            return "status-resolved";
+
+        }
+
+
+        if (
+            statusValue ===
+            "closed"
+        ) {
+
+            return "status-closed";
+
+        }
+
+
+        return "status-pending";
+
+    }
+
+
+
+    /* =====================================================
+       STATUS TEXT
+    ===================================================== */
+
+
+    function formatStatus(
+        value
+    ) {
+
+        const statusValue =
+            String(
+                value || "pending"
+            )
+            .toLowerCase();
+
+
+        if (
+            statusValue ===
+            "in_progress"
+            ||
+            statusValue ===
+            "in progress"
+        ) {
+
+            return "In Progress";
+
+        }
+
+
+        return (
+            statusValue
+                .charAt(0)
+                .toUpperCase()
+            +
+            statusValue.slice(1)
+        );
+
+    }
+
+
+
+    /* =====================================================
+       LOAD STUDENT DATA
+    ===================================================== */
+
+
+    async function loadStudentData(
+        user
+    ) {
+
+
+        const userDoc =
+            await db
+                .collection(
+                    "users"
+                )
+                .doc(
+                    user.uid
+                )
+                .get();
+
+
+        if (!userDoc.exists) {
+
+            throw new Error(
+                "Student account not found."
+            );
+
+        }
+
+
+        const userData =
+            userDoc.data();
+
+
+        if (
+            userData.role !==
+            "student"
+        ) {
+
+            throw new Error(
+                "This account is not registered as a student account."
+            );
+
+        }
+
+
+        if (
+            userData.status !==
+            "active"
+        ) {
+
+            throw new Error(
+                "Your student portal account is currently inactive."
+            );
+
+        }
+
+
+        studentId =
+            userData.studentId;
+
+
+        if (!studentId) {
+
+            throw new Error(
+                "Student ID is missing from your portal account."
+            );
+
+        }
+
+
+        document.getElementById(
+            "studentId"
+        ).textContent =
+            "Student ID: " +
+            studentId;
+
+
+        const studentDoc =
+            await db
+                .collection(
+                    "students"
+                )
+                .doc(
+                    studentId
+                )
+                .get();
+
+
+        if (
+            studentDoc.exists
+        ) {
+
+            studentData =
+                studentDoc.data();
+
+        } else {
+
+            studentData =
+                userData;
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       SUBMIT SUPPORT REQUEST
+    ===================================================== */
+
+
+    document
+        .getElementById(
+            "supportForm"
+        )
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+
+                event.preventDefault();
+
+
+                if (!currentUser) {
+
+                    showMessage(
+                        "You must be logged in to submit a support request.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                const category =
+                    document
+                        .getElementById(
+                            "category"
+                        )
+                        .value
+                        .trim();
+
+
+                const subject =
+                    document
+                        .getElementById(
+                            "subject"
+                        )
+                        .value
+                        .trim();
+
+
+                const description =
+                    document
+                        .getElementById(
+                            "description"
+                        )
+                        .value
+                        .trim();
+
+
+                if (
+                    !category ||
+                    !subject ||
+                    !description
+                ) {
+
+                    showMessage(
+                        "Please complete all fields.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                submitButton.disabled =
+                    true;
+
+
+                submitButton.textContent =
+                    "Submitting...";
+
+
+                try {
+
+
+                    await db
+                        .collection(
+                            "supportRequests"
+                        )
+                        .add({
+
+                            studentId:
+                                studentId,
+
+                            studentUid:
+                                currentUser.uid,
+
+                            studentName:
+                                studentData.fullName ||
+                                currentUser.displayName ||
+                                "",
+
+                            studentEmail:
+                                studentData.email ||
+                                currentUser.email ||
+                                "",
+
+                            category:
+                                category,
+
+                            subject:
+                                subject,
+
+                            description:
+                                description,
+
+                            status:
+                                "pending",
+
+                            response:
+                                "",
+
+                            createdAt:
+                                firebase.firestore.FieldValue
+                                    .serverTimestamp(),
+
+                            updatedAt:
+                                firebase.firestore.FieldValue
+                                    .serverTimestamp()
+
+                        });
+
+
+                    document
+                        .getElementById(
+                            "supportForm"
+                        )
+                        .reset();
+
+
+                    showMessage(
+                        "Your support request has been submitted successfully.",
+                        "success"
+                    );
+
+
+                    await loadRequests();
+
+
+                } catch (error) {
+
+
+                    console.error(
+                        "Support request error:",
+                        error
+                    );
+
+
+                    showMessage(
+                        "Unable to submit your support request: " +
+                        error.message,
+                        "error"
+                    );
+
+                }
+
+
+                submitButton.disabled =
+                    false;
+
+
+                submitButton.textContent =
+                    "Submit Request";
+
+            }
+        );
+
+
+
+    /* =====================================================
+       LOAD SUPPORT REQUESTS
+    ===================================================== */
+
+
+    async function loadRequests() {
+
+
+        if (!studentId) {
+
+            requestsContainer.innerHTML =
+                `
+                <div class="empty">
+                    Student ID could not be found.
+                </div>
+                `;
+
+            return;
+
+        }
+
+
+        try {
+
+const snapshot =
+    await db
+        .collection(
+            "supportRequests"
+        )
+        .where(
+            "studentUid",
+            "==",
+            currentUser.uid
+        )
+        .get();
+
+
+            const requests = [];
+
+
+            snapshot.forEach(
+                function(doc) {
+
+                    requests.push({
+
+                        id:
+                            doc.id,
+
+                        ...doc.data()
+
+                    });
+
+                }
+            );
+
+
+            requests.sort(
+                function(a, b) {
+
+                    const aTime =
+                        a.createdAt &&
+                        a.createdAt.toMillis
+                            ? a.createdAt.toMillis()
+                            : 0;
+
+
+                    const bTime =
+                        b.createdAt &&
+                        b.createdAt.toMillis
+                            ? b.createdAt.toMillis()
+                            : 0;
+
+
+                    return bTime - aTime;
+
+                }
+            );
+
+
+            requestsContainer.innerHTML =
+                "";
+
+
+            requests.forEach(
+                function(request) {
+
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    card.className =
+                        "request-card";
+
+
+                    const response =
+                        String(
+                            request.response ||
+                            ""
+                        ).trim();
+
+
+                    card.innerHTML =
+                        `
+
+                        <div class="request-top">
+
+                            <div>
+
+                                <div class="request-subject">
+
+                                    ${escapeHtml(
+                                        request.subject ||
+                                        "Support Request"
+                                    )}
+
+                                </div>
+
+
+                                <div class="request-category">
+
+                                    ${escapeHtml(
+                                        request.category ||
+                                        "Other"
+                                    )}
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="status ${getStatusClass(
+                                    request.status
+                                )}"
+                            >
+
+                                ${escapeHtml(
+                                    formatStatus(
+                                        request.status
+                                    )
+                                )}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="request-description">
+
+                            ${escapeHtml(
+                                request.description ||
+                                ""
+                            )}
+
+                        </div>
+
+
+                        ${
+                            response
+                                ?
+                                `
+
+                                <div class="response">
+
+                                    <div class="response-title">
+                                        STI Academy Response
+                                    </div>
+
+                                    <div class="response-text">
+
+                                        ${escapeHtml(
+                                            response
+                                        )}
+
+                                    </div>
+
+                                </div>
+
+                                `
+                                :
+                                ""
+                        }
+
+
+                        <div class="request-date">
+
+                            Submitted:
+                            ${escapeHtml(
+                                formatDate(
+                                    request.createdAt
+                                )
+                            )}
+
+                        </div>
+
+                        `;
+
+
+                    requestsContainer.appendChild(
+                        card
+                    );
+
+                }
+            );
+
+
+        } catch (error) {
+
+
+            console.error(
+                "Load requests error:",
+                error
+            );
+
+
+            requestsContainer.innerHTML =
+                `
+                <div class="empty">
+                    Unable to load your support requests.
+                </div>
+                `;
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       AUTH STATE
+    ===================================================== */
+
+
+    auth.onAuthStateChanged(
+        async function(user) {
+
+
+            if (!user) {
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            currentUser =
+                user;
+
+
+            try {
+
+
+                await loadStudentData(
+                    user
+                );
+
+
+                await loadRequests();
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "Support page error:",
+                    error
+                );
+
+
+                showMessage(
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       LOGOUT
+    ===================================================== */
+
+
+    document
+        .getElementById(
+            "logoutButton"
+        )
+        .addEventListener(
+            "click",
+            async function(event) {
+
+
+                event.preventDefault();
+
+
+                try {
+
+
+                    await auth.signOut();
+
+
+                    window.location.href =
+                        "../login.html";
+
+
+                } catch (error) {
+
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+
+</script>
+
+
+</body>
+
+</html>

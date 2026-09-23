@@ -1,0 +1,1034 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Exams | STI Academy</title>
+
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+<style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+
+    body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+    }
+
+
+    .header {
+        background: #050505;
+        border-bottom: 1px solid #1e90ff;
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+
+    .back-btn {
+        color: #1e90ff;
+        text-decoration: none;
+        font-size: 22px;
+    }
+
+
+    .header h1 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+
+    .container {
+        width: 94%;
+        max-width: 1000px;
+        margin: 25px auto;
+    }
+
+
+    .welcome {
+        margin-bottom: 25px;
+    }
+
+
+    .welcome h2 {
+        margin: 0 0 7px;
+        font-size: 24px;
+    }
+
+
+    .welcome p {
+        margin: 0;
+        color: #888;
+    }
+
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+
+    .stat-card {
+        background: #0b0b0b;
+        border: 1px solid #222;
+        border-radius: 10px;
+        padding: 18px;
+    }
+
+
+    .stat-label {
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+
+    .stat-value {
+        font-size: 25px;
+        font-weight: bold;
+        color: #1e90ff;
+    }
+
+
+    .section-title {
+        font-size: 20px;
+        margin: 0 0 15px;
+    }
+
+
+    .exam-list {
+        display: grid;
+        gap: 15px;
+    }
+
+
+    .exam-card {
+        background: #0b0b0b;
+        border: 1px solid #222;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+
+    .exam-title {
+        margin: 0 0 8px;
+        font-size: 20px;
+    }
+
+
+    .exam-course {
+        color: #1e90ff;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+
+    .exam-info {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+
+    .info {
+        background: #111;
+        border-radius: 8px;
+        padding: 12px;
+    }
+
+
+    .info-label {
+        color: #777;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+
+    .info-value {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+
+    .instructions {
+        color: #aaa;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 18px;
+    }
+
+
+    .exam-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+
+    .status {
+        font-size: 13px;
+        padding: 7px 11px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+
+
+    .available {
+        background: #062d48;
+        color: #38a9ff;
+    }
+
+
+    .completed {
+        background: #063b1c;
+        color: #37e878;
+    }
+
+
+    .button {
+        display: inline-block;
+        text-decoration: none;
+        border: none;
+        background: #1e90ff;
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 7px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+
+    .button:hover {
+        background: #087de0;
+    }
+
+
+    .button.disabled {
+        background: #333;
+        color: #777;
+        cursor: not-allowed;
+    }
+
+
+    .loading,
+    .empty,
+    .error {
+        text-align: center;
+        padding: 45px 20px;
+        color: #888;
+    }
+
+
+    .error {
+        color: #ff5c5c;
+    }
+
+
+    @media (max-width: 700px) {
+
+        .stats {
+            grid-template-columns: 1fr;
+        }
+
+
+        .exam-info {
+            grid-template-columns: 1fr;
+        }
+
+
+        .exam-footer {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+
+        .button {
+            text-align: center;
+        }
+
+    }
+
+</style>
+
+</head><body><div class="header">
+
+    <a
+        href="dashboard.html"
+        class="back-btn"
+    >
+        ←
+    </a>
+
+    <h1>
+        Exams
+    </h1>
+
+</div>
+
+
+
+<div class="container">
+
+
+    <div class="welcome">
+
+        <h2 id="welcomeText">
+            Exams
+        </h2>
+
+        <p>
+            View your available exams and complete them within the required time.
+        </p>
+
+    </div>
+
+
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Available Exams
+            </div>
+
+            <div
+                class="stat-value"
+                id="availableCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Completed
+            </div>
+
+            <div
+                class="stat-value"
+                id="completedCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Total Exams
+            </div>
+
+            <div
+                class="stat-value"
+                id="totalCount"
+            >
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <h2 class="section-title">
+        Your Exams
+    </h2>
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+        Loading exams...
+    </div>
+
+
+    <div
+        id="error"
+        class="error"
+        style="display:none;"
+    ></div>
+
+
+    <div
+        id="examList"
+        class="exam-list"
+    ></div>
+
+
+</div>
+
+<script>
+
+
+    const firebaseConfig = {
+
+        apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+        authDomain: "sti-academy.firebaseapp.com",
+
+        projectId: "sti-academy",
+
+        storageBucket: "sti-academy.firebasestorage.app",
+
+        messagingSenderId: "709840261642",
+
+        appId: "1:709840261642:web:714b09bf661afa159f27ff",
+
+        measurementId: "G-7ZRZ3P28YP"
+
+    };
+
+
+    firebase.initializeApp(firebaseConfig);
+
+
+    const auth = firebase.auth();
+
+    const db = firebase.firestore();
+
+
+    let currentUser = null;
+
+    let studentData = null;
+
+
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+
+    function formatDuration(minutes) {
+
+        const mins = Number(minutes) || 0;
+
+        if (mins < 60) {
+            return `${mins} mins`;
+        }
+
+        const hours = Math.floor(mins / 60);
+
+        const remaining =
+            mins % 60;
+
+        if (remaining === 0) {
+            return `${hours} hr${hours > 1 ? "s" : ""}`;
+        }
+
+        return `${hours} hr${hours > 1 ? "s" : ""} ${remaining} mins`;
+
+    }
+
+
+
+    function timestampToDate(timestamp) {
+
+        if (!timestamp) {
+            return null;
+        }
+
+        if (timestamp.toDate) {
+            return timestamp.toDate();
+        }
+
+        if (timestamp.seconds) {
+            return new Date(
+                timestamp.seconds * 1000
+            );
+        }
+
+        const date =
+            new Date(timestamp);
+
+        return isNaN(date.getTime())
+            ? null
+            : date;
+
+    }
+
+
+
+    function formatDate(timestamp) {
+
+        const date =
+            timestampToDate(timestamp);
+
+        if (!date) {
+            return "-";
+        }
+
+        return date.toLocaleDateString(
+            undefined,
+            {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+    }
+
+
+
+    function getStudentDepartment() {
+
+        return (
+            studentData?.department ||
+            studentData?.course ||
+            ""
+        );
+
+    }
+
+
+
+    function matchesStudentDepartment(exam) {
+
+        const examDepartment =
+            String(
+                exam.department || ""
+            )
+            .trim()
+            .toLowerCase();
+
+        if (!examDepartment) {
+            return true;
+        }
+
+        const studentDepartment =
+            String(
+                getStudentDepartment()
+            )
+            .trim()
+            .toLowerCase();
+
+        if (!studentDepartment) {
+            return true;
+        }
+
+        return (
+            examDepartment ===
+            studentDepartment
+        );
+
+    }
+
+
+
+    function getSubmissionStatus(submissions, examId) {
+
+        const found =
+            submissions.find(
+                submission =>
+                    submission.examId === examId
+            );
+
+        if (!found) {
+            return null;
+        }
+
+        return found;
+
+    }
+
+
+
+    function renderExam(
+        exam,
+        submission
+    ) {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "exam-card";
+
+
+        let statusHtml = "";
+
+        let actionHtml = "";
+
+
+        if (submission) {
+
+            const status =
+                submission.status ||
+                (
+                    submission.percentage !== undefined
+                        ? "Graded"
+                        : "Pending"
+                );
+
+            statusHtml = `
+                <span class="status completed">
+                    ${escapeHtml(status)}
+                </span>
+            `;
+
+
+            actionHtml = `
+                <a
+                    href="exam.html?id=${encodeURIComponent(exam.id)}"
+                    class="button"
+                >
+                    View Exam
+                </a>
+            `;
+
+        } else {
+
+            statusHtml = `
+                <span class="status available">
+                    Available
+                </span>
+            `;
+
+
+            actionHtml = `
+                <a
+                    href="exam.html?id=${encodeURIComponent(exam.id)}"
+                    class="button"
+                >
+                    Start Exam
+                </a>
+            `;
+
+        }
+
+
+
+        const instructions =
+            exam.instructions ||
+            "Follow the instructions carefully and submit your exam before the timer ends.";
+
+
+        card.innerHTML = `
+
+            <h3 class="exam-title">
+                ${escapeHtml(
+                    exam.title ||
+                    "Untitled Exam"
+                )}
+            </h3>
+
+
+            <div class="exam-course">
+                ${escapeHtml(
+                    exam.course ||
+                    "General"
+                )}
+            </div>
+
+
+            <div class="exam-info">
+
+                <div class="info">
+
+                    <div class="info-label">
+                        Duration
+                    </div>
+
+                    <div class="info-value">
+                        ${formatDuration(
+                            exam.durationMinutes ||
+                            exam.duration ||
+                            0
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="info">
+
+                    <div class="info-label">
+                        Questions
+                    </div>
+
+                    <div class="info-value">
+                        ${Number(
+                            exam.totalQuestions ||
+                            0
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="info">
+
+                    <div class="info-label">
+                        Pass Mark
+                    </div>
+
+                    <div class="info-value">
+                        ${Number(
+                            exam.passMark ||
+                            0
+                        )}%
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="instructions">
+                ${escapeHtml(instructions)}
+            </div>
+
+
+            <div class="exam-footer">
+
+                <div>
+                    ${statusHtml}
+                </div>
+
+                <div>
+                    ${actionHtml}
+                </div>
+
+            </div>
+
+        `;
+
+
+        return card;
+
+    }
+
+
+
+    async function loadExams() {
+
+        try {
+
+            const examSnapshot =
+                await db
+                    .collection("exams")
+                    .where(
+                        "status",
+                        "==",
+                        "published"
+                    )
+                    .get();
+
+
+            const exams =
+                examSnapshot.docs
+                    .map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }))
+                    .filter(
+                        exam =>
+                            matchesStudentDepartment(
+                                exam
+                            )
+                    );
+
+
+            const submissionSnapshot =
+                await db
+                    .collection("examSubmissions")
+                    .where(
+                        "studentUid",
+                        "==",
+                        currentUser.uid
+                    )
+                    .get();
+
+
+            const submissions =
+                submissionSnapshot.docs
+                    .map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+
+            document.getElementById(
+                "availableCount"
+            ).textContent =
+                exams.length;
+
+
+            document.getElementById(
+                "totalCount"
+            ).textContent =
+                exams.length;
+
+
+            const completedExams =
+                exams.filter(
+                    exam =>
+                        getSubmissionStatus(
+                            submissions,
+                            exam.id
+                        )
+                );
+
+
+            document.getElementById(
+                "completedCount"
+            ).textContent =
+                completedExams.length;
+
+
+            const list =
+                document.getElementById(
+                    "examList"
+                );
+
+
+            list.innerHTML = "";
+
+
+            if (!exams.length) {
+
+                list.innerHTML = `
+                    <div class="empty">
+                        No exams are currently available for you.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+
+            exams.sort(
+                (a, b) => {
+
+                    const aDate =
+                        timestampToDate(
+                            a.createdAt
+                        );
+
+                    const bDate =
+                        timestampToDate(
+                            b.createdAt
+                        );
+
+                    if (!aDate && !bDate) {
+                        return 0;
+                    }
+
+                    if (!aDate) {
+                        return 1;
+                    }
+
+                    if (!bDate) {
+                        return -1;
+                    }
+
+                    return (
+                        bDate - aDate
+                    );
+
+                }
+            );
+
+
+            exams.forEach(exam => {
+
+                const submission =
+                    getSubmissionStatus(
+                        submissions,
+                        exam.id
+                    );
+
+
+                list.appendChild(
+                    renderExam(
+                        exam,
+                        submission
+                    )
+                );
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            document.getElementById(
+                "error"
+            ).textContent =
+                "Failed to load exams: " +
+                error.message;
+
+            document.getElementById(
+                "error"
+            ).style.display =
+                "block";
+
+        } finally {
+
+            document.getElementById(
+                "loading"
+            ).style.display =
+                "none";
+
+        }
+
+    }
+
+
+
+    auth.onAuthStateChanged(
+        async user => {
+
+            if (!user) {
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            currentUser = user;
+
+
+            try {
+
+                const userSnapshot =
+                    await db
+                        .collection("users")
+                        .doc(user.uid)
+                        .get();
+
+
+                if (!userSnapshot.exists) {
+
+                    document.getElementById(
+                        "error"
+                    ).textContent =
+                        "Student account was not found.";
+
+                    document.getElementById(
+                        "error"
+                    ).style.display =
+                        "block";
+
+                    document.getElementById(
+                        "loading"
+                    ).style.display =
+                        "none";
+
+                    return;
+
+                }
+
+
+                studentData =
+                    userSnapshot.data();
+
+
+                if (
+                    studentData.role !==
+                    "student"
+                ) {
+
+                    document.getElementById(
+                        "error"
+                    ).textContent =
+                        "Access denied. Student access required.";
+
+                    document.getElementById(
+                        "error"
+                    ).style.display =
+                        "block";
+
+                    document.getElementById(
+                        "loading"
+                    ).style.display =
+                        "none";
+
+                    return;
+
+                }
+
+
+                document.getElementById(
+                    "welcomeText"
+                ).textContent =
+                    `Exams, ${
+                        studentData.fullName ||
+                        studentData.name ||
+                        "Student"
+                    }`;
+
+
+                await loadExams();
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.getElementById(
+                    "error"
+                ).textContent =
+                    "Something went wrong: " +
+                    error.message;
+
+                document.getElementById(
+                    "error"
+                ).style.display =
+                    "block";
+
+                document.getElementById(
+                    "loading"
+                ).style.display =
+                    "none";
+
+            }
+
+        }
+    );
+
+</script></body>
+</html>
