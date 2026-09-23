@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Certificates | STI Academy Admin</title>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#050505;
+    color:#fff;
+    padding:20px;
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+}
+
+.header{
+    margin-bottom:25px;
+}
+
+.header h1{
+    font-size:28px;
+    margin-bottom:8px;
+}
+
+.header p{
+    color:#aaa;
+    font-size:14px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:#101010;
+    border:1px solid #242424;
+    border-radius:12px;
+    padding:20px;
+}
+
+.stat-card h3{
+    color:#aaa;
+    font-size:13px;
+    margin-bottom:10px;
+}
+
+.stat-card strong{
+    color:#1683ff;
+    font-size:28px;
+}
+
+.card{
+    background:#101010;
+    border:1px solid #242424;
+    border-radius:12px;
+    padding:22px;
+    margin-bottom:25px;
+}
+
+.card h2{
+    font-size:20px;
+    margin-bottom:18px;
+}
+
+.search{
+    margin-bottom:18px;
+}
+
+.search input{
+    width:100%;
+    background:#080808;
+    color:#fff;
+    border:1px solid #303030;
+    border-radius:8px;
+    padding:13px;
+    outline:none;
+}
+
+.search input:focus{
+    border-color:#1683ff;
+}
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+}
+
+th,
+td{
+    padding:13px 10px;
+    border-bottom:1px solid #242424;
+    text-align:left;
+    font-size:13px;
+}
+
+th{
+    color:#aaa;
+}
+
+td{
+    color:#eee;
+}
+
+button{
+    border:none;
+    border-radius:7px;
+    padding:9px 13px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.primary{
+    background:#1683ff;
+    color:#fff;
+}
+
+.secondary{
+    background:#222;
+    color:#fff;
+}
+
+.danger{
+    background:#9f1d1d;
+    color:#fff;
+}
+
+button:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+.badge{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:bold;
+}
+
+.eligible{
+    background:#183b57;
+    color:#6ebcff;
+}
+
+.issued{
+    background:#163d24;
+    color:#72dc95;
+}
+
+.revoked{
+    background:#431717;
+    color:#ff8f8f;
+}
+
+.not-eligible{
+    background:#292929;
+    color:#aaa;
+}
+
+.empty{
+    padding:25px;
+    text-align:center;
+    color:#888;
+}
+
+.loading{
+    padding:20px;
+    text-align:center;
+    color:#888;
+}
+
+.message{
+    display:none;
+    padding:12px;
+    margin-bottom:15px;
+    border-radius:8px;
+    font-size:13px;
+}
+
+.success{
+    display:block;
+    background:#12361f;
+    color:#8ce0a5;
+}
+
+.error{
+    display:block;
+    background:#3d1717;
+    color:#ff9999;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.8);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:999;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-content{
+    width:100%;
+    max-width:550px;
+    max-height:90vh;
+    overflow-y:auto;
+    background:#101010;
+    border:1px solid #303030;
+    border-radius:12px;
+    padding:22px;
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.modal-header h2{
+    font-size:20px;
+}
+
+.close{
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    background:#222;
+    color:#fff;
+    font-size:20px;
+    padding:0;
+}
+
+.info{
+    background:#080808;
+    border:1px solid #292929;
+    border-radius:8px;
+    padding:15px;
+    margin-bottom:18px;
+}
+
+.info p{
+    color:#ccc;
+    font-size:14px;
+    margin:7px 0;
+}
+
+.info strong{
+    color:#fff;
+}
+
+.form-group{
+    margin-bottom:16px;
+}
+
+.form-group label{
+    display:block;
+    color:#aaa;
+    font-size:13px;
+    margin-bottom:7px;
+}
+
+.form-group select,
+.form-group input,
+.form-group textarea{
+    width:100%;
+    background:#080808;
+    color:#fff;
+    border:1px solid #303030;
+    border-radius:8px;
+    padding:12px;
+    outline:none;
+    font-family:Arial,sans-serif;
+    font-size:14px;
+}
+
+.form-group select:focus,
+.form-group input:focus,
+.form-group textarea:focus{
+    border-color:#1683ff;
+}
+
+.form-group textarea{
+    min-height:110px;
+    resize:vertical;
+}
+
+.form-actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+}
+
+@media(max-width:700px){
+
+    body{
+        padding:12px;
+    }
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .card{
+        padding:16px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+    <div class="header">
+
+        <h1>
+            Certificates
+        </h1>
+
+        <p>
+            Manage student certificate eligibility and issued certificates.
+        </p>
+
+    </div>
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <h3>
+                Eligible Students
+            </h3>
+
+            <strong id="eligibleCount">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>
+                Certificates Issued
+            </h3>
+
+            <strong id="issuedCount">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>
+                Revoked Certificates
+            </h3>
+
+            <strong id="revokedCount">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- STUDENTS -->
+
+    <div class="card">
+
+        <h2>
+            Student Certificates
+        </h2>
+
+
+        <div class="search">
+
+            <input
+                type="text"
+                id="studentSearch"
+                placeholder="Search by student name, ID, email or course..."
+            >
+
+        </div>
+
+
+        <div id="studentsContainer">
+
+            <div class="loading">
+                Loading students...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ISSUED CERTIFICATES -->
+
+    <div class="card">
+
+        <h2>
+            Issued Certificates
+        </h2>
+
+
+        <div id="certificatesContainer">
+
+            <div class="loading">
+                Loading certificates...
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ISSUE CERTIFICATE MODAL -->
+
+<div
+    class="modal"
+    id="certificateModal"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+                Issue Certificate
+            </h2>
+
+
+            <button
+                type="button"
+                class="close"
+                onclick="closeCertificateModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="info">
+
+            <p>
+                <strong>
+                    Student:
+                </strong>
+
+                <span id="modalStudentName">
+                    —
+                </span>
+            </p>
+
+
+            <p>
+                <strong>
+                    Student ID:
+                </strong>
+
+                <span id="modalStudentId">
+                    —
+                </span>
+            </p>
+
+        </div>
+
+
+        <!-- COURSE -->
+
+        <div class="form-group">
+
+            <label for="courseSelect">
+                Course
+            </label>
+
+            <select
+                id="courseSelect"
+            >
+
+                <option value="">
+                    Select course
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- COHORT -->
+
+        <div class="form-group">
+
+            <label for="cohortSelect">
+                Cohort
+            </label>
+
+            <select
+                id="cohortSelect"
+                disabled
+            >
+
+                <option value="">
+                    Select course first
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- COMPLETION DATE -->
+
+        <div class="form-group">
+
+            <label for="completionDate">
+                Completion Date
+            </label>
+
+            <input
+                type="date"
+                id="completionDate"
+            >
+
+        </div>
+
+
+        <!-- FEEDBACK -->
+
+        <div class="form-group">
+
+            <label for="feedback">
+                Comments / Feedback
+            </label>
+
+            <textarea
+                id="feedback"
+                placeholder="Add comments, achievements or feedback for this student..."
+            ></textarea>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button
+                type="button"
+                class="primary"
+                id="issueCertificateBtn"
+            >
+                Issue Certificate
+            </button>
+
+
+            <button
+                type="button"
+                class="secondary"
+                onclick="closeCertificateModal()"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   FIREBASE
+========================= */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840261642",
+
+    appId:
+        "1:709840261642:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+firebase.initializeApp(
+    firebaseConfig
+);
+
+
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.firestore();
+
+
+let currentUser = null;
+
+let students = [];
+
+let certificates = [];
+
+let courses = [];
+
+let cohorts = [];
+
+let selectedStudent = null;
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function escapeHtml(value){
+
+    if(
+        value === null ||
+        value === undefined
+    ){
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+function formatDate(value){
+
+    if(!value){
+
+        return "—";
+
+    }
+
+
+    try{
+
+        let date;
+
+
+        if(
+            value &&
+            typeof value.toDate ===
+            "function"
+        ){
+
+            date =
+                value.toDate();
+
+        }else{
+
+            date =
+                new Date(value);
+
+        }
+
+
+        if(
+            isNaN(
+                date.getTime()
+            )
+        ){
+
+            return "—";
+
+        }
+
+
+        return date.toLocaleDateString();
+
+    }catch(error){
+
+        return "—";
+
+    }
+
+}
+
+
+function showMessage(
+    message,
+    type="success"
+){
+
+    const box =
+        document.getElementById(
+            "message"
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.className =
+        "message " +
+        type;
+
+
+    setTimeout(
+        () => {
+
+            box.className =
+                "message";
+
+        },
+        4000
+    );
+
+}
+
+
+/* =========================
+   AUTH
+========================= */
+
+auth.onAuthStateChanged(
+    async user => {
+
+        if(!user){
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+
+        currentUser =
+            user;
+
+
+        try{
+
+            const adminDoc =
+                await db
+                .collection("users")
+                .doc(user.uid)
+                .get();
+
+
+            if(
+                !adminDoc.exists ||
+                adminDoc.data().role !==
+                "admin"
+            ){
+
+                alert(
+                    "Access denied."
+                );
+
+
+                window.location.href =
+                    "../index.html";
+
+                return;
+
+            }
+
+
+            await loadStudents();
+
+            await loadCourses();
+
+            await loadCohorts();
+
+            await loadCertificates();
+
+        }catch(error){
+
+            console.error(error);
+
+
+            showMessage(
+                error.message,
+                "error"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================
+   LOAD STUDENTS
+========================= */
+
+async function loadStudents(){
+
+    const snapshot =
+        await db
+        .collection("users")
+        .get();
+
+
+    students = [];
+
+
+    snapshot.forEach(
+        doc => {
+
+            const data =
+                doc.data();
+
+
+            if(
+                data.role === "student"
+            ){
+
+                students.push({
+
+                    uid:
+                        doc.id,
+
+                    fullName:
+                        data.fullName ||
+                        data.name ||
+                        "Unnamed Student",
+
+                    studentId:
+                        data.studentId ||
+                        "",
+
+                    email:
+                        data.email ||
+                        "",
+
+                    courseId:
+                        data.courseId ||
+                        "",
+
+                    courseName:
+                        data.courseName ||
+                        data.course ||
+                        "",
+
+                    cohortId:
+                        data.cohortId ||
+                        "",
+
+                    cohortName:
+                        data.cohortName ||
+                        data.cohort ||
+                        "",
+
+                    status:
+                        data.status ||
+                        ""
+
+                });
+
+            }
+
+        }
+    );
+
+
+    renderStudents();
+
+}
+
+
+/* =========================
+   LOAD COURSES
+========================= */
+
+async function loadCourses(){
+
+    const snapshot =
+        await db
+        .collection("courses")
+        .get();
+
+
+    courses = [];
+
+
+    snapshot.forEach(
+        doc => {
+
+            const data =
+                doc.data();
+
+
+            courses.push({
+
+                id:
+                    doc.id,
+
+                ...data
+
+            });
+
+        }
+    );
+
+
+    courses.sort(
+        (a,b) => {
+
+            const nameA =
+                a.courseName ||
+                a.name ||
+                a.title ||
+                a.id ||
+                "";
+
+
+            const nameB =
+                b.courseName ||
+                b.name ||
+                b.title ||
+                b.id ||
+                "";
+
+
+            return String(nameA)
+                .localeCompare(
+                    String(nameB)
+                );
+
+        }
+    );
+
+
+    populateCourseSelect();
+
+}
+
+
+/* =========================
+   LOAD COHORTS
+========================= */
+
+async function loadCohorts(){
+
+    const snapshot =
+        await db
+        .collection("cohorts")
+        .get();
+
+
+    cohorts = [];
+
+
+    snapshot.forEach(
+        doc => {
+
+            const data =
+                doc.data();
+
+
+            cohorts.push({
+
+                id:
+                    doc.id,
+
+                ...data
+
+            });
+
+        }
+    );
+
+
+    cohorts.sort(
+        (a,b) => {
+
+            const nameA =
+                a.cohortName ||
+                a.name ||
+                a.title ||
+                a.id ||
+                "";
+
+
+            const nameB =
+                b.cohortName ||
+                b.name ||
+                b.title ||
+                b.id ||
+                "";
+
+
+            return String(nameA)
+                .localeCompare(
+                    String(nameB)
+                );
+
+        }
+    );
+
+}
+
+
+/* =========================
+   POPULATE COURSE SELECT
+========================= */
+
+function populateCourseSelect(){
+
+    const select =
+        document.getElementById(
+            "courseSelect"
+        );
+
+
+    select.innerHTML = `
+
+        <option value="">
+            Select course
+        </option>
+
+    `;
+
+
+    courses.forEach(
+        course => {
+
+            const courseId =
+                course.courseId ||
+                course.id;
+
+
+            const courseName =
+                course.courseName ||
+                course.name ||
+                course.title ||
+                courseId;
+
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                courseId;
+
+
+            option.textContent =
+                courseName;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================
+   COURSE CHANGE
+========================= */
+
+document
+.getElementById(
+    "courseSelect"
+)
+.addEventListener(
+    "change",
+    function(){
+
+        populateCohortSelect(
+            this.value
+        );
+
+    }
+);
+
+
+/* =========================
+   POPULATE COHORT SELECT
+========================= */
+
+function populateCohortSelect(
+    courseId
+){
+
+    const select =
+        document.getElementById(
+            "cohortSelect"
+        );
+
+
+    select.innerHTML = "";
+
+
+    if(!courseId){
+
+        select.disabled =
+            true;
+
+
+        select.innerHTML = `
+
+            <option value="">
+                Select course first
+            </option>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    const matchingCohorts =
+        cohorts.filter(
+            cohort => {
+
+                const cohortCourseId =
+                    cohort.courseId ||
+                    cohort.course ||
+                    "";
+
+
+                return String(
+                    cohortCourseId
+                ) === String(
+                    courseId
+                );
+
+            }
+        );
+
+
+    select.disabled =
+        false;
+
+
+    select.innerHTML = `
+
+        <option value="">
+            Select cohort
+        </option>
+
+    `;
+
+
+    matchingCohorts.forEach(
+        cohort => {
+
+            const cohortId =
+                cohort.cohortId ||
+                cohort.id;
+
+
+            const cohortName =
+                cohort.cohortName ||
+                cohort.name ||
+                cohort.title ||
+                cohortId;
+
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                cohortId;
+
+
+            option.textContent =
+                cohortName;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    if(!matchingCohorts.length){
+
+        select.innerHTML = `
+
+            <option value="">
+                No cohorts found for this course
+            </option>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================
+   LOAD CERTIFICATES
+========================= */
+
+async function loadCertificates(){
+
+    const snapshot =
+        await db
+        .collection("certificates")
+        .get();
+
+
+    certificates = [];
+
+
+    snapshot.forEach(
+        doc => {
+
+            certificates.push({
+
+                id:
+                    doc.id,
+
+                ...doc.data()
+
+            });
+
+        }
+    );
+
+
+    updateStats();
+
+    renderStudents();
+
+    renderCertificates();
+
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+function updateStats(){
+
+    const issued =
+        certificates.filter(
+            certificate =>
+                certificate.status ===
+                "issued"
+        );
+
+
+    const revoked =
+        certificates.filter(
+            certificate =>
+                certificate.status ===
+                "revoked"
+        );
+
+
+    document.getElementById(
+        "issuedCount"
+    ).textContent =
+        issued.length;
+
+
+    document.getElementById(
+        "revokedCount"
+    ).textContent =
+        revoked.length;
+
+
+    document.getElementById(
+        "eligibleCount"
+    ).textContent =
+        issued.length;
+
+}
+
+
+/* =========================
+   CHECK STUDENT CERTIFICATE
+========================= */
+
+function getStudentCertificate(
+    studentUid
+){
+
+    return certificates.find(
+        certificate =>
+            certificate.studentUid ===
+            studentUid
+    );
+
+}
+
+
+/* =========================
+   RENDER STUDENTS
+========================= */
+
+function renderStudents(){
+
+    const container =
+        document.getElementById(
+            "studentsContainer"
+        );
+
+
+    const search =
+        document.getElementById(
+            "studentSearch"
+        )
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    let filtered =
+        students;
+
+
+    if(search){
+
+        filtered =
+            students.filter(
+                student => {
+
+                    return (
+
+                        String(
+                            student.fullName
+                        )
+                        .toLowerCase()
+                        .includes(search)
+
+                        ||
+
+                        String(
+                            student.studentId
+                        )
+                        .toLowerCase()
+                        .includes(search)
+
+                        ||
+
+                        String(
+                            student.email
+                        )
+                        .toLowerCase()
+                        .includes(search)
+
+                        ||
+
+                        String(
+                            student.courseName
+                        )
+                        .toLowerCase()
+                        .includes(search)
+
+                    );
+
+                }
+            );
+
+    }
+
+
+    if(!filtered.length){
+
+        container.innerHTML = `
+            <div class="empty">
+                No students found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    let html = `
+
+        <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Student
+                    </th>
+
+                    <th>
+                        Student ID
+                    </th>
+
+                    <th>
+                        Course
+                    </th>
+
+                    <th>
+                        Cohort
+                    </th>
+
+                    <th>
+                        Certificate
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+    `;
+
+
+    filtered.forEach(
+        student => {
+
+            const certificate =
+                getStudentCertificate(
+                    student.uid
+                );
+
+
+            let statusHtml = "";
+
+
+            let actionHtml = "";
+
+
+            if(!certificate){
+
+                statusHtml = `
+
+                    <span class="badge not-eligible">
+                        Not Eligible
+                    </span>
+
+                `;
+
+
+                actionHtml = `
+
+                    <button
+                        type="button"
+                        class="primary"
+                        onclick="openCertificateModal('${student.uid}')"
+                    >
+                        Issue Certificate
+                    </button>
+
+                `;
+
+            }else if(
+                certificate.status ===
+                "issued"
+            ){
+
+                statusHtml = `
+
+                    <span class="badge issued">
+                        Issued
+                    </span>
+
+                `;
+
+
+                actionHtml = `
+
+                    <button
+                        type="button"
+                        class="secondary"
+                        onclick="viewCertificate('${certificate.id}')"
+                    >
+                        View
+                    </button>
+
+                `;
+
+            }else if(
+                certificate.status ===
+                "revoked"
+            ){
+
+                statusHtml = `
+
+                    <span class="badge revoked">
+                        Revoked
+                    </span>
+
+                `;
+
+
+                actionHtml = `
+
+                    <button
+                        type="button"
+                        class="primary"
+                        onclick="openCertificateModal('${student.uid}')"
+                    >
+                        Re-Issue
+                    </button>
+
+                `;
+
+            }
+
+
+            html += `
+
+                <tr>
+
+                    <td>
+                        ${escapeHtml(
+                            student.fullName
+                        )}
+                    </td>
+
+
+                    <td>
+                        ${escapeHtml(
+                            student.studentId ||
+                            "—"
+                        )}
+                    </td>
+
+
+                    <td>
+                        ${escapeHtml(
+                            student.courseName ||
+                            "—"
+                        )}
+                    </td>
+
+
+                    <td>
+                        ${escapeHtml(
+                            student.cohortName ||
+                            "—"
+                        )}
+                    </td>
+
+
+                    <td>
+                        ${statusHtml}
+                    </td>
+
+
+                    <td>
+                        ${actionHtml}
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+            </tbody>
+
+        </table>
+
+        </div>
+
+    `;
+
+
+    container.innerHTML =
+        html;
+
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+document
+.getElementById(
+    "studentSearch"
+)
+.addEventListener(
+    "input",
+    renderStudents
+);
+
+
+/* =========================
+   OPEN CERTIFICATE MODAL
+========================= */
+
+function openCertificateModal(
+    studentUid
+){
+
+    selectedStudent =
+        students.find(
+            student =>
+                student.uid ===
+                studentUid
+        );
+
+
+    if(!selectedStudent){
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "modalStudentName"
+    ).textContent =
+        selectedStudent.fullName;
+
+
+    document.getElementById(
+        "modalStudentId"
+    ).textContent =
+        selectedStudent.studentId ||
+        "—";
+
+
+    /* RESET COURSE */
+
+    document.getElementById(
+        "courseSelect"
+    ).value = "";
+
+
+    /* RESET COHORT */
+
+    const cohortSelect =
+        document.getElementById(
+            "cohortSelect"
+        );
+
+
+    cohortSelect.innerHTML = `
+
+        <option value="">
+            Select course first
+        </option>
+
+    `;
+
+
+    cohortSelect.disabled =
+        true;
+
+
+    /* COMPLETION DATE */
+
+    const today =
+        new Date();
+
+
+    const formatted =
+        today.toISOString()
+        .split("T")[0];
+
+
+    document.getElementById(
+        "completionDate"
+    ).value =
+        formatted;
+
+
+    /* FEEDBACK */
+
+    document.getElementById(
+        "feedback"
+    ).value = "";
+
+
+    document
+    .getElementById(
+        "certificateModal"
+    )
+    .classList
+    .add("show");
+
+}
+
+
+/* =========================
+   CLOSE MODAL
+========================= */
+
+function closeCertificateModal(){
+
+    document
+    .getElementById(
+        "certificateModal"
+    )
+    .classList
+    .remove("show");
+
+
+    selectedStudent =
+        null;
+
+}
+
+
+/* =========================
+   GENERATE CERTIFICATE ID
+========================= */
+
+function generateCertificateId(
+    student,
+    courseId
+){
+
+    const course =
+        (
+            courseId ||
+            student.courseId ||
+            "COURSE"
+        )
+        .toString()
+        .replace(
+            /[^a-zA-Z0-9]/g,
+            ""
+        )
+        .substring(0,8)
+        .toUpperCase();
+
+
+    const studentId =
+        (
+            student.studentId ||
+            student.uid
+        )
+        .toString()
+        .replace(
+            /[^a-zA-Z0-9]/g,
+            ""
+        )
+        .substring(0,10)
+        .toUpperCase();
+
+
+    return (
+        "STIA-CERT-" +
+        course +
+        "-" +
+        studentId
+    );
+
+}
+
+
+/* =========================
+   ISSUE CERTIFICATE
+========================= */
+
+document
+.getElementById(
+    "issueCertificateBtn"
+)
+.addEventListener(
+    "click",
+    async function(){
+
+        if(!selectedStudent){
+
+            return;
+
+        }
+
+
+        const courseId =
+            document.getElementById(
+                "courseSelect"
+            ).value;
+
+
+        const cohortId =
+            document.getElementById(
+                "cohortSelect"
+            ).value;
+
+
+        const completionDate =
+            document.getElementById(
+                "completionDate"
+            ).value;
+
+
+        const feedback =
+            document.getElementById(
+                "feedback"
+            ).value.trim();
+
+
+        if(!courseId){
+
+            alert(
+                "Please select a course."
+            );
+
+            return;
+
+        }
+
+
+        if(!cohortId){
+
+            alert(
+                "Please select a cohort."
+            );
+
+            return;
+
+        }
+
+
+        if(!completionDate){
+
+            alert(
+                "Select the completion date."
+            );
+
+            return;
+
+        }
+
+
+        const selectedCourse =
+            courses.find(
+                course => {
+
+                    return String(
+                        course.courseId ||
+                        course.id
+                    ) === String(
+                        courseId
+                    );
+
+                }
+            );
+
+
+        const selectedCohort =
+            cohorts.find(
+                cohort => {
+
+                    return String(
+                        cohort.cohortId ||
+                        cohort.id
+                    ) === String(
+                        cohortId
+                    );
+
+                }
+            );
+
+
+        const courseName =
+            selectedCourse
+                ? (
+                    selectedCourse.courseName ||
+                    selectedCourse.name ||
+                    selectedCourse.title ||
+                    courseId
+                )
+                : courseId;
+
+
+        const cohortName =
+            selectedCohort
+                ? (
+                    selectedCohort.cohortName ||
+                    selectedCohort.name ||
+                    selectedCohort.title ||
+                    cohortId
+                )
+                : cohortId;
+
+
+        const existing =
+            getStudentCertificate(
+                selectedStudent.uid
+            );
+
+
+        const certificateId =
+            existing &&
+            existing.certificateId
+                ? existing.certificateId
+                : generateCertificateId(
+                    selectedStudent,
+                    courseId
+                );
+
+
+        this.disabled =
+            true;
+
+
+        this.textContent =
+            "Issuing...";
+
+
+        try{
+
+            const certificateData = {
+
+                certificateId:
+                    certificateId,
+
+                studentUid:
+                    selectedStudent.uid,
+
+                studentId:
+                    selectedStudent.studentId,
+
+                studentName:
+                    selectedStudent.fullName,
+
+                email:
+                    selectedStudent.email,
+
+                courseId:
+                    courseId,
+
+                courseName:
+                    courseName,
+
+                cohortId:
+                    cohortId,
+
+                cohortName:
+                    cohortName,
+
+                completionDate:
+                    completionDate,
+
+                feedback:
+                    feedback,
+
+                status:
+                    "issued",
+
+                issuedAt:
+                    firebase.firestore
+                    .FieldValue
+                    .serverTimestamp(),
+
+                issuedBy:
+                    currentUser.uid
+
+            };
+
+
+            if(existing){
+
+                await db
+                .collection("certificates")
+                .doc(existing.id)
+                .update(
+                    certificateData
+                );
+
+            }else{
+
+                await db
+                .collection("certificates")
+                .add(
+                    certificateData
+                );
+
+            }
+
+
+            showMessage(
+                "Certificate issued successfully."
+            );
+
+
+            closeCertificateModal();
+
+            await loadCertificates();
+
+
+        }catch(error){
+
+            console.error(error);
+
+
+            showMessage(
+                "Unable to issue certificate: " +
+                error.message,
+                "error"
+            );
+
+
+        }finally{
+
+            this.disabled =
+                false;
+
+            this.textContent =
+                "Issue Certificate";
+
+        }
+
+    }
+);
+
+
+/* =========================
+   VIEW CERTIFICATE
+========================= */
+
+function viewCertificate(
+    certificateId
+){
+
+    const certificate =
+        certificates.find(
+            item =>
+                item.id ===
+                certificateId
+        );
+
+
+    if(!certificate){
+
+        return;
+
+    }
+
+
+    alert(
+
+        "Certificate ID: " +
+        certificate.certificateId +
+
+        "\n\nStudent: " +
+        certificate.studentName +
+
+        "\nStudent ID: " +
+        certificate.studentId +
+
+        "\nCourse: " +
+        certificate.courseName +
+
+        "\nCohort: " +
+        certificate.cohortName +
+
+        "\nCompletion Date: " +
+        certificate.completionDate +
+
+        "\n\nComments / Feedback: " +
+        (
+            certificate.feedback ||
+            "None"
+        ) +
+
+        "\n\nStatus: " +
+        certificate.status
+
+    );
+
+}
+
+
+/* =========================
+   RENDER ISSUED CERTIFICATES
+========================= */
+
+function renderCertificates(){
+
+    const container =
+        document.getElementById(
+            "certificatesContainer"
+        );
+
+
+    if(!certificates.length){
+
+        container.innerHTML = `
+            <div class="empty">
+                No certificates have been issued yet.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    let html = `
+
+        <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Certificate ID
+                    </th>
+
+                    <th>
+                        Student
+                    </th>
+
+                    <th>
+                        Course
+                    </th>
+
+                    <th>
+                        Cohort
+                    </th>
+
+                    <th>
+                        Completion
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+    `;
+
+
+    certificates.forEach(
+        certificate => {
+
+            let badgeClass =
+                "issued";
+
+
+            if(
+                certificate.status ===
+                "revoked"
+            ){
+
+                badgeClass =
+                    "revoked";
+
+            }
+
+
+            html += `
+
+                <tr>
+
+                    <td>
+                        ${escapeHtml(
+                            certificate.certificateId
+                        )}
+                    </td>
+
+
+                    <td>
+                        ${escapeHtml(
+                            certificate.studentName
+                        )}
+                    </td>
+
+
+                    <td>
+                        ${escapeHtml(
+                            certificate.courseName ||
+                            "—"
+                        )}
+                    </td>
+
+
+                    <td>
+                        ${escapeHtml(
+                            certificate.cohortName ||
+                            "—"
+                        )}
+                    </td>
+
+
+                    <td>
+                        ${escapeHtml(
+                            certificate.completionDate ||
+                            "—"
+                        )}
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="badge ${badgeClass}"
+                        >
+
+                            ${escapeHtml(
+                                certificate.status
+                            )}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <button
+                            type="button"
+                            class="secondary"
+                            onclick="viewCertificate('${certificate.id}')"
+                        >
+                            View
+                        </button>
+
+
+                        ${
+                            certificate.status ===
+                            "issued"
+
+                                ? `
+
+                                    <button
+                                        type="button"
+                                        class="danger"
+                                        onclick="revokeCertificate('${certificate.id}')"
+                                    >
+                                        Revoke
+                                    </button>
+
+                                `
+
+                                : ""
+                        }
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+            </tbody>
+
+        </table>
+
+        </div>
+
+    `;
+
+
+    container.innerHTML =
+        html;
+
+}
+
+
+/* =========================
+   REVOKE CERTIFICATE
+========================= */
+
+async function revokeCertificate(
+    certificateId
+){
+
+    const certificate =
+        certificates.find(
+            item =>
+                item.id ===
+                certificateId
+        );
+
+
+    if(!certificate){
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+
+            "Are you sure you want to revoke this certificate?\n\n" +
+
+            certificate.certificateId +
+
+            "\n" +
+
+            certificate.studentName
+
+        );
+
+
+    if(!confirmed){
+
+        return;
+
+    }
+
+
+    try{
+
+        await db
+        .collection("certificates")
+        .doc(certificateId)
+        .update({
+
+            status:
+                "revoked",
+
+            revokedAt:
+                firebase.firestore
+                .FieldValue
+                .serverTimestamp(),
+
+            revokedBy:
+                currentUser.uid
+
+        });
+
+
+        showMessage(
+            "Certificate revoked."
+        );
+
+
+        await loadCertificates();
+
+
+    }catch(error){
+
+        console.error(error);
+
+
+        showMessage(
+            "Unable to revoke certificate: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================
+   MODAL BACKDROP
+========================= */
+
+document
+.getElementById(
+    "certificateModal"
+)
+.addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            this
+        ){
+
+            closeCertificateModal();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

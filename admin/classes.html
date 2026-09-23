@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>STI Academy - Classes</title>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: #ffffff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1150px;
+            margin: auto;
+            padding: 25px 18px 50px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .card {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin: 0 0 18px;
+            font-size: 19px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            color: #bbb;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 9px;
+            border: 1px solid #303030;
+            background: #080808;
+            color: #ffffff;
+            outline: none;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #1683ff;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 9px;
+            padding: 13px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .primary-btn {
+            background: #1683ff;
+            color: white;
+        }
+
+        .secondary-btn {
+            background: #222;
+            color: white;
+            border: 1px solid #333;
+        }
+
+        .danger-btn {
+            background: #3a1111;
+            color: #ff9b9b;
+            border: 1px solid #652020;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 9px;
+            font-size: 13px;
+        }
+
+        .error {
+            background: #250909;
+            border: 1px solid #612020;
+            color: #ff9d9d;
+        }
+
+        .success {
+            background: #08200f;
+            border: 1px solid #174c29;
+            color: #8df0ae;
+        }
+
+        .class-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .class-item {
+            background: #090909;
+            border: 1px solid #252525;
+            border-radius: 11px;
+            padding: 17px;
+        }
+
+        .class-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .class-title {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .class-course {
+            color: #1683ff;
+            font-size: 13px;
+        }
+
+        .status {
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status.scheduled {
+            background: #0c2137;
+            color: #65b7ff;
+        }
+
+        .status.live {
+            background: #092514;
+            color: #70e898;
+        }
+
+        .status.completed {
+            background: #202020;
+            color: #aaa;
+        }
+
+        .status.cancelled {
+            background: #2b0b0b;
+            color: #ff8e8e;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .detail {
+            background: #111;
+            border-radius: 8px;
+            padding: 11px;
+        }
+
+        .detail-label {
+            color: #777;
+            font-size: 10px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 13px;
+            word-break: break-word;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .actions button {
+            padding: 9px 12px;
+            font-size: 12px;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+            padding: 35px 15px;
+        }
+
+        .loading {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .section-note {
+            color: #777;
+            font-size: 12px;
+            margin-top: -8px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 700px) {
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .class-top {
+                flex-direction: column;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Classes</h1>
+
+        <p>
+            Schedule and manage live classes for STI Academy cohorts.
+        </p>
+    </div>
+
+
+    <div class="card">
+
+        <h2 id="formTitle">
+            Schedule New Class
+        </h2>
+
+        <p class="section-note">
+            Select a course and cohort. The tutor should be assigned to the
+            appropriate department.
+        </p>
+
+        <form id="classForm">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="course">
+                        Course
+                    </label>
+
+                    <select
+                        id="course"
+                        required
+                    >
+                        <option value="">
+                            Loading courses...
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="cohort">
+                        Cohort
+                    </label>
+
+                    <select
+                        id="cohort"
+                        required
+                        disabled
+                    >
+                        <option value="">
+                            Select a course first
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="tutor">
+                        Tutor
+                    </label>
+
+                    <select
+                        id="tutor"
+                        required
+                    >
+                        <option value="">
+                            Loading tutors...
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="classTitle">
+                        Class Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="classTitle"
+                        placeholder="e.g. Introduction to HTML"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="classDate">
+                        Class Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="classDate"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="startTime">
+                        Start Time
+                    </label>
+
+                    <input
+                        type="time"
+                        id="startTime"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="endTime">
+                        End Time
+                    </label>
+
+                    <input
+                        type="time"
+                        id="endTime"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="classType">
+                        Class Type
+                    </label>
+
+                    <select id="classType">
+
+                        <option value="live">
+                            Live Interactive Class
+                        </option>
+
+                        <option value="practical">
+                            Practical
+                        </option>
+
+                        <option value="assessment">
+                            Assessment
+                        </option>
+
+                        <option value="revision">
+                            Revision
+                        </option>
+
+                        <option value="exam">
+                            Exam
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="meetingLink">
+                        Meeting / Class Link
+                    </label>
+
+                    <input
+                        type="url"
+                        id="meetingLink"
+                        placeholder="https://..."
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="status">
+                        Status
+                    </label>
+
+                    <select id="status">
+
+                        <option value="scheduled">
+                            Scheduled
+                        </option>
+
+                        <option value="live">
+                            Live
+                        </option>
+
+                        <option value="completed">
+                            Completed
+                        </option>
+
+                        <option value="cancelled">
+                            Cancelled
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label for="description">
+                        Class Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        placeholder="Describe what students will learn or do in this class..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="errorMessage"
+                class="message error"
+            ></div>
+
+
+            <div
+                id="successMessage"
+                class="message success"
+            ></div>
+
+
+            <div class="button-row">
+
+                <button
+                    type="submit"
+                    class="primary-btn"
+                    id="submitButton"
+                >
+                    Schedule Class
+                </button>
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    id="resetButton"
+                >
+                    Reset
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>Scheduled Classes</h2>
+
+        <div
+            id="classList"
+            class="class-list"
+        >
+            <div class="loading">
+                Loading classes...
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ==========================================
+    // FIREBASE
+    // ==========================================
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+        authDomain: "sti-academy.firebaseapp.com",
+        projectId: "sti-academy",
+        storageBucket: "sti-academy.firebasestorage.app",
+        messagingSenderId: "709840641262",
+        appId: "1:709840641262:web:714b09bf661afa159f27ff",
+        measurementId: "G-7ZRZ3P28YP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+
+    // ==========================================
+    // ELEMENTS
+    // ==========================================
+
+    const classForm =
+        document.getElementById("classForm");
+
+    const courseInput =
+        document.getElementById("course");
+
+    const cohortInput =
+        document.getElementById("cohort");
+
+    const tutorInput =
+        document.getElementById("tutor");
+
+    const classTitleInput =
+        document.getElementById("classTitle");
+
+    const classDateInput =
+        document.getElementById("classDate");
+
+    const startTimeInput =
+        document.getElementById("startTime");
+
+    const endTimeInput =
+        document.getElementById("endTime");
+
+    const classTypeInput =
+        document.getElementById("classType");
+
+    const meetingLinkInput =
+        document.getElementById("meetingLink");
+
+    const statusInput =
+        document.getElementById("status");
+
+    const descriptionInput =
+        document.getElementById("description");
+
+    const classList =
+        document.getElementById("classList");
+
+    const errorMessage =
+        document.getElementById("errorMessage");
+
+    const successMessage =
+        document.getElementById("successMessage");
+
+    const submitButton =
+        document.getElementById("submitButton");
+
+    const resetButton =
+        document.getElementById("resetButton");
+
+    const formTitle =
+        document.getElementById("formTitle");
+
+
+    // ==========================================
+    // GLOBAL DATA
+    // ==========================================
+
+    let courses = [];
+    let cohorts = [];
+    let tutors = [];
+
+    let editingClassId = null;
+
+
+    // ==========================================
+    // COURSE NAME NORMALIZER
+    // ==========================================
+
+    function normalizeCourseName(value) {
+
+        const text =
+            String(value || "")
+                .trim()
+                .replace(/\s+/g, " ");
+
+        if (!text) {
+            return "";
+        }
+
+        return text
+            .toLowerCase()
+            .split(" ")
+            .map(
+                word =>
+                    word.charAt(0).toUpperCase() +
+                    word.slice(1)
+            )
+            .join(" ");
+
+    }
+
+
+    // ==========================================
+    // AUTH
+    // ==========================================
+
+    auth.onAuthStateChanged(
+        async (user) => {
+
+            if (!user) {
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+            try {
+
+                const userDoc =
+                    await db
+                        .collection("users")
+                        .doc(user.uid)
+                        .get();
+
+                if (
+                    !userDoc.exists ||
+                    userDoc.data().role !== "admin"
+                ) {
+
+                    alert(
+                        "Access denied."
+                    );
+
+                    window.location.href =
+                        "../index.html";
+
+                    return;
+
+                }
+
+                await Promise.all([
+                    loadCourses(),
+                    loadTutors()
+                ]);
+
+                await loadClasses();
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "Unable to load the page."
+                );
+
+            }
+
+        }
+    );
+
+
+    // ==========================================
+    // LOAD COURSES
+    // ==========================================
+
+    async function loadCourses() {
+
+        const snapshot =
+            await db
+                .collection("courses")
+                .get();
+
+        courses = [];
+
+        snapshot.forEach(
+            (doc) => {
+
+                const data =
+                    doc.data();
+
+                if (
+                    data.status === "active"
+                ) {
+
+                    courses.push({
+                        id: doc.id,
+                        ...data,
+
+                        // Keep the original course name,
+                        // but create a clean canonical name
+                        // for classes.
+                        normalizedCourseName:
+                            normalizeCourseName(
+                                data.courseName ||
+                                doc.id
+                            )
+                    });
+
+                }
+
+            }
+        );
+
+        courses.sort(
+            (a, b) =>
+                String(
+                    a.normalizedCourseName ||
+                    a.id
+                ).localeCompare(
+                    String(
+                        b.normalizedCourseName ||
+                        b.id
+                    )
+                )
+        );
+
+        courseInput.innerHTML =
+            `<option value="">
+                Select a course
+            </option>`;
+
+        courses.forEach(
+            (course) => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    course.id;
+
+                option.textContent =
+                    course.normalizedCourseName ||
+                    course.id;
+
+                courseInput.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    // ==========================================
+    // LOAD COHORTS FOR COURSE
+    // ==========================================
+
+    async function loadCohortsForCourse(
+        courseId,
+        selectedCohortId = ""
+    ) {
+
+        cohortInput.disabled = true;
+
+        cohortInput.innerHTML =
+            `<option value="">
+                Loading cohorts...
+            </option>`;
+
+        if (!courseId) {
+
+            cohortInput.innerHTML =
+                `<option value="">
+                    Select a course first
+                </option>`;
+
+            return;
+
+        }
+
+        try {
+
+            const snapshot =
+                await db
+                    .collection("cohorts")
+                    .where(
+                        "courseId",
+                        "==",
+                        courseId
+                    )
+                    .get();
+
+            cohorts = [];
+
+            snapshot.forEach(
+                (doc) => {
+
+                    const data =
+                        doc.data();
+
+                    cohorts.push({
+                        id: doc.id,
+                        ...data
+                    });
+
+                }
+            );
+
+            cohorts.sort(
+                (a, b) =>
+                    String(
+                        b.startDate || ""
+                    ).localeCompare(
+                        String(
+                            a.startDate || ""
+                        )
+                    )
+            );
+
+            cohortInput.innerHTML =
+                `<option value="">
+                    Select a cohort
+                </option>`;
+
+            cohorts.forEach(
+                (cohort) => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        cohort.id;
+
+                    option.textContent =
+                        cohort.cohortName ||
+                        cohort.id;
+
+                    cohortInput.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+            cohortInput.disabled =
+                false;
+
+            if (selectedCohortId) {
+
+                cohortInput.value =
+                    selectedCohortId;
+
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+            cohortInput.innerHTML =
+                `<option value="">
+                    Unable to load cohorts
+                </option>`;
+
+        }
+
+    }
+
+
+    // ==========================================
+    // LOAD TUTORS
+    // ==========================================
+
+    async function loadTutors() {
+
+        const snapshot =
+            await db
+                .collection("tutors")
+                .get();
+
+        tutors = [];
+
+        snapshot.forEach(
+            (doc) => {
+
+                const data =
+                    doc.data();
+
+                if (
+                    data.status === "active" ||
+                    !data.status
+                ) {
+
+                    tutors.push({
+                        id: doc.id,
+                        ...data
+                    });
+
+                }
+
+            }
+        );
+
+        tutors.sort(
+            (a, b) =>
+                String(
+                    a.fullName ||
+                    a.name ||
+                    a.email ||
+                    ""
+                ).localeCompare(
+                    String(
+                        b.fullName ||
+                        b.name ||
+                        b.email ||
+                        ""
+                    )
+                )
+        );
+
+        tutorInput.innerHTML =
+            `<option value="">
+                Select a tutor
+            </option>`;
+
+        tutors.forEach(
+            (tutor) => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    tutor.id;
+
+                option.textContent =
+                    tutor.fullName ||
+                    tutor.name ||
+                    tutor.email ||
+                    tutor.id;
+
+                tutorInput.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    // ==========================================
+    // COURSE CHANGE
+    // ==========================================
+
+    courseInput.addEventListener(
+        "change",
+        async () => {
+
+            await loadCohortsForCourse(
+                courseInput.value
+            );
+
+        }
+    );
+
+
+    // ==========================================
+    // CREATE / UPDATE CLASS
+    // ==========================================
+
+    classForm.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
+
+            clearMessages();
+
+            const course =
+                courses.find(
+                    item =>
+                        item.id ===
+                        courseInput.value
+                );
+
+            const cohort =
+                cohorts.find(
+                    item =>
+                        item.id ===
+                        cohortInput.value
+                );
+
+            const tutor =
+                tutors.find(
+                    item =>
+                        item.id ===
+                        tutorInput.value
+                );
+
+            if (!course) {
+
+                showError(
+                    "Please select a course."
+                );
+
+                return;
+
+            }
+
+            if (!cohort) {
+
+                showError(
+                    "Please select a cohort."
+                );
+
+                return;
+
+            }
+
+            if (!tutor) {
+
+                showError(
+                    "Please select a tutor."
+                );
+
+                return;
+
+            }
+
+            if (
+                !classDateInput.value ||
+                !startTimeInput.value ||
+                !endTimeInput.value
+            ) {
+
+                showError(
+                    "Please enter the class date and time."
+                );
+
+                return;
+
+            }
+
+            if (
+                startTimeInput.value >=
+                endTimeInput.value
+            ) {
+
+                showError(
+                    "End time must be later than start time."
+                );
+
+                return;
+
+            }
+
+
+            submitButton.disabled =
+                true;
+
+            submitButton.textContent =
+                editingClassId
+                    ? "Saving..."
+                    : "Scheduling...";
+
+
+            const cleanCourseName =
+                normalizeCourseName(
+                    course.courseName ||
+                    course.id
+                );
+
+
+            const classData = {
+
+                courseId:
+                    course.id,
+
+                // IMPORTANT:
+                // Always save the normalized
+                // course name so student
+                // queries match exactly.
+                courseName:
+                    cleanCourseName,
+
+                department:
+                    course.department ||
+                    "",
+
+                cohortId:
+                    cohort.id,
+
+                cohortName:
+                    cohort.cohortName ||
+                    cohort.id,
+
+                tutorId:
+                    tutor.id,
+
+                tutorName:
+                    tutor.fullName ||
+                    tutor.name ||
+                    tutor.email ||
+                    tutor.id,
+
+                classTitle:
+                    classTitleInput.value.trim(),
+
+                classDate:
+                    classDateInput.value,
+
+                startTime:
+                    startTimeInput.value,
+
+                endTime:
+                    endTimeInput.value,
+
+                classType:
+                    classTypeInput.value,
+
+                meetingLink:
+                    meetingLinkInput.value.trim(),
+
+                status:
+                    statusInput.value,
+
+                description:
+                    descriptionInput.value.trim(),
+
+                updatedAt:
+                    firebase.firestore
+                        .FieldValue
+                        .serverTimestamp(),
+
+                updatedBy:
+                    auth.currentUser.uid
+
+            };
+
+
+            try {
+
+                if (editingClassId) {
+
+                    await db
+                        .collection("classes")
+                        .doc(editingClassId)
+                        .update(
+                            classData
+                        );
+
+                    showSuccess(
+                        "Class updated successfully."
+                    );
+
+                } else {
+
+                    classData.createdAt =
+                        firebase.firestore
+                            .FieldValue
+                            .serverTimestamp();
+
+                    classData.createdBy =
+                        auth.currentUser.uid;
+
+                    await db
+                        .collection("classes")
+                        .add(
+                            classData
+                        );
+
+                    showSuccess(
+                        "Class scheduled successfully."
+                    );
+
+                }
+
+                resetForm();
+
+                await loadClasses();
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "Unable to save class. Please try again."
+                );
+
+            }
+
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                editingClassId
+                    ? "Save Changes"
+                    : "Schedule Class";
+
+        }
+    );
+
+
+    // ==========================================
+    // LOAD CLASSES
+    // ==========================================
+
+    async function loadClasses() {
+
+        classList.innerHTML =
+            `<div class="loading">
+                Loading classes...
+            </div>`;
+
+        try {
+
+            const snapshot =
+                await db
+                    .collection("classes")
+                    .get();
+
+            const classes = [];
+
+            snapshot.forEach(
+                (doc) => {
+
+                    classes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+
+                }
+            );
+
+            classes.sort(
+                (a, b) => {
+
+                    const first =
+                        `${a.classDate || ""} ${a.startTime || ""}`;
+
+                    const second =
+                        `${b.classDate || ""} ${b.startTime || ""}`;
+
+                    return second.localeCompare(
+                        first
+                    );
+
+                }
+            );
+
+
+            if (classes.length === 0) {
+
+                classList.innerHTML =
+                    `<div class="empty">
+                        No classes scheduled yet.
+                    </div>`;
+
+                return;
+
+            }
+
+
+            classList.innerHTML =
+                "";
+
+
+            classes.forEach(
+                (item) => {
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+                    card.className =
+                        "class-item";
+
+
+                    const status =
+                        item.status ||
+                        "scheduled";
+
+
+                    card.innerHTML = `
+
+                        <div class="class-top">
+
+                            <div>
+
+                                <div class="class-title">
+                                    ${escapeHtml(
+                                        item.classTitle ||
+                                        "Untitled Class"
+                                    )}
+                                </div>
+
+                                <div class="class-course">
+                                    ${escapeHtml(
+                                        normalizeCourseName(
+                                            item.courseName ||
+                                            item.courseId ||
+                                            "-"
+                                        )
+                                    )}
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="status ${escapeHtml(
+                                    status
+                                )}"
+                            >
+                                ${escapeHtml(
+                                    status
+                                )}
+                            </div>
+
+                        </div>
+
+
+                        <div class="details">
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    COHORT
+                                </div>
+
+                                <div class="detail-value">
+                                    ${escapeHtml(
+                                        item.cohortName ||
+                                        "-"
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    DATE
+                                </div>
+
+                                <div class="detail-value">
+                                    ${formatDate(
+                                        item.classDate
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    TIME
+                                </div>
+
+                                <div class="detail-value">
+                                    ${escapeHtml(
+                                        item.startTime ||
+                                        "-"
+                                    )}
+                                    -
+                                    ${escapeHtml(
+                                        item.endTime ||
+                                        "-"
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    TUTOR
+                                </div>
+
+                                <div class="detail-value">
+                                    ${escapeHtml(
+                                        item.tutorName ||
+                                        "-"
+                                    )}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="actions">
+
+                            <button
+                                type="button"
+                                class="secondary-btn"
+                                onclick="editClass('${item.id}')"
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                type="button"
+                                class="secondary-btn"
+                                onclick="changeClassStatus(
+                                    '${item.id}',
+                                    'completed'
+                                )"
+                            >
+                                Mark Completed
+                            </button>
+
+                            <button
+                                type="button"
+                                class="danger-btn"
+                                onclick="changeClassStatus(
+                                    '${item.id}',
+                                    'cancelled'
+                                )"
+                            >
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    `;
+
+
+                    classList.appendChild(
+                        card
+                    );
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(error);
+
+            classList.innerHTML =
+                `<div class="empty">
+                    Unable to load classes.
+                </div>`;
+
+        }
+
+    }
+
+
+    // ==========================================
+    // EDIT CLASS
+    // ==========================================
+
+    window.editClass =
+        async function(id) {
+
+            try {
+
+                const doc =
+                    await db
+                        .collection("classes")
+                        .doc(id)
+                        .get();
+
+                if (!doc.exists) {
+
+                    showError(
+                        "Class not found."
+                    );
+
+                    return;
+
+                }
+
+                const item =
+                    doc.data();
+
+                editingClassId =
+                    id;
+
+                formTitle.textContent =
+                    "Edit Class";
+
+                submitButton.textContent =
+                    "Save Changes";
+
+
+                courseInput.value =
+                    item.courseId || "";
+
+
+                await loadCohortsForCourse(
+                    item.courseId || "",
+                    item.cohortId || ""
+                );
+
+
+                tutorInput.value =
+                    item.tutorId || "";
+
+                classTitleInput.value =
+                    item.classTitle || "";
+
+                classDateInput.value =
+                    item.classDate || "";
+
+                startTimeInput.value =
+                    item.startTime || "";
+
+                endTimeInput.value =
+                    item.endTime || "";
+
+                classTypeInput.value =
+                    item.classType ||
+                    "live";
+
+                meetingLinkInput.value =
+                    item.meetingLink || "";
+
+                statusInput.value =
+                    item.status ||
+                    "scheduled";
+
+                descriptionInput.value =
+                    item.description || "";
+
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "Unable to load class for editing."
+                );
+
+            }
+
+        };
+
+
+    // ==========================================
+    // CHANGE STATUS
+    // ==========================================
+
+    window.changeClassStatus =
+        async function(
+            id,
+            status
+        ) {
+
+            const confirmed =
+                confirm(
+                    `Change this class status to "${status}"?`
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+
+                await db
+                    .collection("classes")
+                    .doc(id)
+                    .update({
+
+                        status:
+                            status,
+
+                        updatedAt:
+                            firebase.firestore
+                                .FieldValue
+                                .serverTimestamp(),
+
+                        updatedBy:
+                            auth.currentUser.uid
+
+                    });
+
+
+                showSuccess(
+                    `Class marked as ${status}.`
+                );
+
+                await loadClasses();
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "Unable to update class status."
+                );
+
+            }
+
+        };
+
+
+    // ==========================================
+    // RESET FORM
+    // ==========================================
+
+    resetButton.addEventListener(
+        "click",
+        resetForm
+    );
+
+
+    function resetForm() {
+
+        classForm.reset();
+
+        editingClassId =
+            null;
+
+        formTitle.textContent =
+            "Schedule New Class";
+
+        submitButton.textContent =
+            "Schedule Class";
+
+        cohortInput.innerHTML =
+            `<option value="">
+                Select a course first
+            </option>`;
+
+        cohortInput.disabled =
+            true;
+
+        clearMessages();
+
+    }
+
+
+    // ==========================================
+    // MESSAGES
+    // ==========================================
+
+    function showError(message) {
+
+        errorMessage.textContent =
+            message;
+
+        errorMessage.style.display =
+            "block";
+
+        successMessage.style.display =
+            "none";
+
+    }
+
+
+    function showSuccess(message) {
+
+        successMessage.textContent =
+            message;
+
+        successMessage.style.display =
+            "block";
+
+        errorMessage.style.display =
+            "none";
+
+    }
+
+
+    function clearMessages() {
+
+        errorMessage.textContent =
+            "";
+
+        successMessage.textContent =
+            "";
+
+        errorMessage.style.display =
+            "none";
+
+        successMessage.style.display =
+            "none";
+
+    }
+
+
+    // ==========================================
+    // FORMAT DATE
+    // ==========================================
+
+    function formatDate(value) {
+
+        if (!value) {
+            return "-";
+        }
+
+        const parts =
+            String(value).split("-");
+
+        if (
+            parts.length !== 3
+        ) {
+
+            return escapeHtml(
+                value
+            );
+
+        }
+
+        const date =
+            new Date(
+                Number(parts[0]),
+                Number(parts[1]) - 1,
+                Number(parts[2])
+            );
+
+        return new Intl.DateTimeFormat(
+            "en-GB",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }
+        ).format(date);
+
+    }
+
+
+    // ==========================================
+    // ESCAPE HTML
+    // ==========================================
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+</script>
+
+</body>
+</html>

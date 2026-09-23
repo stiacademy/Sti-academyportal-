@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tutors | STI Academy</title>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #05070b;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            background: #080c12;
+            border-bottom: 1px solid #182231;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1683ff;
+        }
+
+        .brand span {
+            display: block;
+            font-size: 11px;
+            color: #8d98a7;
+            font-weight: normal;
+            margin-top: 4px;
+        }
+
+        .back-btn,
+        .logout-btn {
+            border: 1px solid #243246;
+            background: #101722;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: auto;
+            padding: 25px 16px 50px;
+        }
+
+        .page-title h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .page-title p {
+            color: #8d98a7;
+            margin-top: 7px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-top: 25px;
+        }
+
+        .stat {
+            background: #0c1119;
+            border: 1px solid #1b2736;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .stat h2 {
+            margin: 0;
+            font-size: 26px;
+            color: #1683ff;
+        }
+
+        .stat p {
+            margin: 7px 0 0;
+            color: #8d98a7;
+            font-size: 13px;
+        }
+
+        .section {
+            margin-top: 25px;
+            background: #0c1119;
+            border: 1px solid #1b2736;
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        label {
+            display: block;
+            color: #9ba6b5;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #243246;
+            background: #070b11;
+            color: white;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #1683ff;
+        }
+
+        .primary-btn {
+            margin-top: 18px;
+            background: #1683ff;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .search-box {
+            margin-bottom: 18px;
+        }
+
+        .tutor-card {
+            border: 1px solid #1b2736;
+            background: #080c12;
+            border-radius: 12px;
+            padding: 17px;
+            margin-bottom: 12px;
+        }
+
+        .tutor-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .tutor-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .tutor-id {
+            color: #1683ff;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .status {
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            background: #123323;
+            color: #4ee28f;
+        }
+
+        .status.inactive {
+            background: #322412;
+            color: #ffc35c;
+        }
+
+        .tutor-details {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .detail {
+            color: #9ba6b5;
+            font-size: 13px;
+        }
+
+        .detail strong {
+            display: block;
+            color: white;
+            margin-top: 3px;
+            font-size: 14px;
+        }
+
+        .empty {
+            text-align: center;
+            color: #8d98a7;
+            padding: 30px 10px;
+        }
+
+        .message {
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        .success {
+            color: #4ee28f;
+        }
+
+        .error {
+            color: #ff6675;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                align-items: flex-start;
+            }
+
+            .page-title h1 {
+                font-size: 24px;
+            }
+
+            .tutor-top {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="brand">
+        STI Academy
+        <span>School of Technology and Innovation</span>
+    </div>
+
+    <div>
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">
+            Dashboard
+        </button>
+
+        <button class="logout-btn" id="logoutBtn">
+            Sign Out
+        </button>
+    </div>
+
+</header>
+
+
+<main class="container">
+
+    <div class="page-title">
+        <h1>Tutor Management</h1>
+        <p>Add, view and manage STI Academy tutors.</p>
+    </div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat">
+            <h2 id="totalTutors">0</h2>
+            <p>Total Tutors</p>
+        </div>
+
+        <div class="stat">
+            <h2 id="activeTutors">0</h2>
+            <p>Active Tutors</p>
+        </div>
+
+        <div class="stat">
+            <h2 id="inactiveTutors">0</h2>
+            <p>Inactive Tutors</p>
+        </div>
+
+    </div>
+
+
+    <!-- ADD TUTOR -->
+
+    <section class="section">
+
+        <h2>Add Tutor</h2>
+
+        <div class="form-grid">
+
+            <div>
+                <label>Tutor ID</label>
+                <input
+                    type="text"
+                    id="tutorId"
+                    placeholder="Example: STIA-TUT-0001"
+                >
+            </div>
+
+            <div>
+                <label>Full Name</label>
+                <input
+                    type="text"
+                    id="fullName"
+                    placeholder="Tutor full name"
+                >
+            </div>
+
+            <div>
+                <label>Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Tutor email"
+                >
+            </div>
+
+            <div>
+                <label>Department</label>
+
+                <select id="department">
+
+                    <option value="">
+                        Select department
+                    </option>
+
+                    <option value="Web Development">
+                        Web Development
+                    </option>
+
+                    <option value="Web Design">
+                        Web Design
+                    </option>
+
+                    <option value="Graphic Design">
+                        Graphic Design
+                    </option>
+
+                    <option value="Video Editing">
+                        Video Editing
+                    </option>
+
+                    <option value="Social Media Management">
+                        Social Media Management
+                    </option>
+
+                    <option value="Cyber Security">
+                        Cyber Security
+                    </option>
+
+                    <option value="Data Analysis">
+                        Data Analysis
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div>
+                <label>Course</label>
+
+                <input
+                    type="text"
+                    id="course"
+                    placeholder="Course taught"
+                >
+
+            </div>
+
+            <div>
+                <label>Status</label>
+
+                <select id="status">
+
+                    <option value="active">
+                        Active
+                    </option>
+
+                    <option value="inactive">
+                        Inactive
+                    </option>
+
+                    <option value="suspended">
+                        Suspended
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <button class="primary-btn" id="addTutorBtn">
+            Add Tutor
+        </button>
+
+        <div id="formMessage" class="message"></div>
+
+    </section>
+
+
+    <!-- TUTOR LIST -->
+
+    <section class="section">
+
+        <h2>All Tutors</h2>
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="searchTutor"
+                placeholder="Search by name, Tutor ID or email..."
+            >
+
+        </div>
+
+        <div id="tutorList">
+
+            <div class="empty">
+                Loading tutors...
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+    authDomain: "sti-academy.firebaseapp.com",
+    projectId: "sti-academy",
+    storageBucket: "sti-academy.firebasestorage.app",
+    messagingSenderId: "709840641262",
+    appId: "1:709840641262:web:714b09bf661afa159f27ff",
+    measurementId: "G-7ZRZ3P28YP"
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let tutors = [];
+
+
+/* ADMIN AUTHENTICATION */
+
+auth.onAuthStateChanged(async function(user) {
+
+    if (!user) {
+        window.location.href = "../index.html";
+        return;
+    }
+
+    try {
+
+        const userDoc = await db
+            .collection("users")
+            .doc(user.uid)
+            .get();
+
+        if (!userDoc.exists) {
+            alert("Admin account not found.");
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const userData = userDoc.data();
+
+        if (userData.role !== "admin") {
+            alert("Admin access required.");
+            window.location.href = "../index.html";
+            return;
+        }
+
+        loadTutors();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to verify admin access.");
+
+    }
+
+});
+
+
+/* LOAD TUTORS */
+
+function loadTutors() {
+
+    db.collection("tutors")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(function(snapshot) {
+
+            tutors = [];
+
+            snapshot.forEach(function(doc) {
+
+                tutors.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+
+            });
+
+            updateStats();
+            displayTutors();
+
+        }, function(error) {
+
+            console.error(error);
+
+            document.getElementById("tutorList").innerHTML = `
+                <div class="empty">
+                    No tutors found yet.
+                </div>
+            `;
+
+        });
+
+}
+
+
+/* ADD TUTOR */
+
+document
+    .getElementById("addTutorBtn")
+    .addEventListener("click", async function() {
+
+        const tutorId =
+            document.getElementById("tutorId").value.trim();
+
+        const fullName =
+            document.getElementById("fullName").value.trim();
+
+        const email =
+            document.getElementById("email").value.trim();
+
+        const department =
+            document.getElementById("department").value;
+
+        const course =
+            document.getElementById("course").value.trim();
+
+        const status =
+            document.getElementById("status").value;
+
+        const message =
+            document.getElementById("formMessage");
+
+
+        message.textContent = "";
+        message.className = "message";
+
+
+        if (
+            !tutorId ||
+            !fullName ||
+            !email ||
+            !department ||
+            !course
+        ) {
+
+            message.textContent =
+                "Please complete all fields.";
+
+            message.classList.add("error");
+
+            return;
+        }
+
+
+        try {
+
+            const existingTutor = await db
+                .collection("tutors")
+                .doc(tutorId)
+                .get();
+
+            if (existingTutor.exists) {
+
+                message.textContent =
+                    "That Tutor ID already exists.";
+
+                message.classList.add("error");
+
+                return;
+            }
+
+
+            await db
+                .collection("tutors")
+                .doc(tutorId)
+                .set({
+
+                    tutorId: tutorId,
+
+                    fullName: fullName,
+
+                    email: email,
+
+                    department: department,
+
+                    course: course,
+
+                    status: status,
+
+                    accountStatus: "not_created",
+
+                    uid: null,
+
+                    createdAt:
+                        firebase.firestore.FieldValue.serverTimestamp(),
+
+                    createdBy:
+                        auth.currentUser.uid
+
+                });
+
+
+            message.textContent =
+                "Tutor added successfully.";
+
+            message.classList.add("success");
+
+
+            document.getElementById("tutorId").value = "";
+            document.getElementById("fullName").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("department").value = "";
+            document.getElementById("course").value = "";
+            document.getElementById("status").value = "active";
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            message.textContent =
+                "Unable to add tutor. Check your Firestore rules.";
+
+            message.classList.add("error");
+
+        }
+
+    });
+
+
+/* DISPLAY TUTORS */
+
+function displayTutors() {
+
+    const list =
+        document.getElementById("tutorList");
+
+    const search =
+        document
+            .getElementById("searchTutor")
+            .value
+            .toLowerCase()
+            .trim();
+
+
+    const filtered =
+        tutors.filter(function(tutor) {
+
+            return (
+
+                (tutor.fullName || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                (tutor.tutorId || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                (tutor.email || "")
+                    .toLowerCase()
+                    .includes(search)
+
+            );
+
+        });
+
+
+    if (!filtered.length) {
+
+        list.innerHTML = `
+            <div class="empty">
+                No tutors found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    list.innerHTML = filtered.map(function(tutor) {
+
+        const statusClass =
+            tutor.status === "active"
+                ? ""
+                : "inactive";
+
+
+        return `
+
+            <div class="tutor-card">
+
+                <div class="tutor-top">
+
+                    <div>
+
+                        <div class="tutor-name">
+                            ${escapeHtml(tutor.fullName || "")}
+                        </div>
+
+                        <div class="tutor-id">
+                            ${escapeHtml(tutor.tutorId || "")}
+                        </div>
+
+                    </div>
+
+                    <span class="status ${statusClass}">
+                        ${escapeHtml(tutor.status || "unknown")}
+                    </span>
+
+                </div>
+
+
+                <div class="tutor-details">
+
+                    <div class="detail">
+                        Email
+                        <strong>
+                            ${escapeHtml(tutor.email || "-")}
+                        </strong>
+                    </div>
+
+                    <div class="detail">
+                        Department
+                        <strong>
+                            ${escapeHtml(tutor.department || "-")}
+                        </strong>
+                    </div>
+
+                    <div class="detail">
+                        Course
+                        <strong>
+                            ${escapeHtml(tutor.course || "-")}
+                        </strong>
+                    </div>
+
+                    <div class="detail">
+                        Account
+                        <strong>
+                            ${
+                                tutor.uid
+                                    ? "Created"
+                                    : "Not created"
+                            }
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }).join("");
+
+}
+
+
+/* SEARCH */
+
+document
+    .getElementById("searchTutor")
+    .addEventListener("input", displayTutors);
+
+
+/* STATISTICS */
+
+function updateStats() {
+
+    const total =
+        tutors.length;
+
+    const active =
+        tutors.filter(function(tutor) {
+            return tutor.status === "active";
+        }).length;
+
+    const inactive =
+        tutors.filter(function(tutor) {
+            return tutor.status !== "active";
+        }).length;
+
+
+    document.getElementById("totalTutors").textContent =
+        total;
+
+    document.getElementById("activeTutors").textContent =
+        active;
+
+    document.getElementById("inactiveTutors").textContent =
+        inactive;
+
+}
+
+
+/* SIGN OUT */
+
+document
+    .getElementById("logoutBtn")
+    .addEventListener("click", function() {
+
+        auth.signOut()
+            .then(function() {
+
+                window.location.href =
+                    "../index.html";
+
+            });
+
+    });
+
+
+/* HTML SAFETY */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2780 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8"><meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Payments | STI Academy</title>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+<style>
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #000;
+        color: #fff;
+        min-height: 100vh;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 245px;
+        height: 100vh;
+        background: #080808;
+        border-right: 1px solid #1b1b1b;
+        padding: 20px 14px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .brand {
+        padding: 8px 10px 22px;
+        border-bottom: 1px solid #1d1d1d;
+        margin-bottom: 18px;
+    }
+
+    .brand h2 {
+        color: #168cff;
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+    .brand p {
+        color: #777;
+        font-size: 11px;
+        margin-top: 5px;
+    }
+
+    .nav-title {
+        color: #555;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 0 10px;
+        margin: 20px 0 8px;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        min-height: 42px;
+        padding: 10px 12px;
+        margin-bottom: 4px;
+        color: #999;
+        text-decoration: none;
+        border-radius: 7px;
+        font-size: 13px;
+        transition: 0.2s;
+    }
+
+    .nav-link:hover {
+        background: #111;
+        color: #fff;
+    }
+
+    .nav-link.active {
+        background: #168cff;
+        color: #fff;
+    }
+
+    .logout {
+        border-top: 1px solid #1d1d1d;
+        margin-top: 25px;
+        padding-top: 18px;
+    }
+
+    .logout button {
+        width: 100%;
+        border: 1px solid #252525;
+        background: #101010;
+        color: #aaa;
+        padding: 11px;
+        border-radius: 7px;
+        cursor: pointer;
+    }
+
+    .logout button:hover {
+        color: #fff;
+        border-color: #168cff;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .main {
+        margin-left: 245px;
+        min-height: 100vh;
+        background: #000;
+    }
+
+    .topbar {
+        height: 65px;
+        background: #080808;
+        border-bottom: 1px solid #1c1c1c;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 25px;
+        position: sticky;
+        top: 0;
+        z-index: 900;
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .topbar h1 {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .admin-email {
+        color: #777;
+        font-size: 12px;
+    }
+
+    .menu-btn {
+        display: none;
+        border: 1px solid #222;
+        background: #111;
+        color: #fff;
+        border-radius: 6px;
+        padding: 7px 10px;
+        cursor: pointer;
+        font-size: 17px;
+    }
+
+    .content {
+        padding: 25px;
+        max-width: 1400px;
+    }
+
+    .page-heading {
+        margin-bottom: 22px;
+    }
+
+    .page-heading h2 {
+        font-size: 23px;
+        margin-bottom: 6px;
+    }
+
+    .page-heading p {
+        color: #777;
+        font-size: 13px;
+    }
+
+    /* =========================
+       CARDS
+    ========================= */
+
+    .card {
+        background: #090909;
+        border: 1px solid #1d1d1d;
+        border-radius: 9px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .card-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        background: #050505;
+        border: 1px solid #292929;
+        color: #fff;
+        padding: 12px 13px;
+        border-radius: 7px;
+        outline: none;
+        font-size: 13px;
+    }
+
+    .search-input::placeholder {
+        color: #555;
+    }
+
+    .search-input:focus {
+        border-color: #168cff;
+    }
+
+    .student-list {
+        margin-top: 10px;
+        border: 1px solid #222;
+        border-radius: 7px;
+        background: #050505;
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .student-option {
+        padding: 13px 14px;
+        border-bottom: 1px solid #191919;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+
+    .student-option:last-child {
+        border-bottom: none;
+    }
+
+    .student-option:hover {
+        background: #101010;
+    }
+
+    .student-option-name {
+        font-size: 13px;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .student-option-details {
+        color: #666;
+        font-size: 11px;
+        margin-top: 5px;
+    }
+
+    .student-count {
+        color: #555;
+        font-size: 11px;
+        margin-top: 9px;
+    }
+
+    /* =========================
+       SELECTED STUDENT
+    ========================= */
+
+    .selected-student {
+        display: none;
+    }
+
+    .student-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #1d1d1d;
+        margin-bottom: 18px;
+    }
+
+    .student-name {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .student-email,
+    .student-course {
+        color: #777;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .student-id {
+        color: #168cff;
+        border: 1px solid #168cff;
+        border-radius: 6px;
+        padding: 7px 10px;
+        height: fit-content;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    /* =========================
+       INFO
+    ========================= */
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .info-box {
+        background: #050505;
+        border: 1px solid #1c1c1c;
+        border-radius: 7px;
+        padding: 13px;
+    }
+
+    .info-label {
+        color: #555;
+        text-transform: uppercase;
+        font-size: 9px;
+        letter-spacing: .6px;
+        margin-bottom: 6px;
+    }
+
+    .info-value {
+        font-size: 13px;
+        color: #ddd;
+        word-break: break-word;
+    }
+
+    /* =========================
+       COURSE FEE
+    ========================= */
+
+    .fee-section {
+        border: 1px solid #1d1d1d;
+        background: #050505;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 18px;
+    }
+
+    .fee-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .fee-description {
+        color: #666;
+        font-size: 11px;
+        margin-bottom: 14px;
+    }
+
+    .fee-row {
+        display: flex;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .fee-row .form-group {
+        flex: 1;
+    }
+
+    /* =========================
+       SUMMARY
+    ========================= */
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 22px;
+    }
+
+    .summary-card {
+        background: #050505;
+        border: 1px solid #1d1d1d;
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .summary-label {
+        color: #666;
+        font-size: 10px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .blue {
+        color: #168cff;
+    }
+
+    .green {
+        color: #27c77b;
+    }
+
+    .orange {
+        color: #f0a23b;
+    }
+
+    /* =========================
+       FORMS
+    ========================= */
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .form-group {
+        margin-bottom: 2px;
+    }
+
+    .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        display: block;
+        color: #aaa;
+        font-size: 11px;
+        margin-bottom: 7px;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        background: #050505;
+        border: 1px solid #292929;
+        color: #fff;
+        padding: 11px 12px;
+        border-radius: 7px;
+        outline: none;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 13px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #168cff;
+    }
+
+    select option {
+        background: #080808;
+        color: #fff;
+    }
+
+    textarea {
+        min-height: 85px;
+        resize: vertical;
+    }
+
+    /* =========================
+       BUTTONS
+    ========================= */
+
+    .button-row {
+        display: flex;
+        gap: 9px;
+        margin-top: 17px;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 7px;
+        padding: 11px 17px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        background: #168cff;
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background: #0879e8;
+    }
+
+    .btn-secondary {
+        background: #151515;
+        color: #aaa;
+        border: 1px solid #292929;
+    }
+
+    .btn-secondary:hover {
+        color: #fff;
+    }
+
+    .btn:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    /* =========================
+       TABLE
+    ========================= */
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 850px;
+    }
+
+    th {
+        color: #555;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        text-align: left;
+        padding: 11px 10px;
+        border-bottom: 1px solid #222;
+        background: #050505;
+    }
+
+    td {
+        color: #aaa;
+        font-size: 11px;
+        padding: 12px 10px;
+        border-bottom: 1px solid #181818;
+    }
+
+    tr:hover td {
+        background: #0c0c0c;
+    }
+
+    .amount {
+        color: #27c77b;
+        font-weight: 600;
+    }
+
+    .empty {
+        text-align: center;
+        color: #555;
+        padding: 30px !important;
+    }
+
+    /* =========================
+       MESSAGE
+    ========================= */
+
+    .status-message {
+        display: none;
+        padding: 11px 13px;
+        border-radius: 7px;
+        margin-bottom: 18px;
+        font-size: 12px;
+    }
+
+    .status-message.success {
+        display: block;
+        color: #27c77b;
+        background: #06140d;
+        border: 1px solid #123e29;
+    }
+
+    .status-message.error {
+        display: block;
+        color: #ff6b6b;
+        background: #170707;
+        border: 1px solid #421515;
+    }
+
+    .loading {
+        color: #666;
+        font-size: 12px;
+        padding: 18px;
+        text-align: center;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 1000px) {
+
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+    }
+
+    @media (max-width: 800px) {
+
+        .sidebar {
+            transform: translateX(-100%);
+            transition: .25s;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .main {
+            margin-left: 0;
+        }
+
+        .menu-btn {
+            display: block;
+        }
+
+        .content {
+            padding: 18px 14px;
+        }
+
+        .topbar {
+            padding: 0 15px;
+        }
+
+        .admin-email {
+            display: none;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.full {
+            grid-column: auto;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .student-header {
+            flex-direction: column;
+        }
+
+        .fee-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+    }
+
+    @media (max-width: 500px) {
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-heading h2 {
+            font-size: 20px;
+        }
+
+        .button-row {
+            flex-direction: column;
+        }
+
+        .button-row button {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+</head><body><!-- =========================
+     SIDEBAR
+========================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <h2>STI Academy</h2>
+        <p>Admin Portal</p>
+    </div>
+
+
+    <div class="nav-title">
+        Main
+    </div>
+
+    <a href="dashboard.html" class="nav-link">
+        Dashboard
+    </a>
+
+    <a href="students.html" class="nav-link">
+        Students
+    </a>
+
+    <a href="payments.html" class="nav-link active">
+        Payments
+    </a>
+
+
+    <div class="nav-title">
+        Academic
+    </div>
+
+    <a href="test.html" class="nav-link">
+        Tests
+    </a>
+
+    <a href="exams.html" class="nav-link">
+        Exams
+    </a>
+
+    <a href="assignments.html" class="nav-link">
+        Assignments
+    </a>
+
+
+    <div class="nav-title">
+        Management
+    </div>
+
+    <a href="announcements.html" class="nav-link">
+        Announcements
+    </a>
+
+    <a href="support.html" class="nav-link">
+        Support
+    </a>
+
+
+    <div class="logout">
+
+        <button onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+</aside>
+
+
+<!-- =========================
+     MAIN
+========================= -->
+
+<main class="main">
+
+    <header class="topbar">
+
+        <div class="topbar-left">
+
+            <button
+                class="menu-btn"
+                onclick="toggleSidebar()"
+            >
+                ☰
+            </button>
+
+            <h1>
+                Payments
+            </h1>
+
+        </div>
+
+        <div
+            class="admin-email"
+            id="adminEmail"
+        >
+            Admin
+        </div>
+
+    </header>
+
+
+    <section class="content">
+
+        <div class="page-heading">
+
+            <h2>
+                Student Payments
+            </h2>
+
+            <p>
+                Set each student's course fee and manage payment records.
+            </p>
+
+        </div>
+
+
+        <div
+            id="statusMessage"
+            class="status-message"
+        ></div>
+
+
+        <!-- =========================
+             STUDENT SELECTOR
+        ========================= -->
+
+        <div class="card">
+
+            <div class="card-title">
+                Select Student
+            </div>
+
+            <div class="search-wrapper">
+
+                <input
+                    type="text"
+                    id="studentSearch"
+                    class="search-input"
+                    placeholder="Search student by name, ID, email or course..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div
+                id="studentCount"
+                class="student-count"
+            >
+                Loading students...
+            </div>
+
+
+            <div
+                id="studentList"
+                class="student-list"
+            >
+
+                <div class="loading">
+                    Loading students...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             SELECTED STUDENT
+        ========================= -->
+
+        <div
+            class="card selected-student"
+            id="selectedStudentCard"
+        >
+
+            <div class="student-header">
+
+                <div>
+
+                    <div
+                        class="student-name"
+                        id="selectedStudentName"
+                    >
+                        -
+                    </div>
+
+                    <div
+                        class="student-email"
+                        id="selectedStudentEmail"
+                    >
+                        -
+                    </div>
+
+                    <div
+                        class="student-course"
+                        id="selectedStudentCourse"
+                    >
+                        -
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="student-id"
+                    id="selectedStudentId"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 STUDENT INFO
+            ========================= -->
+
+            <div class="info-grid">
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Course
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="infoCourse"
+                    >
+                        -
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Department
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="infoDepartment"
+                    >
+                        -
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Cohort
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="infoCohort"
+                    >
+                        -
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Email
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="infoEmail"
+                    >
+                        -
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 COURSE FEE
+            ========================= -->
+
+            <div class="fee-section">
+
+                <div class="fee-title">
+                    Course Fee
+                </div>
+
+                <div class="fee-description">
+                    Enter the exact total fee for this student's enrollment.
+                    You can set a different amount for every student.
+                </div>
+
+
+                <div class="fee-row">
+
+                    <div class="form-group">
+
+                        <label for="courseFee">
+                            Course Fee (₦)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="courseFee"
+                            min="1"
+                            step="100"
+                            placeholder="e.g. 10000"
+                        >
+
+                    </div>
+
+
+                    <button
+                        class="btn btn-primary"
+                        id="saveFeeBtn"
+                        onclick="saveCourseFee()"
+                    >
+                        Save Course Fee
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 PAYMENT SUMMARY
+            ========================= -->
+
+            <div class="summary-grid">
+
+                <div class="summary-card">
+
+                    <div class="summary-label">
+                        Course Fee
+                    </div>
+
+                    <div
+                        class="summary-value blue"
+                        id="summaryCourseFee"
+                    >
+                        ₦0
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-label">
+                        Total Paid
+                    </div>
+
+                    <div
+                        class="summary-value green"
+                        id="summaryTotalPaid"
+                    >
+                        ₦0
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-label">
+                        Outstanding
+                    </div>
+
+                    <div
+                        class="summary-value orange"
+                        id="summaryOutstanding"
+                    >
+                        ₦0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 RECORD PAYMENT
+            ========================= -->
+
+            <div class="card-title">
+                Record Payment
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label for="paymentAmount">
+                        Payment Amount (₦)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="paymentAmount"
+                        min="1"
+                        step="100"
+                        placeholder="Enter amount paid"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="paymentDate">
+                        Payment Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="paymentDate"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="paymentMethod">
+                        Payment Method
+                    </label>
+
+                    <select id="paymentMethod">
+
+                        <option value="">
+                            Select method
+                        </option>
+
+                        <option value="Bank Transfer">
+                            Bank Transfer
+                        </option>
+
+                        <option value="Cash">
+                            Cash
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="paymentReference">
+                        Reference
+                    </label>
+
+                    <input
+                        type="text"
+                        id="paymentReference"
+                        placeholder="Transaction reference"
+                    >
+
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label for="paymentNote">
+                        Note
+                    </label>
+
+                    <textarea
+                        id="paymentNote"
+                        placeholder="Optional payment note..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="button-row">
+
+                <button
+                    class="btn btn-primary"
+                    id="recordPaymentBtn"
+                    onclick="recordPayment()"
+                >
+                    Record Payment
+                </button>
+
+                <button
+                    class="btn btn-secondary"
+                    onclick="clearSelectedStudent()"
+                >
+                    Clear Student
+                </button>
+
+            </div>
+
+
+            <!-- =========================
+                 PAYMENT HISTORY
+            ========================= -->
+
+            <div style="margin-top:30px;">
+
+                <div class="card-title">
+                    Payment History
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Amount
+                                </th>
+
+                                <th>
+                                    Method
+                                </th>
+
+                                <th>
+                                    Reference
+                                </th>
+
+                                <th>
+                                    Note
+                                </th>
+
+                                <th>
+                                    Recorded By
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="paymentHistory">
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="empty"
+                                >
+                                    Select a student to view payment history.
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+
+    /* =========================
+       FIREBASE CONFIG
+    ========================= */
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+        authDomain: "sti-academy.firebaseapp.com",
+        projectId: "sti-academy",
+        storageBucket: "sti-academy.firebasestorage.app",
+        messagingSenderId: "709840261642",
+        appId: "1:709840261642:web:714b09bf661afa159f27ff",
+        measurementId: "G-7ZRZ3P28YP"
+    };
+
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+
+    const db = firebase.firestore();
+
+
+    /* =========================
+       VARIABLES
+    ========================= */
+
+    let allStudents = [];
+
+    let selectedStudent = null;
+
+    let paymentRecords = [];
+
+
+    /* =========================
+       AUTH
+    ========================= */
+
+    auth.onAuthStateChanged(async (user) => {
+
+        if (!user) {
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+
+        document.getElementById(
+            "adminEmail"
+        ).textContent =
+            user.email || "Admin";
+
+
+        try {
+
+            const userDoc =
+                await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+            if (!userDoc.exists) {
+
+                await auth.signOut();
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            const userData =
+                userDoc.data();
+
+
+            if (
+                userData.role !== "admin" ||
+                userData.status === "disabled" ||
+                userData.status === "suspended"
+            ) {
+
+                await auth.signOut();
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            await loadStudents();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "Unable to load the payment page: " +
+                error.message,
+                "error"
+            );
+
+        }
+
+    });
+
+
+    /* =========================
+       LOAD ALL STUDENTS
+    ========================= */
+
+    async function loadStudents() {
+
+        const list =
+            document.getElementById(
+                "studentList"
+            );
+
+        const count =
+            document.getElementById(
+                "studentCount"
+            );
+
+
+        list.innerHTML = `
+            <div class="loading">
+                Loading students...
+            </div>
+        `;
+
+
+        try {
+
+            const snapshot =
+                await db
+                    .collection("students")
+                    .get();
+
+
+            allStudents = [];
+
+
+            snapshot.forEach(doc => {
+
+                const data =
+                    doc.data();
+
+
+                allStudents.push({
+
+                    id: doc.id,
+
+                    ...data
+
+                });
+
+            });
+
+
+            allStudents.sort(
+                (a, b) => {
+
+                    const nameA =
+                        String(
+                            a.fullName ||
+                            a.name ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const nameB =
+                        String(
+                            b.fullName ||
+                            b.name ||
+                            ""
+                        ).toLowerCase();
+
+
+                    return nameA.localeCompare(
+                        nameB
+                    );
+
+                }
+            );
+
+
+            count.textContent =
+                allStudents.length +
+                (
+                    allStudents.length === 1
+                        ? " student"
+                        : " students"
+                );
+
+
+            renderStudentList(
+                allStudents
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+
+            list.innerHTML = `
+                <div class="empty">
+                    Unable to load students.
+                    <br><br>
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+
+
+            count.textContent =
+                "Could not load students";
+
+        }
+
+    }
+
+
+    /* =========================
+       RENDER STUDENT LIST
+    ========================= */
+
+    function renderStudentList(students) {
+
+        const list =
+            document.getElementById(
+                "studentList"
+            );
+
+
+        list.innerHTML = "";
+
+
+        if (!students.length) {
+
+            list.innerHTML = `
+                <div class="empty">
+                    No students found.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        students.forEach(student => {
+
+            const option =
+                document.createElement("div");
+
+
+            option.className =
+                "student-option";
+
+
+            const name =
+                student.fullName ||
+                student.name ||
+                "Unnamed Student";
+
+
+            const studentId =
+                student.studentId ||
+                student.id ||
+                "No Student ID";
+
+
+            const email =
+                student.email ||
+                "No email";
+
+
+            const course =
+                student.course ||
+                student.department ||
+                "No course";
+
+
+            option.innerHTML = `
+
+                <div class="student-option-name">
+                    ${escapeHtml(name)}
+                </div>
+
+                <div class="student-option-details">
+                    ${escapeHtml(studentId)}
+                    &nbsp; • &nbsp;
+                    ${escapeHtml(course)}
+                    &nbsp; • &nbsp;
+                    ${escapeHtml(email)}
+                </div>
+
+            `;
+
+
+            option.addEventListener(
+                "click",
+                () => selectStudent(student)
+            );
+
+
+            list.appendChild(option);
+
+        });
+
+    }
+
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    document
+        .getElementById("studentSearch")
+        .addEventListener(
+            "input",
+            function () {
+
+                const query =
+                    this.value
+                        .trim()
+                        .toLowerCase();
+
+
+                if (!query) {
+
+                    renderStudentList(
+                        allStudents
+                    );
+
+                    return;
+
+                }
+
+
+                const filtered =
+                    allStudents.filter(
+                        student => {
+
+                            const name =
+                                String(
+                                    student.fullName ||
+                                    student.name ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            const studentId =
+                                String(
+                                    student.studentId ||
+                                    student.id ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            const email =
+                                String(
+                                    student.email ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            const course =
+                                String(
+                                    student.course ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            const department =
+                                String(
+                                    student.department ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            return (
+                                name.includes(query) ||
+                                studentId.includes(query) ||
+                                email.includes(query) ||
+                                course.includes(query) ||
+                                department.includes(query)
+                            );
+
+                        }
+                    );
+
+
+                renderStudentList(
+                    filtered
+                );
+
+            }
+        );
+
+
+    /* =========================
+       SELECT STUDENT
+    ========================= */
+
+    async function selectStudent(student) {
+
+        selectedStudent = student;
+
+
+        document.getElementById(
+            "selectedStudentCard"
+        ).style.display = "block";
+
+
+        document.getElementById(
+            "studentSearch"
+        ).value =
+            student.fullName ||
+            student.name ||
+            "";
+
+
+        document.getElementById(
+            "selectedStudentName"
+        ).textContent =
+            student.fullName ||
+            student.name ||
+            "Unnamed Student";
+
+
+        document.getElementById(
+            "selectedStudentEmail"
+        ).textContent =
+            student.email ||
+            "No email";
+
+
+        document.getElementById(
+            "selectedStudentId"
+        ).textContent =
+            student.studentId ||
+            student.id ||
+            "No Student ID";
+
+
+        document.getElementById(
+            "selectedStudentCourse"
+        ).textContent =
+            (
+                student.course ||
+                "No course"
+            ) +
+            " • " +
+            (
+                student.department ||
+                "No department"
+            );
+
+
+        document.getElementById(
+            "infoCourse"
+        ).textContent =
+            student.course ||
+            "-";
+
+
+        document.getElementById(
+            "infoDepartment"
+        ).textContent =
+            student.department ||
+            "-";
+
+
+        document.getElementById(
+            "infoCohort"
+        ).textContent =
+            student.cohort ||
+            "-";
+
+
+        document.getElementById(
+            "infoEmail"
+        ).textContent =
+            student.email ||
+            "-";
+
+
+        const fee =
+            getCourseFee(student);
+
+
+        document.getElementById(
+            "courseFee"
+        ).value =
+            fee > 0
+                ? fee
+                : "";
+
+
+        await loadPaymentHistory();
+
+        updatePaymentSummary();
+
+
+        document
+            .getElementById(
+                "selectedStudentCard"
+            )
+            .scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+    }
+
+
+    /* =========================
+       COURSE FEE
+    ========================= */
+
+    function getCourseFee(student) {
+
+        if (!student) {
+            return 0;
+        }
+
+
+        const fee =
+            student.courseFee;
+
+
+        if (
+            fee !== undefined &&
+            fee !== null &&
+            fee !== "" &&
+            !isNaN(Number(fee))
+        ) {
+
+            return Number(fee);
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    /* =========================
+       SAVE COURSE FEE
+    ========================= */
+
+    async function saveCourseFee() {
+
+        if (!selectedStudent) {
+
+            showMessage(
+                "Select a student first.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const input =
+            document.getElementById(
+                "courseFee"
+            );
+
+
+        const fee =
+            Number(input.value);
+
+
+        if (
+            !input.value ||
+            isNaN(fee) ||
+            fee <= 0
+        ) {
+
+            showMessage(
+                "Enter a valid course fee greater than ₦0.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const button =
+            document.getElementById(
+                "saveFeeBtn"
+            );
+
+
+        button.disabled = true;
+
+        button.textContent =
+            "Saving...";
+
+
+        try {
+
+            const user =
+                auth.currentUser;
+
+
+            await db
+                .collection("students")
+                .doc(selectedStudent.id)
+                .update({
+
+                    courseFee: fee,
+
+                    feeUpdatedAt:
+                        firebase.firestore
+                            .FieldValue
+                            .serverTimestamp(),
+
+                    feeUpdatedBy:
+                        user
+                            ? user.uid
+                            : ""
+
+                });
+
+
+            selectedStudent.courseFee =
+                fee;
+
+
+            updatePaymentSummary();
+
+
+            showMessage(
+                "Course fee saved successfully.",
+                "success"
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "Could not save course fee: " +
+                error.message,
+                "error"
+            );
+
+        } finally {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Save Course Fee";
+
+        }
+
+    }
+
+
+    /* =========================
+       LOAD PAYMENTS
+    ========================= */
+
+    async function loadPaymentHistory() {
+
+        const tbody =
+            document.getElementById(
+                "paymentHistory"
+            );
+
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="loading">
+                    Loading payment history...
+                </td>
+            </tr>
+        `;
+
+
+        paymentRecords = [];
+
+
+        const studentId =
+            selectedStudent.studentId ||
+            selectedStudent.id;
+
+
+        try {
+
+            const snapshot =
+                await db
+                    .collection("payments")
+                    .where(
+                        "studentId",
+                        "==",
+                        studentId
+                    )
+                    .get();
+
+
+            snapshot.forEach(doc => {
+
+                paymentRecords.push({
+
+                    id: doc.id,
+
+                    ...doc.data()
+
+                });
+
+            });
+
+
+            paymentRecords.sort(
+                (a, b) =>
+                    getPaymentDateMillis(b) -
+                    getPaymentDateMillis(a)
+            );
+
+
+            renderPaymentHistory();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty">
+                        Unable to load payment history.
+                    </td>
+                </tr>
+            `;
+
+        }
+
+    }
+
+
+    /* =========================
+       RENDER PAYMENTS
+    ========================= */
+
+    function renderPaymentHistory() {
+
+        const tbody =
+            document.getElementById(
+                "paymentHistory"
+            );
+
+
+        if (!paymentRecords.length) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty">
+                        No payments recorded yet.
+                    </td>
+                </tr>
+            `;
+
+            return;
+
+        }
+
+
+        tbody.innerHTML = "";
+
+
+        paymentRecords.forEach(
+            payment => {
+
+                const tr =
+                    document.createElement("tr");
+
+
+                tr.innerHTML = `
+
+                    <td>
+                        ${escapeHtml(
+                            formatPaymentDate(payment)
+                        )}
+                    </td>
+
+                    <td class="amount">
+                        ${formatNaira(
+                            payment.amount
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            payment.paymentMethod || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            payment.reference || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            payment.note || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            payment.recordedByEmail ||
+                            payment.recordedBy ||
+                            "-"
+                        )}
+                    </td>
+
+                `;
+
+
+                tbody.appendChild(tr);
+
+            }
+        );
+
+    }
+
+
+    /* =========================
+       SUMMARY
+    ========================= */
+
+    function updatePaymentSummary() {
+
+        if (!selectedStudent) {
+            return;
+        }
+
+
+        const courseFee =
+            getCourseFee(
+                selectedStudent
+            );
+
+
+        const totalPaid =
+            paymentRecords.reduce(
+                (total, payment) =>
+                    total +
+                    Number(
+                        payment.amount || 0
+                    ),
+                0
+            );
+
+
+        const outstanding =
+            Math.max(
+                courseFee - totalPaid,
+                0
+            );
+
+
+        document.getElementById(
+            "summaryCourseFee"
+        ).textContent =
+            formatNaira(courseFee);
+
+
+        document.getElementById(
+            "summaryTotalPaid"
+        ).textContent =
+            formatNaira(totalPaid);
+
+
+        document.getElementById(
+            "summaryOutstanding"
+        ).textContent =
+            formatNaira(outstanding);
+
+    }
+
+
+    /* =========================
+       RECORD PAYMENT
+    ========================= */
+
+    async function recordPayment() {
+
+        if (!selectedStudent) {
+
+            showMessage(
+                "Select a student first.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const courseFee =
+            getCourseFee(
+                selectedStudent
+            );
+
+
+        if (courseFee <= 0) {
+
+            showMessage(
+                "Set the student's course fee before recording payment.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const amount =
+            Number(
+                document.getElementById(
+                    "paymentAmount"
+                ).value
+            );
+
+
+        const paymentDate =
+            document.getElementById(
+                "paymentDate"
+            ).value;
+
+
+        const paymentMethod =
+            document.getElementById(
+                "paymentMethod"
+            ).value;
+
+
+        const reference =
+            document.getElementById(
+                "paymentReference"
+            ).value.trim();
+
+
+        const note =
+            document.getElementById(
+                "paymentNote"
+            ).value.trim();
+
+
+        if (
+            !amount ||
+            isNaN(amount) ||
+            amount <= 0
+        ) {
+
+            showMessage(
+                "Enter a valid payment amount.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!paymentDate) {
+
+            showMessage(
+                "Select the payment date.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!paymentMethod) {
+
+            showMessage(
+                "Select the payment method.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const totalPaid =
+            paymentRecords.reduce(
+                (total, payment) =>
+                    total +
+                    Number(
+                        payment.amount || 0
+                    ),
+                0
+            );
+
+
+        const outstanding =
+            Math.max(
+                courseFee - totalPaid,
+                0
+            );
+
+
+        if (amount > outstanding) {
+
+            const confirmPayment =
+                confirm(
+                    "This payment is more than the current outstanding balance.\n\n" +
+                    "Course Fee: " +
+                    formatNaira(courseFee) +
+                    "\n" +
+                    "Total Paid: " +
+                    formatNaira(totalPaid) +
+                    "\n" +
+                    "Outstanding: " +
+                    formatNaira(outstanding) +
+                    "\n\n" +
+                    "Record this payment anyway?"
+                );
+
+
+            if (!confirmPayment) {
+                return;
+            }
+
+        }
+
+
+        const button =
+            document.getElementById(
+                "recordPaymentBtn"
+            );
+
+
+        button.disabled = true;
+
+        button.textContent =
+            "Saving...";
+
+
+        try {
+
+            const user =
+                auth.currentUser;
+
+
+            const paymentData = {
+
+                studentId:
+                    selectedStudent.studentId ||
+                    selectedStudent.id,
+
+                studentUid:
+                    selectedStudent.uid ||
+                    selectedStudent.userUid ||
+                    selectedStudent.studentUid ||
+                    "",
+
+                studentName:
+                    selectedStudent.fullName ||
+                    selectedStudent.name ||
+                    "",
+
+                email:
+                    selectedStudent.email ||
+                    "",
+
+                course:
+                    selectedStudent.course ||
+                    "",
+
+                department:
+                    selectedStudent.department ||
+                    "",
+
+                cohort:
+                    selectedStudent.cohort ||
+                    "",
+
+                amount: amount,
+
+                paymentDate:
+                    paymentDate,
+
+                paymentMethod:
+                    paymentMethod,
+
+                reference:
+                    reference,
+
+                note:
+                    note,
+
+                recordedBy:
+                    user
+                        ? user.uid
+                        : "",
+
+                recordedByEmail:
+                    user
+                        ? user.email
+                        : "",
+
+                createdAt:
+                    firebase.firestore
+                        .FieldValue
+                        .serverTimestamp()
+
+            };
+
+
+            await db
+                .collection("payments")
+                .add(
+                    paymentData
+                );
+
+
+            showMessage(
+                "Payment recorded successfully.",
+                "success"
+            );
+
+
+            document.getElementById(
+                "paymentAmount"
+            ).value = "";
+
+
+            document.getElementById(
+                "paymentMethod"
+            ).value = "";
+
+
+            document.getElementById(
+                "paymentReference"
+            ).value = "";
+
+
+            document.getElementById(
+                "paymentNote"
+            ).value = "";
+
+
+            await loadPaymentHistory();
+
+            updatePaymentSummary();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "Could not record payment: " +
+                error.message,
+                "error"
+            );
+
+        } finally {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Record Payment";
+
+        }
+
+    }
+
+
+    /* =========================
+       DATE
+    ========================= */
+
+    function getPaymentDateMillis(payment) {
+
+        if (payment.paymentDate) {
+
+            const date =
+                new Date(
+                    payment.paymentDate
+                );
+
+
+            if (!isNaN(date.getTime())) {
+
+                return date.getTime();
+
+            }
+
+        }
+
+
+        if (
+            payment.createdAt &&
+            payment.createdAt.toDate
+        ) {
+
+            return payment.createdAt
+                .toDate()
+                .getTime();
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    function formatPaymentDate(payment) {
+
+        if (payment.paymentDate) {
+
+            const date =
+                new Date(
+                    payment.paymentDate
+                );
+
+
+            if (!isNaN(date.getTime())) {
+
+                return date.toLocaleDateString(
+                    "en-NG",
+                    {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric"
+                    }
+                );
+
+            }
+
+        }
+
+
+        if (
+            payment.createdAt &&
+            payment.createdAt.toDate
+        ) {
+
+            return payment.createdAt
+                .toDate()
+                .toLocaleDateString(
+                    "en-NG",
+                    {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric"
+                    }
+                );
+
+        }
+
+
+        return "-";
+
+    }
+
+
+    /* =========================
+       NAIRA
+    ========================= */
+
+    function formatNaira(amount) {
+
+        return "₦" +
+            Number(
+                amount || 0
+            ).toLocaleString(
+                "en-NG",
+                {
+                    maximumFractionDigits: 2
+                }
+            );
+
+    }
+
+
+    /* =========================
+       CLEAR
+    ========================= */
+
+    function clearSelectedStudent() {
+
+        selectedStudent = null;
+
+        paymentRecords = [];
+
+
+        document.getElementById(
+            "selectedStudentCard"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "studentSearch"
+        ).value = "";
+
+
+        document.getElementById(
+            "courseFee"
+        ).value = "";
+
+
+        document.getElementById(
+            "paymentAmount"
+        ).value = "";
+
+
+        document.getElementById(
+            "paymentMethod"
+        ).value = "";
+
+
+        document.getElementById(
+            "paymentReference"
+        ).value = "";
+
+
+        document.getElementById(
+            "paymentNote"
+        ).value = "";
+
+
+        document.getElementById(
+            "summaryCourseFee"
+        ).textContent =
+            "₦0";
+
+
+        document.getElementById(
+            "summaryTotalPaid"
+        ).textContent =
+            "₦0";
+
+
+        document.getElementById(
+            "summaryOutstanding"
+        ).textContent =
+            "₦0";
+
+
+        renderStudentList(
+            allStudents
+        );
+
+    }
+
+
+    /* =========================
+       MESSAGE
+    ========================= */
+
+    function showMessage(
+        message,
+        type
+    ) {
+
+        const box =
+            document.getElementById(
+                "statusMessage"
+            );
+
+
+        box.textContent =
+            message;
+
+
+        box.className =
+            "status-message " +
+            type;
+
+
+        setTimeout(
+            () => {
+
+                box.className =
+                    "status-message";
+
+                box.textContent =
+                    "";
+
+            },
+            5000
+        );
+
+    }
+
+
+    /* =========================
+       ESCAPE HTML
+    ========================= */
+
+    function escapeHtml(value) {
+
+        return String(
+            value ?? ""
+        )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+    }
+
+
+    /* =========================
+       MOBILE SIDEBAR
+    ========================= */
+
+    function toggleSidebar() {
+
+        document
+            .getElementById(
+                "sidebar"
+            )
+            .classList
+            .toggle("open");
+
+    }
+
+
+    /* =========================
+       LOGOUT
+    ========================= */
+
+    async function logout() {
+
+        try {
+
+            await auth.signOut();
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+
+        window.location.href =
+            "../login.html";
+
+    }
+
+
+    /* =========================
+       DEFAULT DATE
+    ========================= */
+
+    document.getElementById(
+        "paymentDate"
+    ).value =
+        new Date()
+            .toISOString()
+            .split("T")[0];
+
+</script></body>
+</html>

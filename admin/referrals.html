@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Referrals | STI Academy Admin</title>
+
+
+    <!-- FIREBASE -->
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
+
+
+        body{
+            font-family:Arial, sans-serif;
+            background:#000;
+            color:#fff;
+            min-height:100vh;
+        }
+
+
+        .header{
+            background:#080808;
+            border-bottom:1px solid #1d1d1d;
+            padding:20px;
+        }
+
+
+        .header h1{
+            color:#1683ff;
+            font-size:24px;
+            margin-bottom:6px;
+        }
+
+
+        .header p{
+            color:#888;
+            font-size:14px;
+        }
+
+
+        .container{
+            max-width:1200px;
+            margin:auto;
+            padding:25px 18px 50px;
+        }
+
+
+        .stats{
+            display:grid;
+            grid-template-columns:
+                repeat(4,1fr);
+
+            gap:15px;
+            margin-bottom:25px;
+        }
+
+
+        .stat-card{
+            background:#0b0b0b;
+            border:1px solid #1d1d1d;
+            border-radius:12px;
+            padding:20px;
+        }
+
+
+        .stat-card small{
+            display:block;
+            color:#777;
+            font-size:12px;
+            margin-bottom:10px;
+        }
+
+
+        .stat-card strong{
+            font-size:27px;
+            color:#1683ff;
+        }
+
+
+        .card{
+            background:#0b0b0b;
+            border:1px solid #1d1d1d;
+            border-radius:14px;
+            padding:20px;
+            margin-bottom:25px;
+        }
+
+
+        .card-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            margin-bottom:18px;
+        }
+
+
+        .card-header h2{
+            font-size:18px;
+        }
+
+
+        .search{
+            width:100%;
+            padding:13px 15px;
+            border-radius:8px;
+            border:1px solid #292929;
+            background:#111;
+            color:#fff;
+            outline:none;
+            margin-bottom:20px;
+        }
+
+
+        .search:focus{
+            border-color:#1683ff;
+        }
+
+
+        .table-wrapper{
+            overflow-x:auto;
+        }
+
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            min-width:950px;
+        }
+
+
+        th,
+        td{
+            padding:14px 12px;
+            text-align:left;
+            border-bottom:1px solid #1c1c1c;
+            font-size:13px;
+        }
+
+
+        th{
+            color:#777;
+            font-size:11px;
+            text-transform:uppercase;
+        }
+
+
+        td{
+            color:#ddd;
+        }
+
+
+        .status{
+            display:inline-block;
+            padding:6px 10px;
+            border-radius:20px;
+            font-size:11px;
+            font-weight:bold;
+        }
+
+
+        .successful{
+            background:rgba(22,131,255,.12);
+            color:#1683ff;
+        }
+
+
+        .pending{
+            background:rgba(255,180,0,.12);
+            color:#ffb400;
+        }
+
+
+        .paid{
+            background:rgba(0,200,100,.12);
+            color:#00c864;
+        }
+
+
+        .unpaid{
+            background:rgba(255,80,80,.12);
+            color:#ff5050;
+        }
+
+
+        .empty{
+            text-align:center;
+            padding:45px 20px;
+            color:#777;
+        }
+
+
+        button{
+            border:none;
+            cursor:pointer;
+            border-radius:7px;
+            padding:9px 13px;
+            font-size:12px;
+            font-weight:bold;
+        }
+
+
+        .primary{
+            background:#1683ff;
+            color:#fff;
+        }
+
+
+        .secondary{
+            background:#171717;
+            color:#fff;
+            border:1px solid #292929;
+        }
+
+
+        .danger{
+            background:#321010;
+            color:#ff5555;
+        }
+
+
+        .actions{
+            display:flex;
+            gap:7px;
+            flex-wrap:wrap;
+        }
+
+
+        .modal{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.75);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+            z-index:1000;
+        }
+
+
+        .modal-box{
+            width:100%;
+            max-width:550px;
+            max-height:90vh;
+            overflow-y:auto;
+            background:#0b0b0b;
+            border:1px solid #292929;
+            border-radius:14px;
+            padding:22px;
+        }
+
+
+        .modal-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:20px;
+        }
+
+
+        .modal-header h2{
+            color:#1683ff;
+            font-size:19px;
+        }
+
+
+        .close{
+            background:none;
+            color:#aaa;
+            font-size:22px;
+            padding:0;
+        }
+
+
+        .field{
+            margin-bottom:15px;
+        }
+
+
+        .field label{
+            display:block;
+            color:#aaa;
+            font-size:12px;
+            margin-bottom:7px;
+        }
+
+
+        .field input,
+        .field select{
+            width:100%;
+            padding:12px;
+            background:#111;
+            color:#fff;
+            border:1px solid #292929;
+            border-radius:7px;
+            outline:none;
+        }
+
+
+        .field input:focus,
+        .field select:focus{
+            border-color:#1683ff;
+        }
+
+
+        /* STUDENT SELECTOR */
+
+        .student-selector{
+            position:relative;
+        }
+
+
+        .student-search{
+            margin-bottom:0 !important;
+        }
+
+
+        .student-dropdown{
+            position:absolute;
+            left:0;
+            right:0;
+            top:100%;
+            margin-top:5px;
+            background:#111;
+            border:1px solid #292929;
+            border-radius:8px;
+            max-height:220px;
+            overflow-y:auto;
+            display:none;
+            z-index:1100;
+        }
+
+
+        .student-option{
+            padding:12px 14px;
+            border-bottom:1px solid #1d1d1d;
+            cursor:pointer;
+        }
+
+
+        .student-option:last-child{
+            border-bottom:none;
+        }
+
+
+        .student-option:hover{
+            background:#181818;
+        }
+
+
+        .student-option strong{
+            display:block;
+            color:#fff;
+            font-size:13px;
+            margin-bottom:4px;
+        }
+
+
+        .student-option small{
+            color:#777;
+            font-size:11px;
+        }
+
+
+        .selected-student{
+            margin-top:8px;
+            padding:10px 12px;
+            background:#111;
+            border:1px solid #1683ff;
+            border-radius:7px;
+            color:#fff;
+            font-size:13px;
+            display:none;
+        }
+
+
+        .selected-student span{
+            color:#1683ff;
+            font-weight:bold;
+        }
+
+
+        .modal-actions{
+            display:flex;
+            gap:10px;
+            margin-top:20px;
+        }
+
+
+        .modal-actions button{
+            flex:1;
+            padding:12px;
+        }
+
+
+        .detail-row{
+            display:flex;
+            justify-content:space-between;
+            gap:20px;
+            padding:12px 0;
+            border-bottom:1px solid #1d1d1d;
+        }
+
+
+        .detail-row span:first-child{
+            color:#777;
+        }
+
+
+        .detail-row span:last-child{
+            text-align:right;
+            color:#fff;
+            font-weight:bold;
+        }
+
+
+        .message{
+            position:fixed;
+            bottom:20px;
+            right:20px;
+            max-width:350px;
+            padding:14px 18px;
+            background:#111;
+            border:1px solid #292929;
+            border-radius:9px;
+            display:none;
+            z-index:2000;
+            font-size:13px;
+        }
+
+
+        .message.success{
+            border-color:#1683ff;
+        }
+
+
+        .message.error{
+            border-color:#ff4444;
+            color:#ff7777;
+        }
+
+
+        @media(max-width:850px){
+
+            .stats{
+                grid-template-columns:
+                    repeat(2,1fr);
+            }
+
+        }
+
+
+        @media(max-width:500px){
+
+            .stats{
+                grid-template-columns:1fr;
+            }
+
+
+            .header h1{
+                font-size:21px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="header">
+
+        <h1>
+            Referrals
+        </h1>
+
+        <p>
+            Manage STI Academy student referrals and rewards
+        </p>
+
+    </div>
+
+
+    <main class="container">
+
+
+        <!-- STATS -->
+
+        <section class="stats">
+
+
+            <div class="stat-card">
+
+                <small>
+                    Total Referrals
+                </small>
+
+                <strong id="totalReferrals">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <small>
+                    Successful Referrals
+                </small>
+
+                <strong id="successfulReferrals">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <small>
+                    Pending Referrals
+                </small>
+
+                <strong id="pendingReferrals">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <small>
+                    Total Rewards
+                </small>
+
+                <strong id="totalRewards">
+                    ₦0
+                </strong>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- REFERRALS -->
+
+        <section class="card">
+
+
+            <div class="card-header">
+
+                <h2>
+                    Referral Records
+                </h2>
+
+
+                <button
+                    class="primary"
+                    onclick="openAddModal()"
+                >
+                    Add Referral
+                </button>
+
+            </div>
+
+
+            <input
+                type="text"
+                id="searchInput"
+                class="search"
+                placeholder="Search by student name, ID, email or referral code..."
+                oninput="renderReferrals()"
+            >
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Referrer
+                            </th>
+
+                            <th>
+                                Referred Student
+                            </th>
+
+                            <th>
+                                Course
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Reward
+                            </th>
+
+                            <th>
+                                Reward Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="referralsTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- TOP REFERRERS -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>
+                    Top Referrers
+                </h2>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                #
+                            </th>
+
+                            <th>
+                                Student
+                            </th>
+
+                            <th>
+                                Student ID
+                            </th>
+
+                            <th>
+                                Successful Referrals
+                            </th>
+
+                            <th>
+                                Total Rewards
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="topReferrersTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ADD REFERRAL MODAL -->
+
+    <div
+        class="modal"
+        id="addModal"
+    >
+
+        <div class="modal-box">
+
+
+            <div class="modal-header">
+
+                <h2>
+                    Add Referral
+                </h2>
+
+                <button
+                    class="close"
+                    onclick="closeAddModal()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- REFERRAL STUDENT -->
+
+            <div class="field">
+
+                <label>
+                    Referral Student
+                </label>
+
+
+                <div class="student-selector">
+
+                    <input
+                        type="text"
+                        id="studentSearch"
+                        class="student-search"
+                        placeholder="Search student by name or Student ID..."
+                        autocomplete="off"
+                        oninput="searchStudents()"
+                        onclick="showStudentDropdown()"
+                    >
+
+
+                    <div
+                        id="studentDropdown"
+                        class="student-dropdown"
+                    ></div>
+
+                </div>
+
+
+                <div
+                    id="selectedStudent"
+                    class="selected-student"
+                >
+
+                    Selected:
+                    <span id="selectedStudentName">
+                        -
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- REFERRED STUDENT -->
+
+            <div class="field">
+
+                <label>
+                    Referred Student Name
+                </label>
+
+                <input
+                    type="text"
+                    id="referredName"
+                    placeholder="New student's name"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Referred Student ID
+                </label>
+
+                <input
+                    type="text"
+                    id="referredStudentId"
+                    placeholder="STIA-..."
+                >
+
+            </div>
+
+
+
+            <!-- COURSE -->
+
+            <div class="field">
+
+                <label>
+                    Course
+                </label>
+
+                <select id="courseSelect">
+
+                    <option value="">
+                        Select Course
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- REWARD -->
+
+            <div class="field">
+
+                <label>
+                    Reward Amount
+                </label>
+
+                <input
+                    type="number"
+                    id="rewardAmount"
+                    value="500"
+                    min="0"
+                >
+
+            </div>
+
+
+
+            <!-- REFERRAL STATUS -->
+
+            <div class="field">
+
+                <label>
+                    Referral Status
+                </label>
+
+                <select id="referralStatus">
+
+                    <option value="successful">
+                        Successful
+                    </option>
+
+                    <option value="pending">
+                        Pending
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- REWARD STATUS -->
+
+            <div class="field">
+
+                <label>
+                    Reward Status
+                </label>
+
+                <select id="rewardStatus">
+
+                    <option value="unpaid">
+                        Unpaid
+                    </option>
+
+                    <option value="paid">
+                        Paid
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <div class="modal-actions">
+
+                <button
+                    class="secondary"
+                    onclick="closeAddModal()"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    class="primary"
+                    onclick="addReferral()"
+                >
+                    Save Referral
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- DETAILS MODAL -->
+
+    <div
+        class="modal"
+        id="detailsModal"
+    >
+
+        <div class="modal-box">
+
+
+            <div class="modal-header">
+
+                <h2>
+                    Referral Details
+                </h2>
+
+                <button
+                    class="close"
+                    onclick="closeDetailsModal()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div id="detailsContent">
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    class="secondary"
+                    onclick="closeDetailsModal()"
+                >
+                    Close
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+
+    <script>
+
+
+        /* FIREBASE */
+
+        const firebaseConfig = {
+
+            apiKey:
+                "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+            authDomain:
+                "sti-academy.firebaseapp.com",
+
+            projectId:
+                "sti-academy",
+
+            storageBucket:
+                "sti-academy.firebasestorage.app",
+
+            messagingSenderId:
+                "709840261642",
+
+            appId:
+                "1:709840261642:web:714b09bf661afa159f27ff",
+
+            measurementId:
+                "G-7ZRZ3P28YP"
+
+        };
+
+
+        firebase.initializeApp(
+            firebaseConfig
+        );
+
+
+        const auth =
+            firebase.auth();
+
+
+        const db =
+            firebase.firestore();
+
+
+        let currentUser = null;
+
+        let referrals = [];
+
+        let students = [];
+
+        let courses = [];
+
+        let selectedReferralStudent = null;
+
+
+
+        /* AUTH */
+
+        auth.onAuthStateChanged(
+
+            async user => {
+
+                if(!user){
+
+                    window.location.href =
+                        "../login.html";
+
+                    return;
+
+                }
+
+
+                currentUser = user;
+
+
+                try{
+
+                    const adminDoc =
+                        await db
+                        .collection("users")
+                        .doc(user.uid)
+                        .get();
+
+
+                    if(
+                        !adminDoc.exists ||
+                        adminDoc.data().role !== "admin"
+                    ){
+
+                        alert(
+                            "Access denied."
+                        );
+
+                        window.location.href =
+                            "../index.html";
+
+                        return;
+
+                    }
+
+
+                    await loadStudents();
+
+                    await loadCourses();
+
+                    await loadReferrals();
+
+
+                }catch(error){
+
+                    console.error(error);
+
+                    showMessage(
+                        error.message,
+                        "error"
+                    );
+
+                }
+
+            }
+
+        );
+
+
+
+        /* LOAD STUDENTS */
+
+        async function loadStudents(){
+
+            const snapshot =
+                await db
+                .collection("users")
+                .get();
+
+
+            students = [];
+
+
+            snapshot.forEach(
+                doc => {
+
+                    const data =
+                        doc.data();
+
+
+                    if(
+                        data.role ===
+                        "student"
+                    ){
+
+                        students.push({
+
+                            uid:
+                                doc.id,
+
+                            fullName:
+                                data.fullName ||
+                                data.name ||
+                                "Unnamed Student",
+
+                            studentId:
+                                data.studentId ||
+                                "",
+
+                            email:
+                                data.email ||
+                                "",
+
+                            courseName:
+                                data.courseName ||
+                                data.course ||
+                                ""
+
+                        });
+
+                    }
+
+                }
+            );
+
+
+            students.sort(
+                (a,b) =>
+                    a.fullName
+                    .toLowerCase()
+                    .localeCompare(
+                        b.fullName
+                        .toLowerCase()
+                    )
+            );
+
+        }
+
+
+
+        /* LOAD COURSES */
+
+        async function loadCourses(){
+
+            const snapshot =
+                await db
+                .collection("courses")
+                .get();
+
+
+            courses = [];
+
+
+            snapshot.forEach(
+                doc => {
+
+                    const data =
+                        doc.data();
+
+
+                    courses.push({
+
+                        id:
+                            doc.id,
+
+                        courseId:
+                            data.courseId ||
+                            doc.id,
+
+                        courseName:
+                            data.courseName ||
+                            data.name ||
+                            data.title ||
+                            ""
+
+                    });
+
+                }
+            );
+
+
+            courses.sort(
+                (a,b) =>
+                    a.courseName
+                    .toLowerCase()
+                    .localeCompare(
+                        b.courseName
+                        .toLowerCase()
+                    )
+            );
+
+
+            populateCourses();
+
+        }
+
+
+
+        /* POPULATE COURSES */
+
+        function populateCourses(){
+
+            const select =
+                document
+                .getElementById(
+                    "courseSelect"
+                );
+
+
+            select.innerHTML = `
+
+                <option value="">
+                    Select Course
+                </option>
+
+            `;
+
+
+            courses.forEach(
+                course => {
+
+                    if(
+                        !course.courseName
+                    ){
+
+                        return;
+
+                    }
+
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+
+                    option.value =
+                        course.courseId;
+
+
+                    option.textContent =
+                        course.courseName;
+
+
+                    option.dataset.name =
+                        course.courseName;
+
+
+                    select.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* LOAD REFERRALS */
+
+        async function loadReferrals(){
+
+            const snapshot =
+                await db
+                .collection("referrals")
+                .orderBy(
+                    "createdAt",
+                    "desc"
+                )
+                .get();
+
+
+            referrals = [];
+
+
+            snapshot.forEach(
+                doc => {
+
+                    referrals.push({
+
+                        id:doc.id,
+
+                        ...doc.data()
+
+                    });
+
+                }
+            );
+
+
+            updateStats();
+
+            renderReferrals();
+
+            renderTopReferrers();
+
+        }
+
+
+
+        /* STATS */
+
+        function updateStats(){
+
+            const total =
+                referrals.length;
+
+
+            const successful =
+                referrals.filter(
+                    item =>
+                        item.status ===
+                        "successful"
+                ).length;
+
+
+            const pending =
+                referrals.filter(
+                    item =>
+                        item.status ===
+                        "pending"
+                ).length;
+
+
+            const rewards =
+                referrals.reduce(
+                    (sum,item) =>
+                        sum +
+                        Number(
+                            item.rewardAmount ||
+                            0
+                        ),
+                    0
+                );
+
+
+            document
+                .getElementById(
+                    "totalReferrals"
+                )
+                .textContent =
+                    total;
+
+
+            document
+                .getElementById(
+                    "successfulReferrals"
+                )
+                .textContent =
+                    successful;
+
+
+            document
+                .getElementById(
+                    "pendingReferrals"
+                )
+                .textContent =
+                    pending;
+
+
+            document
+                .getElementById(
+                    "totalRewards"
+                )
+                .textContent =
+                    "₦" +
+                    rewards.toLocaleString();
+
+        }
+
+
+
+        /* RENDER REFERRALS */
+
+        function renderReferrals(){
+
+            const table =
+                document
+                .getElementById(
+                    "referralsTable"
+                );
+
+
+            const search =
+                document
+                .getElementById(
+                    "searchInput"
+                )
+                .value
+                .toLowerCase()
+                .trim();
+
+
+            const filtered =
+                referrals.filter(
+                    item => {
+
+                        const text = [
+
+                            item.referrerName ||
+                            "",
+
+                            item.referrerStudentId ||
+                            "",
+
+                            item.referralCode ||
+                            "",
+
+                            item.referredName ||
+                            "",
+
+                            item.referredStudentId ||
+                            "",
+
+                            item.courseName ||
+                            ""
+
+                        ]
+                        .join(" ")
+                        .toLowerCase();
+
+
+                        return text.includes(
+                            search
+                        );
+
+                    }
+                );
+
+
+            if(
+                filtered.length === 0
+            ){
+
+                table.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="8"
+                            class="empty"
+                        >
+                            No referral records found.
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            table.innerHTML =
+                filtered.map(
+                    item => `
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                ${escapeHtml(
+                                    item.referrerName ||
+                                    "-"
+                                )}
+                            </strong>
+
+                            <br>
+
+                            <small>
+                                ${escapeHtml(
+                                    item.referrerStudentId ||
+                                    "-"
+                                )}
+                            </small>
+
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+                                ${escapeHtml(
+                                    item.referredName ||
+                                    "-"
+                                )}
+                            </strong>
+
+                            <br>
+
+                            <small>
+                                ${escapeHtml(
+                                    item.referredStudentId ||
+                                    "-"
+                                )}
+                            </small>
+
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(
+                                item.courseName ||
+                                "-"
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${formatDate(
+                                item.createdAt
+                            )}
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="status ${
+                                    item.status ===
+                                    "successful"
+                                    ? "successful"
+                                    : "pending"
+                                }"
+                            >
+                                ${
+                                    item.status ===
+                                    "successful"
+                                    ? "Successful"
+                                    : "Pending"
+                                }
+                            </span>
+
+                        </td>
+
+
+                        <td>
+                            ₦${Number(
+                                item.rewardAmount ||
+                                0
+                            ).toLocaleString()}
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="status ${
+                                    item.rewardStatus ===
+                                    "paid"
+                                    ? "paid"
+                                    : "unpaid"
+                                }"
+                            >
+                                ${
+                                    item.rewardStatus ===
+                                    "paid"
+                                    ? "Paid"
+                                    : "Unpaid"
+                                }
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <button
+                                    class="secondary"
+                                    onclick="viewReferral('${item.id}')"
+                                >
+                                    View
+                                </button>
+
+
+                                ${
+                                    item.rewardStatus !==
+                                    "paid"
+                                    ?
+                                    `
+                                    <button
+                                        class="primary"
+                                        onclick="markRewardPaid('${item.id}')"
+                                    >
+                                        Mark Paid
+                                    </button>
+                                    `
+                                    :
+                                    ""
+                                }
+
+
+                                <button
+                                    class="danger"
+                                    onclick="deleteReferral('${item.id}')"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `
+                )
+                .join("");
+
+        }
+
+
+
+        /* TOP REFERRERS */
+
+        function renderTopReferrers(){
+
+            const table =
+                document
+                .getElementById(
+                    "topReferrersTable"
+                );
+
+
+            const people = {};
+
+
+            referrals
+                .filter(
+                    item =>
+                        item.status ===
+                        "successful"
+                )
+                .forEach(
+                    item => {
+
+                        const key =
+                            item.referrerUid ||
+                            item.referrerStudentId ||
+                            item.referrerName;
+
+
+                        if(!people[key]){
+
+                            people[key] = {
+
+                                name:
+                                    item.referrerName ||
+                                    "-",
+
+                                studentId:
+                                    item.referrerStudentId ||
+                                    "-",
+
+                                count:0,
+
+                                rewards:0
+
+                            };
+
+                        }
+
+
+                        people[key].count++;
+
+
+                        people[key].rewards +=
+                            Number(
+                                item.rewardAmount ||
+                                0
+                            );
+
+                    }
+                );
+
+
+            const sorted =
+                Object.values(
+                    people
+                )
+                .sort(
+                    (a,b) =>
+                        b.count -
+                        a.count
+                );
+
+
+            if(
+                sorted.length === 0
+            ){
+
+                table.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="empty"
+                        >
+                            No successful referrals yet.
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            table.innerHTML =
+                sorted.map(
+                    (item,index) => `
+
+                    <tr>
+
+                        <td>
+                            ${index + 1}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                item.name
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                item.studentId
+                            )}
+                        </td>
+
+                        <td>
+                            ${item.count}
+                        </td>
+
+                        <td>
+                            ₦${item.rewards.toLocaleString()}
+                        </td>
+
+                    </tr>
+
+                `
+                )
+                .join("");
+
+        }
+
+
+
+        /* OPEN ADD MODAL */
+
+        function openAddModal(){
+
+            selectedReferralStudent =
+                null;
+
+
+            document
+                .getElementById(
+                    "studentSearch"
+                )
+                .value = "";
+
+
+            document
+                .getElementById(
+                    "selectedStudent"
+                )
+                .style.display =
+                    "none";
+
+
+            document
+                .getElementById(
+                    "courseSelect"
+                )
+                .value = "";
+
+
+            document
+                .getElementById(
+                    "referredName"
+                )
+                .value = "";
+
+
+            document
+                .getElementById(
+                    "referredStudentId"
+                )
+                .value = "";
+
+
+            document
+                .getElementById(
+                    "rewardAmount"
+                )
+                .value = 500;
+
+
+            document
+                .getElementById(
+                    "referralStatus"
+                )
+                .value =
+                    "successful";
+
+
+            document
+                .getElementById(
+                    "rewardStatus"
+                )
+                .value =
+                    "unpaid";
+
+
+            document
+                .getElementById(
+                    "studentDropdown"
+                )
+                .style.display =
+                    "none";
+
+
+            document
+                .getElementById(
+                    "addModal"
+                )
+                .style.display =
+                    "flex";
+
+        }
+
+
+
+        function closeAddModal(){
+
+            document
+                .getElementById(
+                    "addModal"
+                )
+                .style.display =
+                    "none";
+
+
+            document
+                .getElementById(
+                    "studentDropdown"
+                )
+                .style.display =
+                    "none";
+
+        }
+
+
+
+        /* STUDENT SEARCH */
+
+        function searchStudents(){
+
+            const input =
+                document
+                .getElementById(
+                    "studentSearch"
+                );
+
+
+            const search =
+                input.value
+                .toLowerCase()
+                .trim();
+
+
+            selectedReferralStudent =
+                null;
+
+
+            document
+                .getElementById(
+                    "selectedStudent"
+                )
+                .style.display =
+                    "none";
+
+
+            const dropdown =
+                document
+                .getElementById(
+                    "studentDropdown"
+                );
+
+
+            const filtered =
+                students.filter(
+                    student => {
+
+                        const text = [
+
+                            student.fullName ||
+                            "",
+
+                            student.studentId ||
+                            "",
+
+                            student.email ||
+                            ""
+
+                        ]
+                        .join(" ")
+                        .toLowerCase();
+
+
+                        return text.includes(
+                            search
+                        );
+
+                    }
+                );
+
+
+            renderStudentOptions(
+                filtered
+            );
+
+        }
+
+
+
+        function showStudentDropdown(){
+
+            const search =
+                document
+                .getElementById(
+                    "studentSearch"
+                )
+                .value
+                .toLowerCase()
+                .trim();
+
+
+            const filtered =
+                search
+                ?
+                students.filter(
+                    student => {
+
+                        const text = [
+
+                            student.fullName ||
+                            "",
+
+                            student.studentId ||
+                            "",
+
+                            student.email ||
+                            ""
+
+                        ]
+                        .join(" ")
+                        .toLowerCase();
+
+
+                        return text.includes(
+                            search
+                        );
+
+                    }
+                )
+                :
+                students;
+
+
+            renderStudentOptions(
+                filtered
+            );
+
+        }
+
+
+
+        function renderStudentOptions(
+            list
+        ){
+
+            const dropdown =
+                document
+                .getElementById(
+                    "studentDropdown"
+                );
+
+
+            if(
+                list.length === 0
+            ){
+
+                dropdown.innerHTML = `
+
+                    <div
+                        class="student-option"
+                    >
+
+                        <small>
+                            No students found.
+                        </small>
+
+                    </div>
+
+                `;
+
+
+                dropdown.style.display =
+                    "block";
+
+                return;
+
+            }
+
+
+            dropdown.innerHTML =
+                list.map(
+                    student => `
+
+                    <div
+                        class="student-option"
+                        onclick="selectReferralStudent('${student.uid}')"
+                    >
+
+                        <strong>
+                            ${escapeHtml(
+                                student.fullName
+                            )}
+                        </strong>
+
+                        <small>
+                            ${escapeHtml(
+                                student.studentId ||
+                                "No Student ID"
+                            )}
+                            ${
+                                student.email
+                                ?
+                                " • " +
+                                escapeHtml(
+                                    student.email
+                                )
+                                :
+                                ""
+                            }
+                        </small>
+
+                    </div>
+
+                `
+                )
+                .join("");
+
+
+            dropdown.style.display =
+                "block";
+
+        }
+
+
+
+        function selectReferralStudent(
+            uid
+        ){
+
+            const student =
+                students.find(
+                    item =>
+                        item.uid === uid
+                );
+
+
+            if(!student){
+
+                return;
+
+            }
+
+
+            selectedReferralStudent =
+                student;
+
+
+            document
+                .getElementById(
+                    "studentSearch"
+                )
+                .value =
+                    student.fullName;
+
+
+            document
+                .getElementById(
+                    "selectedStudentName"
+                )
+                .textContent =
+                    student.fullName +
+                    (
+                        student.studentId
+                        ?
+                        " (" +
+                        student.studentId +
+                        ")"
+                        :
+                        ""
+                    );
+
+
+            document
+                .getElementById(
+                    "selectedStudent"
+                )
+                .style.display =
+                    "block";
+
+
+            document
+                .getElementById(
+                    "studentDropdown"
+                )
+                .style.display =
+                    "none";
+
+        }
+
+
+
+        /* CLOSE DROPDOWN WHEN CLICKING OUTSIDE */
+
+        document.addEventListener(
+            "click",
+            function(event){
+
+                const selector =
+                    document
+                    .querySelector(
+                        ".student-selector"
+                    );
+
+
+                if(
+                    selector &&
+                    !selector.contains(
+                        event.target
+                    )
+                ){
+
+                    document
+                        .getElementById(
+                            "studentDropdown"
+                        )
+                        .style.display =
+                            "none";
+
+                }
+
+            }
+        );
+
+
+
+        /* ADD REFERRAL */
+
+        async function addReferral(){
+
+            if(
+                !selectedReferralStudent
+            ){
+
+                showMessage(
+                    "Please select the student who made the referral.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const referredName =
+                getValue(
+                    "referredName"
+                );
+
+
+            const referredStudentId =
+                getValue(
+                    "referredStudentId"
+                );
+
+
+            const courseSelect =
+                document
+                .getElementById(
+                    "courseSelect"
+                );
+
+
+            const selectedCourseOption =
+                courseSelect
+                .options[
+                    courseSelect.selectedIndex
+                ];
+
+
+            const courseId =
+                courseSelect.value;
+
+
+            const courseName =
+                selectedCourseOption
+                ?
+                selectedCourseOption.dataset.name ||
+                selectedCourseOption.textContent ||
+                ""
+                :
+                "";
+
+
+            const rewardAmount =
+                Number(
+                    getValue(
+                        "rewardAmount"
+                    ) || 0
+                );
+
+
+            const status =
+                getValue(
+                    "referralStatus"
+                );
+
+
+            const rewardStatus =
+                getValue(
+                    "rewardStatus"
+                );
+
+
+            if(
+                !referredName ||
+                !referredStudentId
+            ){
+
+                showMessage(
+                    "Referred student name and Student ID are required.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if(!courseId){
+
+                showMessage(
+                    "Please select a course.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const data = {
+
+                referrerUid:
+                    selectedReferralStudent.uid,
+
+                referrerName:
+                    selectedReferralStudent.fullName,
+
+                referrerStudentId:
+                    selectedReferralStudent.studentId,
+
+                referrerEmail:
+                    selectedReferralStudent.email,
+
+                referredName:
+                    referredName,
+
+                referredStudentId:
+                    referredStudentId,
+
+                courseId:
+                    courseId,
+
+                courseName:
+                    courseName,
+
+                rewardAmount:
+                    rewardAmount,
+
+                status:
+                    status,
+
+                rewardStatus:
+                    rewardStatus,
+
+                createdAt:
+                    firebase.firestore
+                    .FieldValue
+                    .serverTimestamp(),
+
+                createdBy:
+                    currentUser.uid
+
+            };
+
+
+            if(
+                rewardStatus ===
+                "paid"
+            ){
+
+                data.paidAt =
+                    firebase.firestore
+                    .FieldValue
+                    .serverTimestamp();
+
+                data.paidBy =
+                    currentUser.uid;
+
+            }
+
+
+            try{
+
+                await db
+                    .collection(
+                        "referrals"
+                    )
+                    .add(data);
+
+
+                closeAddModal();
+
+
+                await loadReferrals();
+
+
+                showMessage(
+                    "Referral added successfully.",
+                    "success"
+                );
+
+
+            }catch(error){
+
+                console.error(error);
+
+                showMessage(
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+
+        /* VIEW */
+
+        function viewReferral(id){
+
+            const item =
+                referrals.find(
+                    referral =>
+                        referral.id === id
+                );
+
+
+            if(!item){
+
+                return;
+
+            }
+
+
+            document
+                .getElementById(
+                    "detailsContent"
+                )
+                .innerHTML = `
+
+                    <div class="detail-row">
+
+                        <span>
+                            Referral Student
+                        </span>
+
+                        <span>
+                            ${escapeHtml(
+                                item.referrerName ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Student ID
+                        </span>
+
+                        <span>
+                            ${escapeHtml(
+                                item.referrerStudentId ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Referred Student
+                        </span>
+
+                        <span>
+                            ${escapeHtml(
+                                item.referredName ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Referred Student ID
+                        </span>
+
+                        <span>
+                            ${escapeHtml(
+                                item.referredStudentId ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Course
+                        </span>
+
+                        <span>
+                            ${escapeHtml(
+                                item.courseName ||
+                                "-"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Date
+                        </span>
+
+                        <span>
+                            ${formatDate(
+                                item.createdAt
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Referral Status
+                        </span>
+
+                        <span>
+                            ${
+                                item.status ||
+                                "-"
+                            }
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Reward
+                        </span>
+
+                        <span>
+                            ₦${Number(
+                                item.rewardAmount ||
+                                0
+                            ).toLocaleString()}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Reward Status
+                        </span>
+
+                        <span>
+                            ${
+                                item.rewardStatus ||
+                                "unpaid"
+                            }
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <span>
+                            Paid Date
+                        </span>
+
+                        <span>
+                            ${formatDate(
+                                item.paidAt
+                            )}
+                        </span>
+
+                    </div>
+
+                `;
+
+
+            document
+                .getElementById(
+                    "detailsModal"
+                )
+                .style.display =
+                    "flex";
+
+        }
+
+
+
+        function closeDetailsModal(){
+
+            document
+                .getElementById(
+                    "detailsModal"
+                )
+                .style.display =
+                    "none";
+
+        }
+
+
+
+        /* MARK REWARD PAID */
+
+        async function markRewardPaid(id){
+
+            if(
+                !confirm(
+                    "Mark this referral reward as paid?"
+                )
+            ){
+
+                return;
+
+            }
+
+
+            try{
+
+                await db
+                    .collection(
+                        "referrals"
+                    )
+                    .doc(id)
+                    .update({
+
+                        rewardStatus:
+                            "paid",
+
+                        paidAt:
+                            firebase.firestore
+                            .FieldValue
+                            .serverTimestamp(),
+
+                        paidBy:
+                            currentUser.uid
+
+                    });
+
+
+                await loadReferrals();
+
+
+                showMessage(
+                    "Reward marked as paid.",
+                    "success"
+                );
+
+
+            }catch(error){
+
+                console.error(error);
+
+                showMessage(
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+
+        /* DELETE */
+
+        async function deleteReferral(id){
+
+            if(
+                !confirm(
+                    "Delete this referral record?"
+                )
+            ){
+
+                return;
+
+            }
+
+
+            try{
+
+                await db
+                    .collection(
+                        "referrals"
+                    )
+                    .doc(id)
+                    .delete();
+
+
+                await loadReferrals();
+
+
+                showMessage(
+                    "Referral deleted.",
+                    "success"
+                );
+
+
+            }catch(error){
+
+                console.error(error);
+
+                showMessage(
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+
+        /* HELPERS */
+
+        function getValue(id){
+
+            return document
+                .getElementById(id)
+                .value
+                .trim();
+
+        }
+
+
+
+        function formatDate(date){
+
+            if(!date){
+
+                return "-";
+
+            }
+
+
+            try{
+
+                if(
+                    date.toDate
+                ){
+
+                    date =
+                        date.toDate();
+
+                }
+
+
+                const parsed =
+                    new Date(date);
+
+
+                if(
+                    isNaN(
+                        parsed.getTime()
+                    )
+                ){
+
+                    return "-";
+
+                }
+
+
+                return parsed.toLocaleDateString(
+                    "en-GB",
+                    {
+                        day:"2-digit",
+                        month:"short",
+                        year:"numeric"
+                    }
+                );
+
+            }catch(error){
+
+                return "-";
+
+            }
+
+        }
+
+
+
+        function escapeHtml(value){
+
+            return String(
+                value || ""
+            )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+        }
+
+
+
+        function showMessage(
+            text,
+            type
+        ){
+
+            const message =
+                document
+                .getElementById(
+                    "message"
+                );
+
+
+            message.textContent =
+                text;
+
+
+            message.className =
+                "message " +
+                (
+                    type === "error"
+                    ? "error"
+                    : "success"
+                );
+
+
+            message.style.display =
+                "block";
+
+
+            setTimeout(
+                () => {
+
+                    message.style.display =
+                        "none";
+
+                },
+                3500
+            );
+
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,1981 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>New Exam | STI Academy</title>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #080b10;
+        color: #fff;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1000px;
+        margin: auto;
+        padding: 25px 16px 60px;
+    }
+
+    h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+    }
+
+    .subtitle {
+        color: #9aa4b2;
+        margin-bottom: 25px;
+    }
+
+    .card {
+        background: #11161d;
+        border: 1px solid #202936;
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .card h2 {
+        font-size: 19px;
+        margin-top: 0;
+        color: #168cff;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .full {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 7px;
+        color: #dbe2ea;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        border: 1px solid #2a3442;
+        background: #0b1016;
+        color: #fff;
+        border-radius: 9px;
+        padding: 12px;
+        outline: none;
+        font-size: 14px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #168cff;
+    }
+
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .score-box {
+        background: #0b1016;
+        border: 1px solid #168cff;
+        border-radius: 9px;
+        padding: 12px;
+        color: #168cff;
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    .schedule-note {
+        margin-top: 8px;
+        font-size: 12px;
+        color: #8d98a7;
+        line-height: 1.5;
+    }
+
+    .question {
+        border: 1px solid #283342;
+        background: #0b1016;
+        border-radius: 12px;
+        padding: 18px;
+        margin-top: 15px;
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .question-number {
+        font-weight: bold;
+        color: #168cff;
+    }
+
+    .remove-btn {
+        border: 0;
+        background: #35171b;
+        color: #ff7d88;
+        padding: 8px 12px;
+        border-radius: 7px;
+        cursor: pointer;
+    }
+
+    .options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .question-type {
+        margin-bottom: 12px;
+    }
+
+    .add-btn,
+    .save-btn {
+        border: 0;
+        cursor: pointer;
+        border-radius: 9px;
+        padding: 12px 18px;
+        font-weight: bold;
+    }
+
+    .add-btn {
+        background: #172334;
+        color: #168cff;
+        border: 1px solid #168cff;
+        margin-top: 15px;
+    }
+
+    .save-btn {
+        width: 100%;
+        background: #168cff;
+        color: white;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+
+    .save-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .message {
+        display: none;
+        padding: 12px;
+        border-radius: 9px;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .success {
+        display: block;
+        background: #102719;
+        color: #65e39a;
+        border: 1px solid #1c6738;
+    }
+
+    .error {
+        display: block;
+        background: #301417;
+        color: #ff858e;
+        border: 1px solid #71323a;
+    }
+
+    .theory-box {
+        display: none;
+        margin-top: 12px;
+    }
+
+    @media (max-width: 700px) {
+        .grid,
+        .options {
+            grid-template-columns: 1fr;
+        }
+
+        .full {
+            grid-column: auto;
+        }
+    }
+</style>
+
+</head><body><div class="container"><h1 id="pageTitle">Create New Exam</h1>
+
+<div class="subtitle">
+    Create and schedule an examination for STI Academy students.
+</div>
+
+<div id="message" class="message"></div>
+
+<form id="examForm">
+
+    <!-- =========================================
+         EXAM DETAILS
+    ========================================== -->
+
+    <div class="card">
+
+        <h2>Exam Details</h2>
+
+        <div class="grid">
+
+            <div class="full">
+
+                <label for="title">
+                    Exam Title
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    placeholder="e.g. HTML & CSS Fundamentals Examination"
+                    required
+                >
+
+            </div>
+
+
+            <div>
+
+                <label for="course">
+                    Course
+                </label>
+
+                <select id="course" required>
+
+                    <option value="">
+                        Select course
+                    </option>
+
+                    <option value="Web Development">
+                        Web Development
+                    </option>
+
+                    <option value="Web Design">
+                        Web Design
+                    </option>
+
+                    <option value="Graphic Design">
+                        Graphic Design
+                    </option>
+
+                    <option value="Video Editing">
+                        Video Editing
+                    </option>
+
+                    <option value="Social Media Management">
+                        Social Media Management
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label for="department">
+                    Department
+                </label>
+
+                <select id="department" required>
+
+                    <option value="">
+                        Select department
+                    </option>
+
+                    <option value="Web Development">
+                        Web Development
+                    </option>
+
+                    <option value="Web Design">
+                        Web Design
+                    </option>
+
+                    <option value="Graphic Design">
+                        Graphic Design
+                    </option>
+
+                    <option value="Video Editing">
+                        Video Editing
+                    </option>
+
+                    <option value="Social Media Management">
+                        Social Media Management
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label for="duration">
+                    Exam Duration (Minutes)
+                </label>
+
+                <input
+                    type="number"
+                    id="duration"
+                    min="1"
+                    value="30"
+                    required
+                >
+
+                <div class="schedule-note">
+                    Time given to each student after they press Start Exam.
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label for="passMark">
+                    Pass Mark (%)
+                </label>
+
+                <input
+                    type="number"
+                    id="passMark"
+                    min="0"
+                    max="100"
+                    value="50"
+                    required
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Total Score
+                </label>
+
+                <div
+                    class="score-box"
+                    id="totalScore"
+                >
+                    0 marks
+                </div>
+
+                <div class="schedule-note">
+                    Automatically calculated from the marks assigned to each question.
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label for="status">
+                    Status
+                </label>
+
+                <select id="status" required>
+
+                    <option value="draft">
+                        Draft
+                    </option>
+
+                    <option value="published">
+                        Published
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- =========================================
+                 SCHEDULE
+            ========================================== -->
+
+            <div>
+
+                <label for="startDateTime">
+                    Exam Start Date & Time
+                </label>
+
+                <input
+                    type="datetime-local"
+                    id="startDateTime"
+                    required
+                >
+
+                <div class="schedule-note">
+                    Students cannot start before this time.
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label for="endDateTime">
+                    Exam End Date & Time
+                </label>
+
+                <input
+                    type="datetime-local"
+                    id="endDateTime"
+                    required
+                >
+
+                <div class="schedule-note">
+                    Students cannot start after this time.
+                </div>
+
+            </div>
+
+
+            <div class="full">
+
+                <label for="instructions">
+                    Instructions
+                </label>
+
+                <textarea
+                    id="instructions"
+                    placeholder="Enter instructions for students..."
+                ></textarea>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         QUESTIONS
+    ========================================== -->
+
+    <div class="card">
+
+        <h2>Exam Questions</h2>
+
+        <div id="questionsContainer"></div>
+
+        <button
+            type="button"
+            class="add-btn"
+            id="addQuestionBtn"
+        >
+            + Add Question
+        </button>
+
+    </div>
+
+
+    <button
+        type="submit"
+        class="save-btn"
+        id="saveBtn"
+    >
+        Save Exam
+    </button>
+
+</form>
+
+</div><script>
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+    authDomain: "sti-academy.firebaseapp.com",
+    projectId: "sti-academy",
+    storageBucket: "sti-academy.firebasestorage.app",
+    messagingSenderId: "709840261642",
+    appId: "1:709840261642:web:714b09bf661afa159f27ff",
+    measurementId: "G-7ZRZ3P28YP"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+
+/* =========================================
+   VARIABLES
+========================================= */
+
+const params =
+    new URLSearchParams(window.location.search);
+
+const examId =
+    params.get("id");
+
+const examForm =
+    document.getElementById("examForm");
+
+const questionsContainer =
+    document.getElementById("questionsContainer");
+
+const addQuestionBtn =
+    document.getElementById("addQuestionBtn");
+
+const saveBtn =
+    document.getElementById("saveBtn");
+
+const message =
+    document.getElementById("message");
+
+const totalScoreElement =
+    document.getElementById("totalScore");
+
+let questionCount = 0;
+
+
+/* =========================================
+   AUTH
+========================================= */
+
+auth.onAuthStateChanged(
+    async user => {
+
+        if (!user) {
+
+            window.location.href =
+                "../login.html";
+
+            return;
+        }
+
+
+        try {
+
+            const userDoc =
+                await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+            if (!userDoc.exists) {
+
+                showMessage(
+                    "User account not found.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            const userData =
+                userDoc.data();
+
+
+            if (
+                userData.role !== "admin" &&
+                userData.role !== "tutor"
+            ) {
+
+                showMessage(
+                    "You are not authorized to manage exams.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (examId) {
+
+                await loadExam();
+
+            } else {
+
+                addQuestion();
+            }
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "Unable to load exam page: " +
+                error.message,
+                "error"
+            );
+        }
+
+    }
+);
+
+
+/* =========================================
+   MESSAGE
+========================================= */
+
+function showMessage(text, type) {
+
+    message.textContent =
+        text;
+
+    message.className =
+        "message " + type;
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+/* =========================================
+   ADD QUESTION
+========================================= */
+
+function addQuestion(data = null) {
+
+    questionCount++;
+
+    const number =
+        questionCount;
+
+
+    const question =
+        document.createElement("div");
+
+
+    question.className =
+        "question";
+
+
+    question.dataset.questionId =
+        data && data.id
+            ? data.id
+            : "";
+
+
+    question.innerHTML = `
+
+        <div class="question-header">
+
+            <div class="question-number">
+                Question ${number}
+            </div>
+
+            <button
+                type="button"
+                class="remove-btn"
+                onclick="removeQuestion(this)"
+            >
+                Remove
+            </button>
+
+        </div>
+
+
+        <div class="question-type">
+
+            <label>
+                Question Type
+            </label>
+
+            <select class="q-type">
+
+                <option value="objective">
+                    Objective
+                </option>
+
+                <option value="theory">
+                    Theory
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div>
+
+            <label>
+                Question
+            </label>
+
+            <textarea
+                class="q-text"
+                placeholder="Enter question..."
+                required
+            ></textarea>    </div>
+
+
+    <div style="margin-top:12px;">
+
+        <label>
+            Marks
+        </label>
+
+        <input
+            type="number"
+            class="q-marks"
+            min="1"
+            value="1"
+            required
+        >
+
+    </div>
+
+
+    <div class="objective-box">
+
+        <label style="margin-top:12px;">
+            Options
+        </label>
+
+        <div class="options">
+
+            <input
+                type="text"
+                class="option-a"
+                placeholder="Option A"
+            >
+
+            <input
+                type="text"
+                class="option-b"
+                placeholder="Option B"
+            >
+
+            <input
+                type="text"
+                class="option-c"
+                placeholder="Option C"
+            >
+
+            <input
+                type="text"
+                class="option-d"
+                placeholder="Option D"
+            >
+
+        </div>
+
+
+        <div style="margin-top:12px;">
+
+            <label>
+                Correct Answer
+            </label>
+
+            <select class="correct-answer">
+
+                <option value="">
+                    Select answer
+                </option>
+
+                <option value="A">
+                    A
+                </option>
+
+                <option value="B">
+                    B
+                </option>
+
+                <option value="C">
+                    C
+                </option>
+
+                <option value="D">
+                    D
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div style="margin-top:12px;">
+
+            <label>
+                Explanation
+            </label>
+
+            <textarea
+                class="q-explanation"
+                placeholder="Optional explanation..."
+            ></textarea>
+
+        </div>
+
+    </div>
+
+
+    <div class="theory-box">
+
+        <label>
+            Model Answer / Key Points
+        </label>
+
+        <textarea
+            class="model-answer"
+            placeholder="Enter the model answer or key points..."
+        ></textarea>
+
+    </div>
+
+`;
+
+
+questionsContainer.appendChild(
+    question
+);
+
+
+const typeSelect =
+    question.querySelector(
+        ".q-type"
+    );
+
+
+const objectiveBox =
+    question.querySelector(
+        ".objective-box"
+    );
+
+
+const theoryBox =
+    question.querySelector(
+        ".theory-box"
+    );
+
+
+typeSelect.addEventListener(
+    "change",
+    () => {
+
+        if (
+            typeSelect.value ===
+            "objective"
+        ) {
+
+            objectiveBox.style.display =
+                "block";
+
+            theoryBox.style.display =
+                "none";
+
+        } else {
+
+            objectiveBox.style.display =
+                "none";
+
+            theoryBox.style.display =
+                "block";
+        }
+
+        calculateTotalScore();
+    }
+);
+
+
+const marksInput =
+    question.querySelector(
+        ".q-marks"
+    );
+
+
+marksInput.addEventListener(
+    "input",
+    calculateTotalScore
+);
+
+
+if (data) {
+
+    typeSelect.value =
+        data.type || "objective";
+
+
+    question.querySelector(
+        ".q-text"
+    ).value =
+        data.question || "";
+
+
+    question.querySelector(
+        ".q-marks"
+    ).value =
+        data.marks || 1;
+
+
+    if (
+        data.type ===
+        "objective"
+    ) {
+
+        question.querySelector(
+            ".option-a"
+        ).value =
+            data.options?.A || "";
+
+
+        question.querySelector(
+            ".option-b"
+        ).value =
+            data.options?.B || "";
+
+
+        question.querySelector(
+            ".option-c"
+        ).value =
+            data.options?.C || "";
+
+
+        question.querySelector(
+            ".option-d"
+        ).value =
+            data.options?.D || "";
+
+
+        question.querySelector(
+            ".correct-answer"
+        ).value =
+            data.correctAnswer || "";
+
+
+        question.querySelector(
+            ".q-explanation"
+        ).value =
+            data.explanation || "";
+
+
+        objectiveBox.style.display =
+            "block";
+
+        theoryBox.style.display =
+            "none";
+
+
+    } else {
+
+        question.querySelector(
+            ".model-answer"
+        ).value =
+            data.modelAnswer || "";
+
+
+        objectiveBox.style.display =
+            "none";
+
+        theoryBox.style.display =
+            "block";
+    }
+
+} else {
+
+    objectiveBox.style.display =
+        "block";
+
+    theoryBox.style.display =
+        "none";
+}
+
+
+calculateTotalScore();
+
+}
+
+/* =========================================
+CALCULATE TOTAL SCORE
+========================================= */
+
+function calculateTotalScore() {
+
+const questions =
+    document.querySelectorAll(
+        ".question"
+    );
+
+
+let total =
+    0;
+
+
+questions.forEach(
+    question => {
+
+        const marksInput =
+            question.querySelector(
+                ".q-marks"
+            );
+
+
+        const marks =
+            Number(
+                marksInput?.value
+            );
+
+
+        if (
+            Number.isFinite(marks) &&
+            marks > 0
+        ) {
+
+            total += marks;
+        }
+    }
+);
+
+
+totalScoreElement.textContent =
+    `${total} ${total === 1 ? "mark" : "marks"}`;
+
+
+return total;
+
+}
+
+/* =========================================
+REMOVE QUESTION
+========================================= */
+
+function removeQuestion(button) {
+
+const question =
+    button.closest(
+        ".question"
+    );
+
+
+question.remove();
+
+
+renumberQuestions();
+
+calculateTotalScore();
+
+}
+
+/* =========================================
+RENUMBER QUESTIONS
+========================================= */
+
+function renumberQuestions() {
+
+const questions =
+    document.querySelectorAll(
+        ".question"
+    );
+
+
+questions.forEach(
+    (question, index) => {
+
+        question.querySelector(
+            ".question-number"
+        ).textContent =
+            "Question " +
+            (index + 1);
+    }
+);
+
+
+questionCount =
+    questions.length;
+
+}
+
+/* =========================================
+ADD QUESTION BUTTON
+========================================= */
+
+addQuestionBtn.addEventListener(
+"click",
+() => {
+
+    addQuestion();
+
+}
+
+);
+
+/* =========================================
+LOAD EXISTING EXAM
+========================================= */
+
+async function loadExam() {
+
+document.getElementById(
+    "pageTitle"
+).textContent =
+    "Edit Exam";
+
+
+saveBtn.textContent =
+    "Update Exam";
+
+
+const examDoc =
+    await db
+        .collection("exams")
+        .doc(examId)
+        .get();
+
+
+if (!examDoc.exists) {
+
+    showMessage(
+        "Exam not found.",
+        "error"
+    );
+
+    return;
+}
+
+
+const exam =
+    examDoc.data();
+
+
+document.getElementById(
+    "title"
+).value =
+    exam.title || "";
+
+
+document.getElementById(
+    "course"
+).value =
+    exam.course || "";
+
+
+document.getElementById(
+    "department"
+).value =
+    exam.department || "";
+
+
+const storedDuration =
+    exam.durationMinutes ??
+    exam.duration ??
+    30;
+
+
+document.getElementById(
+    "duration"
+).value =
+    Number(storedDuration);
+
+
+document.getElementById(
+    "passMark"
+).value =
+    exam.passMark ?? 50;
+
+
+document.getElementById(
+    "status"
+).value =
+    exam.status || "draft";
+
+
+document.getElementById(
+    "instructions"
+).value =
+    exam.instructions || "";
+
+
+if (exam.startTime) {
+
+    document.getElementById(
+        "startDateTime"
+    ).value =
+        timestampToDateTimeLocal(
+            exam.startTime
+        );
+}
+
+
+if (exam.endTime) {
+
+    document.getElementById(
+        "endDateTime"
+    ).value =
+        timestampToDateTimeLocal(
+            exam.endTime
+        );
+}
+
+
+const questionsSnapshot =
+    await db
+        .collection("examQuestions")
+        .where(
+            "examId",
+            "==",
+            examId
+        )
+        .get();
+
+
+questionsContainer.innerHTML =
+    "";
+
+questionCount =
+    0;
+
+
+const questions =
+    questionsSnapshot.docs
+        .map(
+            doc => ({
+                id: doc.id,
+                ...doc.data()
+            })
+        )
+        .sort(
+            (a, b) =>
+                Number(
+                    a.questionNumber || 0
+                ) -
+                Number(
+                    b.questionNumber || 0
+                )
+        );
+
+
+questions.forEach(
+    question => {
+
+        addQuestion(
+            question
+        );
+
+    }
+);
+
+
+if (
+    questions.length === 0
+) {
+
+    addQuestion();
+}
+
+
+calculateTotalScore();
+
+}
+
+/* =========================================
+TIMESTAMP TO LOCAL INPUT
+========================================= */
+
+function timestampToDateTimeLocal(
+value
+) {
+
+let date;
+
+
+if (
+    value &&
+    typeof value.toDate ===
+    "function"
+) {
+
+    date =
+        value.toDate();
+
+} else {
+
+    date =
+        new Date(value);
+}
+
+
+if (
+    isNaN(
+        date.getTime()
+    )
+) {
+
+    return "";
+}
+
+
+const year =
+    date.getFullYear();
+
+
+const month =
+    String(
+        date.getMonth() + 1
+    ).padStart(
+        2,
+        "0"
+    );
+
+
+const day =
+    String(
+        date.getDate()
+    ).padStart(
+        2,
+        "0"
+    );
+
+
+const hours =
+    String(
+        date.getHours()
+    ).padStart(
+        2,
+        "0"
+    );
+
+
+const minutes =
+    String(
+        date.getMinutes()
+    ).padStart(
+        2,
+        "0"
+    );
+
+
+return `${year}-${month}-${day}T${hours}:${minutes}`;
+
+}
+
+/* =========================================
+SAVE EXAM
+========================================= */
+
+examForm.addEventListener(
+"submit",
+async event => {
+
+    event.preventDefault();
+
+
+    saveBtn.disabled =
+        true;
+
+
+    saveBtn.textContent =
+        "Saving...";
+
+
+    try {
+
+        const title =
+            document.getElementById(
+                "title"
+            ).value.trim();
+
+
+        const course =
+            document.getElementById(
+                "course"
+            ).value;
+
+
+        const department =
+            document.getElementById(
+                "department"
+            ).value;
+
+
+        const durationMinutes =
+            Number(
+                document.getElementById(
+                    "duration"
+                ).value
+            );
+
+
+        const passMark =
+            Number(
+                document.getElementById(
+                    "passMark"
+                ).value
+            );
+
+
+        const startValue =
+            document.getElementById(
+                "startDateTime"
+            ).value;
+
+
+        const endValue =
+            document.getElementById(
+                "endDateTime"
+            ).value;
+
+
+        const status =
+            document.getElementById(
+                "status"
+            ).value;
+
+
+        const instructions =
+            document.getElementById(
+                "instructions"
+            ).value.trim();
+
+
+        /* =========================================
+           VALIDATION
+        ========================================== */
+
+        if (!title) {
+
+            throw new Error(
+                "Please enter an exam title."
+            );
+        }
+
+
+        if (!course) {
+
+            throw new Error(
+                "Please select a course."
+            );
+        }
+
+
+        if (!department) {
+
+            throw new Error(
+                "Please select a department."
+            );
+        }
+
+
+        if (
+            !Number.isFinite(
+                durationMinutes
+            ) ||
+            durationMinutes <= 0
+        ) {
+
+            throw new Error(
+                "Enter a valid exam duration."
+            );
+        }
+
+
+        if (
+            !Number.isFinite(
+                passMark
+            ) ||
+            passMark < 0 ||
+            passMark > 100
+        ) {
+
+            throw new Error(
+                "Pass mark must be between 0 and 100."
+            );
+        }
+
+
+        if (
+            !startValue ||
+            !endValue
+        ) {
+
+            throw new Error(
+                "Please set both the exam start and end time."
+            );
+        }
+
+
+        const startDate =
+            new Date(
+                startValue
+            );
+
+
+        const endDate =
+            new Date(
+                endValue
+            );
+
+
+        if (
+            isNaN(
+                startDate.getTime()
+            ) ||
+            isNaN(
+                endDate.getTime()
+            )
+        ) {
+
+            throw new Error(
+                "Invalid exam schedule."
+            );
+        }
+
+
+        if (
+            endDate <= startDate
+        ) {
+
+            throw new Error(
+                "Exam end time must be after the start time."
+            );
+        }
+
+
+        /* =========================================
+           TOTAL SCORE
+        ========================================== */
+
+        const totalMarks =
+            calculateTotalScore();
+
+
+        if (
+            totalMarks <= 0
+        ) {
+
+            throw new Error(
+                "Add at least one question with marks."
+            );
+        }
+
+
+        /* =========================================
+           EXAM DATA
+        ========================================== */
+
+        const examData = {
+
+            title,
+
+            course,
+
+            department,
+
+            durationMinutes,
+
+            // Compatibility with older records
+            duration:
+                durationMinutes,
+
+            totalMarks,
+
+            passMark,
+
+            status,
+
+            instructions,
+
+            startTime:
+                firebase.firestore.Timestamp
+                    .fromDate(
+                        startDate
+                    ),
+
+            endTime:
+                firebase.firestore.Timestamp
+                    .fromDate(
+                        endDate
+                    ),
+
+            updatedAt:
+                firebase.firestore
+                    .FieldValue
+                    .serverTimestamp()
+        };
+
+
+        let currentExamId =
+            examId;
+
+
+        /* =========================================
+           CREATE / UPDATE EXAM
+        ========================================== */
+
+        if (examId) {
+
+            await db
+                .collection("exams")
+                .doc(examId)
+                .update(
+                    examData
+                );
+
+        } else {
+
+            examData.createdAt =
+                firebase.firestore
+                    .FieldValue
+                    .serverTimestamp();
+
+
+            const examRef =
+                await db
+                    .collection("exams")
+                    .add(
+                        examData
+                    );
+
+
+            currentExamId =
+                examRef.id;
+        }
+
+
+        /* =========================================
+           EXISTING QUESTIONS
+        ========================================== */
+
+        const existingQuestions =
+            await db
+                .collection(
+                    "examQuestions"
+                )
+                .where(
+                    "examId",
+                    "==",
+                    currentExamId
+                )
+                .get();
+
+
+        const existingIds =
+            new Set(
+                existingQuestions.docs
+                    .map(
+                        doc =>
+                            doc.id
+                    )
+            );
+
+
+        const batch =
+            db.batch();
+
+
+        const currentQuestionIds =
+            new Set();
+
+
+        const questionElements =
+            document.querySelectorAll(
+                ".question"
+            );
+
+
+        questionElements.forEach(
+            (
+                questionElement,
+                index
+            ) => {
+
+                const questionId =
+                    questionElement
+                        .dataset
+                        .questionId;
+
+
+                const type =
+                    questionElement
+                        .querySelector(
+                            ".q-type"
+                        )
+                        .value;
+
+
+                const questionText =
+                    questionElement
+                        .querySelector(
+                            ".q-text"
+                        )
+                        .value
+                        .trim();
+
+
+                const marks =
+                    Number(
+                        questionElement
+                            .querySelector(
+                                ".q-marks"
+                            )
+                            .value
+                    );
+
+
+                if (!questionText) {
+
+                    throw new Error(
+                        `Question ${
+                            index + 1
+                        } is empty.`
+                    );
+                }
+
+
+                if (
+                    !Number.isFinite(
+                        marks
+                    ) ||
+                    marks <= 0
+                ) {
+
+                    throw new Error(
+                        `Question ${
+                            index + 1
+                        } must have valid marks.`
+                    );
+                }
+
+
+                const questionData = {
+
+                    examId:
+                        currentExamId,
+
+                    questionNumber:
+                        index + 1,
+
+                    type,
+
+                    question:
+                        questionText,
+
+                    marks,
+
+                    updatedAt:
+                        firebase.firestore
+                            .FieldValue
+                            .serverTimestamp()
+                };
+
+
+                if (
+                    type ===
+                    "objective"
+                ) {
+
+                    questionData.options = {
+
+                        A:
+                            questionElement
+                                .querySelector(
+                                    ".option-a"
+                                )
+                                .value
+                                .trim(),
+
+                        B:
+                            questionElement
+                                .querySelector(
+                                    ".option-b"
+                                )
+                                .value
+                                .trim(),
+
+                        C:
+                            questionElement
+                                .querySelector(
+                                    ".option-c"
+                                )
+                                .value
+                                .trim(),
+
+                        D:
+                            questionElement
+                                .querySelector(
+                                    ".option-d"
+                                )
+                                .value
+                                .trim()
+                    };
+
+
+                    questionData.correctAnswer =
+                        questionElement
+                            .querySelector(
+                                ".correct-answer"
+                            )
+                            .value;
+
+
+                    questionData.explanation =
+                        questionElement
+                            .querySelector(
+                                ".q-explanation"
+                            )
+                            .value
+                            .trim();
+
+                } else {
+
+                    questionData.modelAnswer =
+                        questionElement
+                            .querySelector(
+                                ".model-answer"
+                            )
+                            .value
+                            .trim();
+                }
+
+
+                let ref;
+
+
+                if (
+                    questionId &&
+                    existingIds.has(
+                        questionId
+                    )
+                ) {
+
+                    ref =
+                        db
+                            .collection(
+                                "examQuestions"
+                            )
+                            .doc(
+                                questionId
+                            );
+
+
+                    currentQuestionIds.add(
+                        questionId
+                    );
+
+
+                    batch.update(
+                        ref,
+                        questionData
+                    );
+
+                } else {
+
+                    ref =
+                        db
+                            .collection(
+                                "examQuestions"
+                            )
+                            .doc();
+
+
+                    batch.set(
+                        ref,
+                        {
+                            ...questionData,
+
+                            createdAt:
+                                firebase.firestore
+                                    .FieldValue
+                                    .serverTimestamp()
+                        }
+                    );
+                }
+            }
+        );
+
+
+        /* =========================================
+           DELETE REMOVED QUESTIONS
+        ========================================== */
+
+        existingQuestions.docs.forEach(
+            doc => {
+
+                if (
+                    !currentQuestionIds.has(
+                        doc.id
+                    ) &&
+                    document.querySelector(
+                        `[data-question-id="${doc.id}"]`
+                    ) === null
+                ) {
+
+                    batch.delete(
+                        doc.ref
+                    );
+                }
+
+            }
+        );
+
+
+        await batch.commit();
+
+
+        /* =========================================
+           SUCCESS
+        ========================================== */
+
+        showMessage(
+            examId
+                ? "Exam updated successfully."
+                : "Exam created successfully.",
+            "success"
+        );
+
+
+        setTimeout(
+            () => {
+
+                window.location.href =
+                    "exams.html";
+
+            },
+            1200
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        showMessage(
+            error.message ||
+            "Unable to save exam.",
+            "error"
+        );
+
+
+        saveBtn.disabled =
+            false;
+
+
+        saveBtn.textContent =
+            examId
+                ? "Update Exam"
+                : "Save Exam";
+    }
+
+}
+
+);
+
+</script></body>
+</html>

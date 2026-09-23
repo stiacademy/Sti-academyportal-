@@ -1,0 +1,981 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Exams | STI Academy</title>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #080b10;
+        color: #fff;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 25px 16px 60px;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 28px;
+    }
+
+    .subtitle {
+        color: #9aa4b2;
+        margin-top: 7px;
+        margin-bottom: 25px;
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .create-btn {
+        display: inline-block;
+        text-decoration: none;
+        background: #168cff;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 9px;
+        font-weight: bold;
+    }
+
+    .message {
+        display: none;
+        padding: 13px;
+        border-radius: 9px;
+        margin-bottom: 18px;
+    }
+
+    .error {
+        display: block;
+        background: #301417;
+        border: 1px solid #71323a;
+        color: #ff858e;
+    }
+
+    .loading {
+        text-align: center;
+        color: #9aa4b2;
+        padding: 40px 10px;
+    }
+
+    .empty {
+        background: #11161d;
+        border: 1px solid #202936;
+        border-radius: 14px;
+        padding: 35px 20px;
+        text-align: center;
+        color: #9aa4b2;
+    }
+
+    .exam-card {
+        background: #11161d;
+        border: 1px solid #202936;
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 18px;
+    }
+
+    .exam-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .exam-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 7px;
+    }
+
+    .course {
+        color: #9aa4b2;
+        font-size: 14px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 7px 11px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .upcoming {
+        background: #17283c;
+        color: #62b5ff;
+    }
+
+    .live {
+        background: #12301f;
+        color: #66e39a;
+    }
+
+    .ended {
+        background: #302126;
+        color: #ff8b96;
+    }
+
+    .draft {
+        background: #2a2417;
+        color: #e8bf68;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .info {
+        background: #0b1016;
+        border: 1px solid #222d3a;
+        border-radius: 9px;
+        padding: 12px;
+    }
+
+    .info-label {
+        color: #7f8a99;
+        font-size: 11px;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    .info-value {
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .schedule {
+        margin-top: 15px;
+        padding: 14px;
+        background: #0b1016;
+        border-radius: 9px;
+        border: 1px solid #222d3a;
+    }
+
+    .schedule-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 6px 0;
+        font-size: 14px;
+    }
+
+    .schedule-label {
+        color: #7f8a99;
+    }
+
+    .schedule-value {
+        text-align: right;
+    }
+
+    .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 18px;
+    }
+
+    .action-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .edit {
+        background: #172334;
+        color: #5fb2ff;
+        border: 1px solid #285987;
+    }
+
+    .submissions {
+        background: #168cff;
+        color: white;
+    }
+
+    .delete {
+        background: #35171b;
+        color: #ff7d88;
+        border: 1px solid #71323a;
+    }
+
+    @media (max-width: 800px) {
+
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+    }
+
+    @media (max-width: 600px) {
+
+        .top-bar,
+        .exam-top {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .create-btn {
+            text-align: center;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .schedule-row {
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .schedule-value {
+            text-align: left;
+        }
+
+    }
+</style>
+
+</head><body><div class="container"><div class="top-bar">
+
+    <div>
+        <h1>Exams</h1>
+
+        <div class="subtitle">
+            Create, schedule and manage examinations.
+        </div>
+    </div>
+
+    <a
+        href="new-exam.html"
+        class="create-btn"
+    >
+        + Create Exam
+    </a>
+
+</div>
+
+
+<div
+    id="message"
+    class="message"
+></div>
+
+
+<div
+    id="loading"
+    class="loading"
+>
+    Loading exams...
+</div>
+
+
+<div id="examsContainer"></div>
+
+</div><script>
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+    authDomain: "sti-academy.firebaseapp.com",
+    projectId: "sti-academy",
+    storageBucket: "sti-academy.firebasestorage.app",
+    messagingSenderId: "709840261642",
+    appId: "1:709840261642:web:714b09bf661afa159f27ff",
+    measurementId: "G-7ZRZ3P28YP"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const examsContainer =
+    document.getElementById(
+        "examsContainer"
+    );
+
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+
+let exams = [];
+
+
+/* =========================================
+   AUTH
+========================================= */
+
+auth.onAuthStateChanged(
+    async user => {
+
+        if (!user) {
+
+            window.location.href =
+                "../login.html";
+
+            return;
+        }
+
+
+        try {
+
+            const userDoc =
+                await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+            if (!userDoc.exists) {
+
+                showError(
+                    "User account not found."
+                );
+
+                return;
+            }
+
+
+            const userData =
+                userDoc.data();
+
+
+            if (
+                userData.role !== "admin" &&
+                userData.role !== "tutor"
+            ) {
+
+                showError(
+                    "You are not authorized to manage exams."
+                );
+
+                return;
+            }
+
+
+            loadExams();
+
+        } catch (error) {
+
+            console.error(error);
+
+            showError(
+                "Unable to verify your account."
+            );
+        }
+
+    }
+);
+
+
+/* =========================================
+   LOAD EXAMS
+========================================= */
+
+async function loadExams() {
+
+    try {
+
+        const snapshot =
+            await db
+                .collection("exams")
+                .orderBy(
+                    "startTime",
+                    "asc"
+                )
+                .get();
+
+
+        exams =
+            snapshot.docs.map(
+                doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })
+            );
+
+
+        loading.style.display =
+            "none";
+
+
+        renderExams();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        loading.style.display =
+            "none";
+
+        showError(
+            "Unable to load exams: " +
+            error.message
+        );
+    }
+}
+
+
+/* =========================================
+   RENDER EXAMS
+========================================= */
+
+function renderExams() {
+
+    examsContainer.innerHTML =
+        "";
+
+
+    if (
+        exams.length === 0
+    ) {
+
+        examsContainer.innerHTML = `
+
+            <div class="empty">
+
+                <h3>
+                    No Exams Yet
+                </h3>
+
+                <p>
+                    Create your first exam to get started.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    exams.forEach(
+        exam => {
+
+            examsContainer.appendChild(
+                createExamCard(
+                    exam
+                )
+            );
+
+        }
+    );
+}
+
+
+/* =========================================
+   CREATE EXAM CARD
+========================================= */
+
+function createExamCard(exam) {
+
+    const card =
+        document.createElement(
+            "div"
+        );
+
+
+    card.className =
+        "exam-card";
+
+
+    const status =
+        getExamStatus(
+            exam
+        );
+
+
+    const statusClass =
+        status
+            .toLowerCase()
+            .replace(
+                " ",
+                "-"
+            );
+
+
+    const duration =
+        Number(
+            exam.durationMinutes ??
+            exam.duration ??
+            0
+        );
+
+
+    const totalMarks =
+        Number(
+            exam.totalMarks ??
+            0
+        );
+
+
+    const startDate =
+        getDate(
+            exam.startTime
+        );
+
+
+    const endDate =
+        getDate(
+            exam.endTime
+        );
+
+
+    const publishedText =
+        exam.status === "published"
+            ? "Published"
+            : "Draft";
+
+
+    card.innerHTML = `
+
+        <div class="exam-top">
+
+            <div>
+
+                <div class="exam-title">
+                    ${escapeHtml(
+                        exam.title ||
+                        "Untitled Exam"
+                    )}
+                </div>
+
+                <div class="course">
+
+                    ${escapeHtml(
+                        exam.course ||
+                        "No course"
+                    )}
+
+                    ${exam.department
+                        ? " • " +
+                          escapeHtml(
+                              exam.department
+                          )
+                        : ""
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <span
+                    class="badge ${statusClass}"
+                >
+                    ${status}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info">
+
+                <div class="info-label">
+                    Duration
+                </div>
+
+                <div class="info-value">
+                    ${duration} minutes
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    Total Score
+                </div>
+
+                <div class="info-value">
+                    ${totalMarks} marks
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    Pass Mark
+                </div>
+
+                <div class="info-value">
+                    ${Number(
+                        exam.passMark ??
+                        50
+                    )}%
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    Status
+                </div>
+
+                <div class="info-value">
+                    ${publishedText}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="schedule">
+
+            <div class="schedule-row">
+
+                <span class="schedule-label">
+                    Opens
+                </span>
+
+                <span class="schedule-value">
+                    ${formatDate(
+                        startDate
+                    )}
+                </span>
+
+            </div>
+
+
+            <div class="schedule-row">
+
+                <span class="schedule-label">
+                    Closes
+                </span>
+
+                <span class="schedule-value">
+                    ${formatDate(
+                        endDate
+                    )}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <a
+                href="new-exam.html?id=${exam.id}"
+                class="action-btn edit"
+            >
+                Edit Exam
+            </a>
+
+
+            <a
+                href="exam-submissions.html?examId=${exam.id}"
+                class="action-btn submissions"
+            >
+                View Submissions
+            </a>
+
+
+            <button
+                type="button"
+                class="action-btn delete"
+                onclick="deleteExam('${exam.id}')"
+            >
+                Delete
+            </button>
+
+        </div>
+
+    `;
+
+
+    return card;
+}
+
+
+/* =========================================
+   EXAM STATUS
+========================================= */
+
+function getExamStatus(exam) {
+
+    if (
+        exam.status !== "published"
+    ) {
+
+        return "Draft";
+    }
+
+
+    const now =
+        new Date();
+
+
+    const start =
+        getDate(
+            exam.startTime
+        );
+
+
+    const end =
+        getDate(
+            exam.endTime
+        );
+
+
+    if (
+        !start ||
+        !end
+    ) {
+
+        return "Draft";
+    }
+
+
+    if (
+        now < start
+    ) {
+
+        return "Upcoming";
+    }
+
+
+    if (
+        now >= start &&
+        now < end
+    ) {
+
+        return "Live";
+    }
+
+
+    return "Ended";
+}
+
+
+/* =========================================
+   DELETE EXAM
+========================================= */
+
+async function deleteExam(
+    examId
+) {
+
+    const confirmed =
+        confirm(
+            "Delete this exam and all its questions? This cannot be undone."
+        );
+
+
+    if (!confirmed) {
+
+        return;
+    }
+
+
+    try {
+
+        const questions =
+            await db
+                .collection(
+                    "examQuestions"
+                )
+                .where(
+                    "examId",
+                    "==",
+                    examId
+                )
+                .get();
+
+
+        const batch =
+            db.batch();
+
+
+        questions.forEach(
+            doc => {
+
+                batch.delete(
+                    doc.ref
+                );
+
+            }
+        );
+
+
+        batch.delete(
+            db
+                .collection("exams")
+                .doc(examId)
+        );
+
+
+        await batch.commit();
+
+
+        exams =
+            exams.filter(
+                exam =>
+                    exam.id !== examId
+            );
+
+
+        renderExams();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            "Unable to delete exam: " +
+            error.message
+        );
+    }
+}
+
+
+/* =========================================
+   DATE HELPERS
+========================================= */
+
+function getDate(value) {
+
+    if (!value) {
+
+        return null;
+    }
+
+
+    if (
+        typeof value.toDate ===
+        "function"
+    ) {
+
+        return value.toDate();
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return null;
+    }
+
+
+    return date;
+}
+
+
+function formatDate(date) {
+
+    if (!date) {
+
+        return "Not set";
+    }
+
+
+    return date.toLocaleString(
+        undefined,
+        {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+}
+
+
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+function showError(text) {
+
+    message.textContent =
+        text;
+
+    message.className =
+        "message error";
+}
+
+</script></body>
+</html>

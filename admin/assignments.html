@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Assignments | STI Academy</title>
+
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+
+        .page {
+            max-width: 1400px;
+            margin: auto;
+            padding: 25px;
+        }
+
+
+        /* HEADER */
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+
+        .header-left h1 {
+            font-size: 30px;
+            margin-bottom: 7px;
+        }
+
+
+        .header-left p {
+            color: #999;
+            font-size: 14px;
+        }
+
+
+        .new-btn {
+            border: none;
+            background: #168cff;
+            color: white;
+            padding: 13px 20px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+
+        .new-btn:hover {
+            background: #0878df;
+        }
+
+
+        /* STATS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+
+        .stat-card {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+
+        .stat-label {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+
+        .stat-value {
+            color: #168cff;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+
+        /* FILTERS */
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+
+        .filters input,
+        .filters select {
+            background: #101010;
+            color: #fff;
+            border: 1px solid #292929;
+            border-radius: 8px;
+            padding: 12px 14px;
+            outline: none;
+        }
+
+
+        .filters input {
+            flex: 1;
+            min-width: 220px;
+        }
+
+
+        .filters input:focus,
+        .filters select:focus {
+            border-color: #168cff;
+        }
+
+
+        /* TABLE */
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 12px;
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+
+
+        th {
+            text-align: left;
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            padding: 16px;
+            border-bottom: 1px solid #242424;
+            white-space: nowrap;
+        }
+
+
+        td {
+            padding: 17px 16px;
+            border-bottom: 1px solid #1d1d1d;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+
+        tr:hover td {
+            background: #151515;
+        }
+
+
+        .assignment-title {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+
+        .assignment-id {
+            color: #666;
+            font-size: 11px;
+        }
+
+
+        .course {
+            color: #ccc;
+        }
+
+
+        .number {
+            color: #ddd;
+            font-weight: bold;
+        }
+
+
+        .deadline {
+            color: #bbb;
+            white-space: nowrap;
+        }
+
+
+        /* STATUS */
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+
+        .status-active {
+            color: #53c7ff;
+            background: rgba(22, 140, 255, .15);
+        }
+
+
+        .status-closed {
+            color: #ff7777;
+            background: rgba(255, 60, 60, .12);
+        }
+
+
+        .status-draft {
+            color: #ffc857;
+            background: rgba(255, 193, 7, .12);
+        }
+
+
+        /* SUBMISSIONS */
+
+        .submission-btn {
+            border: none;
+            background: transparent;
+            color: #168cff;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+
+        .submission-btn:hover {
+            color: #63b5ff;
+        }
+
+
+        .submission-count {
+            min-width: 27px;
+            height: 27px;
+            padding: 0 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(22, 140, 255, .15);
+            border-radius: 50%;
+        }
+
+
+        .arrow {
+            font-size: 18px;
+        }
+
+
+        /* ACTIONS */
+
+        .actions {
+            display: flex;
+            gap: 7px;
+        }
+
+
+        .action-btn {
+            border: 1px solid #303030;
+            background: #171717;
+            color: #ddd;
+            border-radius: 7px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+
+        .action-btn:hover {
+            border-color: #168cff;
+            color: #168cff;
+        }
+
+
+        .delete-btn:hover {
+            border-color: #ff4d4d;
+            color: #ff4d4d;
+        }
+
+
+        /* LOADING */
+
+        .loading {
+            padding: 70px 20px;
+            text-align: center;
+            color: #777;
+        }
+
+
+        .empty {
+            padding: 70px 20px;
+            text-align: center;
+            color: #777;
+        }
+
+
+        .empty h3 {
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+
+        /* ERROR */
+
+        .error-screen {
+            display: none;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+        }
+
+
+        .error-box {
+            max-width: 500px;
+            background: #101010;
+            border: 1px solid #292929;
+            border-radius: 14px;
+            padding: 35px;
+        }
+
+
+        .error-box h2 {
+            color: #ff5555;
+            margin-bottom: 12px;
+        }
+
+
+        .error-box p {
+            color: #999;
+            line-height: 1.6;
+        }
+
+
+        /* TOAST */
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: #151515;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 9px;
+            display: none;
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+
+        .toast.show {
+            display: block;
+        }
+
+
+        .toast.error {
+            border-color: #ff4d4d;
+        }
+
+
+        @media (max-width: 800px) {
+
+            .page {
+                padding: 16px;
+            }
+
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+
+            .new-btn {
+                width: 100%;
+            }
+
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+
+        @media (max-width: 450px) {
+
+            .stats {
+                gap: 10px;
+            }
+
+
+            .stat-card {
+                padding: 15px;
+            }
+
+
+            .stat-value {
+                font-size: 23px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ADMIN ASSIGNMENTS PAGE -->
+
+    <div
+        id="adminPage"
+        class="page"
+        style="display:none;"
+    >
+
+
+        <!-- HEADER -->
+
+        <div class="header">
+
+            <div class="header-left">
+
+                <h1>
+                    Assignments
+                </h1>
+
+                <p>
+                    Create, manage and monitor student assignments.
+                </p>
+
+            </div>
+
+
+            <button
+                class="new-btn"
+                onclick="newAssignment()"
+            >
+                + New Assignment
+            </button>
+
+        </div>
+
+
+        <!-- STATS -->
+
+        <div class="stats">
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Assignments
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="totalAssignments"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Active
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="activeAssignments"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Submissions
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="totalSubmissions"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Drafts
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="draftAssignments"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- FILTERS -->
+
+        <div class="filters">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search assignments..."
+                oninput="renderAssignments()"
+            >
+
+
+            <select
+                id="courseFilter"
+                onchange="renderAssignments()"
+            >
+
+                <option value="all">
+                    All Courses
+                </option>
+
+            </select>
+
+
+            <select
+                id="statusFilter"
+                onchange="renderAssignments()"
+            >
+
+                <option value="all">
+                    All Status
+                </option>
+
+                <option value="active">
+                    Active
+                </option>
+
+                <option value="closed">
+                    Closed
+                </option>
+
+                <option value="draft">
+                    Draft
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ASSIGNMENTS TABLE -->
+
+        <div class="table-container">
+
+
+            <div
+                id="loading"
+                class="loading"
+            >
+                Loading assignments...
+            </div>
+
+
+            <table
+                id="assignmentTable"
+                style="display:none;"
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Title
+                        </th>
+
+                        <th>
+                            Course
+                        </th>
+
+                        <th>
+                            Questions
+                        </th>
+
+                        <th>
+                            Marks
+                        </th>
+
+                        <th>
+                            Deadline
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Submissions
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody
+                    id="assignmentBody"
+                ></tbody>
+
+            </table>
+
+
+            <div
+                id="emptyState"
+                class="empty"
+                style="display:none;"
+            >
+
+                <h3>
+                    No assignments found
+                </h3>
+
+                <p>
+                    Create your first assignment to get started.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ERROR SCREEN -->
+
+    <div
+        id="errorScreen"
+        class="error-screen"
+    >
+
+        <div class="error-box">
+
+            <h2>
+                Access Denied
+            </h2>
+
+            <p id="errorMessage">
+                You do not have permission to access this page.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- TOAST -->
+
+    <div
+        id="toast"
+        class="toast"
+    ></div>
+
+
+<script>
+
+
+/* ==========================================
+   EXACT FIREBASE CONFIG
+   DO NOT CHANGE
+========================================== */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840261642",
+
+    appId:
+        "1:709840261642:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+/* ==========================================
+   FIREBASE
+========================================== */
+
+firebase.initializeApp(firebaseConfig);
+
+const auth =
+    firebase.auth();
+
+const db =
+    firebase.firestore();
+
+
+/* ==========================================
+   GLOBAL DATA
+========================================== */
+
+let allAssignments = [];
+
+let submissionCounts = {};
+
+
+/* ==========================================
+   AUTH CHECK
+========================================== */
+
+auth.onAuthStateChanged(
+    async function(user) {
+
+        console.log(
+            "Auth state:",
+            user ? user.uid : "signed out"
+        );
+
+
+        if (!user) {
+
+            showForbidden(
+                "No administrator is currently signed in."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            const userSnapshot =
+                await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+            if (!userSnapshot.exists) {
+
+                showForbidden(
+                    "Your account does not have a user record in STI Academy."
+                );
+
+                return;
+
+            }
+
+
+            const userData =
+                userSnapshot.data();
+
+
+            console.log(
+                "Current user:",
+                userData
+            );
+
+
+            /*
+             * Your rules expect:
+             *
+             * role = "admin"
+             * status = "active"
+             */
+
+            if (
+                userData.role !== "admin"
+            ) {
+
+                showForbidden(
+                    "This account is not registered as an admin."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                userData.status !== "active"
+            ) {
+
+                showForbidden(
+                    "This admin account is not active."
+                );
+
+                return;
+
+            }
+
+
+            /*
+             * ADMIN VERIFIED
+             */
+
+            document.getElementById(
+                "errorScreen"
+            ).style.display = "none";
+
+
+            document.getElementById(
+                "adminPage"
+            ).style.display = "block";
+
+
+            await loadAssignments();
+
+        }
+
+
+        catch(error) {
+
+            console.error(
+                "Admin verification error:",
+                error
+            );
+
+
+            showForbidden(
+                "Firebase error: " +
+                error.message
+            );
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+   FORBIDDEN SCREEN
+========================================== */
+
+function showForbidden(message) {
+
+    document.getElementById(
+        "adminPage"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "errorMessage"
+    ).textContent = message;
+
+
+    document.getElementById(
+        "errorScreen"
+    ).style.display = "flex";
+
+}
+
+
+/* ==========================================
+   LOAD ASSIGNMENTS
+========================================== */
+
+async function loadAssignments() {
+
+    try {
+
+        let snapshot;
+
+
+        try {
+
+            snapshot =
+                await db
+                    .collection("assignments")
+                    .orderBy(
+                        "createdAt",
+                        "desc"
+                    )
+                    .get();
+
+        }
+
+
+        catch(error) {
+
+            console.warn(
+                "Ordered query failed. Using normal query.",
+                error
+            );
+
+
+            snapshot =
+                await db
+                    .collection("assignments")
+                    .get();
+
+        }
+
+
+        allAssignments =
+            snapshot.docs.map(
+                function(doc) {
+
+                    return {
+
+                        id: doc.id,
+
+                        ...doc.data()
+
+                    };
+
+                }
+            );
+
+
+        /*
+         * Get the real submission count.
+         */
+
+        await loadSubmissionCounts();
+
+
+        populateCourseFilter();
+
+        updateStats();
+
+        renderAssignments();
+
+
+        document.getElementById(
+            "loading"
+        ).style.display = "none";
+
+
+        document.getElementById(
+            "assignmentTable"
+        ).style.display = "table";
+
+    }
+
+
+    catch(error) {
+
+        console.error(
+            "Assignments loading error:",
+            error
+        );
+
+
+        document.getElementById(
+            "loading"
+        ).textContent =
+            "Unable to load assignments: " +
+            error.message;
+
+    }
+
+}
+
+
+/* ==========================================
+   REAL SUBMISSION COUNTS
+========================================== */
+
+async function loadSubmissionCounts() {
+
+    submissionCounts = {};
+
+
+    const snapshot =
+        await db
+            .collection(
+                "assignmentSubmissions"
+            )
+            .get();
+
+
+    snapshot.forEach(
+        function(doc) {
+
+            const submission =
+                doc.data();
+
+
+            const assignmentId =
+                submission.assignmentId;
+
+
+            if (!assignmentId) {
+
+                return;
+
+            }
+
+
+            if (
+                !submissionCounts[
+                    assignmentId
+                ]
+            ) {
+
+                submissionCounts[
+                    assignmentId
+                ] = 0;
+
+            }
+
+
+            submissionCounts[
+                assignmentId
+            ]++;
+
+        }
+    );
+
+
+    console.log(
+        "Submission counts:",
+        submissionCounts
+    );
+
+}
+
+
+/* ==========================================
+   COURSE FILTER
+========================================== */
+
+function populateCourseFilter() {
+
+    const select =
+        document.getElementById(
+            "courseFilter"
+        );
+
+
+    const courses =
+        new Set();
+
+
+    allAssignments.forEach(
+        function(assignment) {
+
+            if (
+                assignment.course
+            ) {
+
+                courses.add(
+                    assignment.course
+                );
+
+            }
+
+        }
+    );
+
+
+    select.innerHTML =
+        '<option value="all">All Courses</option>';
+
+
+    Array.from(courses)
+        .sort()
+        .forEach(
+            function(course) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    course;
+
+
+                option.textContent =
+                    course;
+
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+}
+
+
+/* ==========================================
+   STATUS
+========================================== */
+
+function getStatus(assignment) {
+
+    if (
+        assignment.status
+    ) {
+
+        return String(
+            assignment.status
+        ).toLowerCase();
+
+    }
+
+
+    if (
+        assignment.isDraft === true
+    ) {
+
+        return "draft";
+
+    }
+
+
+    if (
+        assignment.deadline
+    ) {
+
+        const deadline =
+            getDate(
+                assignment.deadline
+            );
+
+
+        if (
+            deadline &&
+            deadline.getTime() < Date.now()
+        ) {
+
+            return "closed";
+
+        }
+
+    }
+
+
+    return "active";
+
+}
+
+
+/* ==========================================
+   DATE
+========================================== */
+
+function getDate(value) {
+
+    if (!value) {
+
+        return null;
+
+    }
+
+
+    if (
+        value &&
+        typeof value.toDate === "function"
+    ) {
+
+        return value.toDate();
+
+    }
+
+
+    if (
+        value instanceof Date
+    ) {
+
+        return value;
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return date;
+
+}
+
+
+function formatDate(value) {
+
+    const date =
+        getDate(value);
+
+
+    if (!date) {
+
+        return "—";
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-NG",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* ==========================================
+   QUESTION COUNT
+========================================== */
+
+function getQuestionCount(assignment) {
+
+    if (
+        Array.isArray(
+            assignment.questions
+        )
+    ) {
+
+        return assignment.questions.length;
+
+    }
+
+
+    if (
+        assignment.questionCount !== undefined
+    ) {
+
+        return assignment.questionCount;
+
+    }
+
+
+    return 0;
+
+}
+
+
+/* ==========================================
+   MARKS
+========================================== */
+
+function getMarks(assignment) {
+
+    if (
+        assignment.totalMarks !== undefined
+    ) {
+
+        return assignment.totalMarks;
+
+    }
+
+
+    if (
+        assignment.marks !== undefined
+    ) {
+
+        return assignment.marks;
+
+    }
+
+
+    if (
+        Array.isArray(
+            assignment.questions
+        )
+    ) {
+
+        return assignment.questions.reduce(
+            function(total, question) {
+
+                return (
+                    total +
+                    Number(
+                        question.marks || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+    }
+
+
+    return 0;
+
+}
+
+
+/* ==========================================
+   UPDATE STATS
+========================================== */
+
+function updateStats() {
+
+    const total =
+        allAssignments.length;
+
+
+    const active =
+        allAssignments.filter(
+            function(assignment) {
+
+                return (
+                    getStatus(
+                        assignment
+                    ) === "active"
+                );
+
+            }
+        ).length;
+
+
+    const drafts =
+        allAssignments.filter(
+            function(assignment) {
+
+                return (
+                    getStatus(
+                        assignment
+                    ) === "draft"
+                );
+
+            }
+        ).length;
+
+
+    const submissions =
+        Object.values(
+            submissionCounts
+        ).reduce(
+            function(total, count) {
+
+                return total + count;
+
+            },
+            0
+        );
+
+
+    document.getElementById(
+        "totalAssignments"
+    ).textContent =
+        total;
+
+
+    document.getElementById(
+        "activeAssignments"
+    ).textContent =
+        active;
+
+
+    document.getElementById(
+        "draftAssignments"
+    ).textContent =
+        drafts;
+
+
+    document.getElementById(
+        "totalSubmissions"
+    ).textContent =
+        submissions;
+
+}
+
+
+/* ==========================================
+   RENDER ASSIGNMENTS
+========================================== */
+
+function renderAssignments() {
+
+    const body =
+        document.getElementById(
+            "assignmentBody"
+        );
+
+
+    const search =
+        document.getElementById(
+            "searchInput"
+        )
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    const course =
+        document.getElementById(
+            "courseFilter"
+        ).value;
+
+
+    const status =
+        document.getElementById(
+            "statusFilter"
+        ).value;
+
+
+    body.innerHTML = "";
+
+
+    const filtered =
+        allAssignments.filter(
+            function(assignment) {
+
+                const title =
+                    String(
+                        assignment.title || ""
+                    ).toLowerCase();
+
+
+                const courseName =
+                    String(
+                        assignment.course || ""
+                    );
+
+
+                const assignmentStatus =
+                    getStatus(
+                        assignment
+                    );
+
+
+                const matchesSearch =
+                    !search ||
+                    title.includes(search) ||
+                    courseName
+                        .toLowerCase()
+                        .includes(search);
+
+
+                const matchesCourse =
+                    course === "all" ||
+                    courseName === course;
+
+
+                const matchesStatus =
+                    status === "all" ||
+                    assignmentStatus === status;
+
+
+                return (
+                    matchesSearch &&
+                    matchesCourse &&
+                    matchesStatus
+                );
+
+            }
+        );
+
+
+    document.getElementById(
+        "emptyState"
+    ).style.display =
+        filtered.length === 0
+            ? "block"
+            : "none";
+
+
+    if (
+        filtered.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    filtered.forEach(
+        function(assignment) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const id =
+                assignment.id;
+
+
+            const title =
+                assignment.title ||
+                "Untitled Assignment";
+
+
+            const course =
+                assignment.course ||
+                "Course N/A";
+
+
+            const questions =
+                getQuestionCount(
+                    assignment
+                );
+
+
+            const marks =
+                getMarks(
+                    assignment
+                );
+
+
+            const deadline =
+                formatDate(
+                    assignment.deadline
+                );
+
+
+            const status =
+                getStatus(
+                    assignment
+                );
+
+
+            const submissions =
+                submissionCounts[
+                    id
+                ] || 0;
+
+
+            let statusClass =
+                "status-active";
+
+
+            if (
+                status === "closed"
+            ) {
+
+                statusClass =
+                    "status-closed";
+
+            }
+
+
+            if (
+                status === "draft"
+            ) {
+
+                statusClass =
+                    "status-draft";
+
+            }
+
+
+            row.innerHTML = `
+
+                <td>
+
+                    <div class="assignment-title">
+                        ${escapeHtml(title)}
+                    </div>
+
+                    <div class="assignment-id">
+                        ${escapeHtml(id)}
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <span class="course">
+                        ${escapeHtml(course)}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="number">
+                        ${questions}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="number">
+                        ${marks}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="deadline">
+                        ${deadline}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="status ${statusClass}">
+                        ${capitalize(status)}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <button
+                        class="submission-btn"
+                        onclick="viewSubmissions('${escapeJs(id)}')"
+                        title="View submissions"
+                    >
+
+                        <span class="submission-count">
+                            ${submissions}
+                        </span>
+
+                        <span class="arrow">
+                            →
+                        </span>
+
+                    </button>
+
+                </td>
+
+
+                <td>
+
+                    <div class="actions">
+
+                        <button
+                            class="action-btn"
+                            onclick="editAssignment('${escapeJs(id)}')"
+                        >
+                            Edit
+                        </button>
+
+
+                        <button
+                            class="action-btn delete-btn"
+                            onclick="deleteAssignment('${escapeJs(id)}')"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            body.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   NEW ASSIGNMENT
+========================================== */
+
+function newAssignment() {
+
+    window.location.href =
+        "new-assignment.html";
+
+}
+
+
+/* ==========================================
+   EDIT ASSIGNMENT
+========================================== */
+
+function editAssignment(id) {
+
+    window.location.href =
+        "new-assignment.html?id=" +
+        encodeURIComponent(id);
+
+}
+
+
+/* ==========================================
+   VIEW SUBMISSIONS
+========================================== */
+
+function viewSubmissions(id) {
+
+    window.location.href =
+        "submission.html?assignmentId=" +
+        encodeURIComponent(id);
+
+}
+
+
+/* ==========================================
+   DELETE ASSIGNMENT
+========================================== */
+
+async function deleteAssignment(id) {
+
+    const assignment =
+        allAssignments.find(
+            function(item) {
+
+                return item.id === id;
+
+            }
+        );
+
+
+    if (!assignment) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            'Delete "' +
+            (
+                assignment.title ||
+                "this assignment"
+            ) +
+            '"?\n\nThis will delete the assignment document.'
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await db
+            .collection("assignments")
+            .doc(id)
+            .delete();
+
+
+        allAssignments =
+            allAssignments.filter(
+                function(item) {
+
+                    return item.id !== id;
+
+                }
+            );
+
+
+        delete submissionCounts[id];
+
+
+        populateCourseFilter();
+
+        updateStats();
+
+        renderAssignments();
+
+
+        showToast(
+            "Assignment deleted successfully."
+        );
+
+    }
+
+
+    catch(error) {
+
+        console.error(
+            "Delete assignment error:",
+            error
+        );
+
+
+        showToast(
+            "Unable to delete assignment: " +
+            error.message,
+            true
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   ESCAPE HTML
+========================================== */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+function escapeJs(value) {
+
+    return String(value)
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+        .replace(
+            /'/g,
+            "\\'"
+        );
+
+}
+
+
+function capitalize(value) {
+
+    if (!value) {
+
+        return "";
+
+    }
+
+
+    return (
+        value.charAt(0).toUpperCase() +
+        value.slice(1)
+    );
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message,
+    isError = false
+) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.className =
+        "toast show" +
+        (
+            isError
+                ? " error"
+                : ""
+        );
+
+
+    setTimeout(
+        function() {
+
+            toast.className =
+                "toast";
+
+        },
+        4000
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Ranking | STI Academy Admin</title>
+
+    <!-- FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: #ffffff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #999;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #303030;
+            background: #080808;
+            color: #fff;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #1683ff;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .primary {
+            background: #1683ff;
+            color: #fff;
+        }
+
+        .secondary {
+            background: #242424;
+            color: #fff;
+        }
+
+        .danger {
+            background: #b91c1c;
+            color: #fff;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .stat-number {
+            font-size: 25px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th,
+        td {
+            padding: 13px 10px;
+            border-bottom: 1px solid #242424;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            color: #999;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #151515;
+        }
+
+        .position {
+            font-weight: bold;
+            color: #1683ff;
+        }
+
+        .course-badge {
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 6px;
+            background: #0d2945;
+            color: #1683ff;
+            font-size: 12px;
+        }
+
+        .grade {
+            font-weight: bold;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .actions button {
+            padding: 7px 10px;
+            font-size: 12px;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+            padding: 30px;
+        }
+
+        .loading {
+            color: #999;
+            padding: 20px 0;
+        }
+
+        .error {
+            background: #351010;
+            border: 1px solid #6b1b1b;
+            color: #ff8a8a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success {
+            background: #0d2d18;
+            border: 1px solid #1f6b38;
+            color: #7ee2a4;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .student-info {
+            margin-top: 8px;
+            color: #999;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Ranking</h1>
+
+    <div class="subtitle">
+        Manage student rankings and academic performance.
+    </div>
+
+    <div id="errorMessage" class="error"></div>
+
+    <div id="successMessage" class="success"></div>
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <div class="stat-label">
+                Total Students
+            </div>
+
+            <div
+                class="stat-number"
+                id="totalStudents"
+            >
+                0
+            </div>
+
+        </div>
+
+        <div class="stat">
+
+            <div class="stat-label">
+                Ranked Students
+            </div>
+
+            <div
+                class="stat-number"
+                id="rankedStudents"
+            >
+                0
+            </div>
+
+        </div>
+
+        <div class="stat">
+
+            <div class="stat-label">
+                Courses
+            </div>
+
+            <div
+                class="stat-number"
+                id="totalCourses"
+            >
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ADD / EDIT RANKING -->
+
+    <div class="card">
+
+        <h2 id="formTitle">
+            Add Ranking
+        </h2>
+
+        <div class="form-grid">
+
+            <div class="full">
+
+                <label>
+                    Student
+                </label>
+
+                <select id="studentSelect">
+
+                    <option value="">
+                        Select student
+                    </option>
+
+                </select>
+
+                <div
+                    id="studentInfo"
+                    class="student-info"
+                ></div>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Course
+                </label>
+
+                <select id="courseSelect">
+
+                    <option value="">
+                        Select course
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Total Score
+                </label>
+
+                <input
+                    type="number"
+                    id="totalScore"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 85"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Position
+                </label>
+
+                <input
+                    type="number"
+                    id="position"
+                    min="1"
+                    placeholder="e.g. 1"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Grade
+                </label>
+
+                <select id="grade">
+
+                    <option value="">
+                        Select grade
+                    </option>
+
+                    <option value="First Class">
+                        First Class
+                    </option>
+
+                    <option value="2:1">
+                        2:1
+                    </option>
+
+                    <option value="2:2">
+                        2:2
+                    </option>
+
+                    <option value="Third">
+                        Third
+                    </option>
+
+                    <option value="Pass">
+                        Pass
+                    </option>
+
+                    <option value="Fail">
+                        Fail
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Ranking Points
+                </label>
+
+                <input
+                    type="number"
+                    id="rankingPoints"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 85"
+                >
+
+            </div>
+
+
+            <div class="full">
+
+                <label>
+                    Remarks
+                </label>
+
+                <textarea
+                    id="remarks"
+                    placeholder="Optional remarks..."
+                ></textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="button-row">
+
+            <button
+                class="primary"
+                id="saveButton"
+                onclick="saveRanking()"
+            >
+                Save Ranking
+            </button>
+
+            <button
+                class="secondary"
+                id="cancelButton"
+                onclick="cancelEdit()"
+                style="display:none;"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- FILTER -->
+
+    <div class="card">
+
+        <h2>
+            Ranking List
+        </h2>
+
+        <div class="form-grid">
+
+            <div>
+
+                <label>
+                    Search Student
+                </label>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search by name or student ID..."
+                    oninput="renderRankings()"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Filter Course
+                </label>
+
+                <select
+                    id="filterCourse"
+                    onchange="renderRankings()"
+                >
+
+                    <option value="">
+                        All Courses
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TABLE -->
+
+    <div class="card">
+
+        <div
+            id="tableLoading"
+            class="loading"
+        >
+            Loading rankings...
+        </div>
+
+        <div class="table-wrapper">
+
+            <table id="rankingTable">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Position
+                        </th>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th>
+                            Student ID
+                        </th>
+
+                        <th>
+                            Course
+                        </th>
+
+                        <th>
+                            Score
+                        </th>
+
+                        <th>
+                            Grade
+                        </th>
+
+                        <th>
+                            Points
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="rankingBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ================================
+    // FIREBASE
+    // ================================
+
+    const firebaseConfig = {
+
+        apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+        authDomain: "sti-academy.firebaseapp.com",
+
+        projectId: "sti-academy",
+
+        storageBucket: "sti-academy.firebasestorage.app",
+
+        messagingSenderId: "709840261642",
+
+        appId: "1:709840261642:web:714b09bf661afa159f27ff",
+
+        measurementId: "G-7ZRZ3P28YP"
+
+    };
+
+
+    firebase.initializeApp(firebaseConfig);
+
+
+    const auth = firebase.auth();
+
+    const db = firebase.firestore();
+
+
+    // ================================
+    // GLOBAL VARIABLES
+    // ================================
+
+    let students = [];
+
+    let courses = [];
+
+    let rankings = [];
+
+    let editingRankingId = null;
+
+
+    // ================================
+    // AUTH CHECK
+    // ================================
+
+    auth.onAuthStateChanged(async (user) => {
+
+        if (!user) {
+
+            window.location.href = "../login.html";
+
+            return;
+
+        }
+
+
+        try {
+
+            const userDoc =
+                await db.collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+            if (
+                !userDoc.exists ||
+                userDoc.data().role !== "admin"
+            ) {
+
+                alert("Access denied.");
+
+                window.location.href = "../index.html";
+
+                return;
+
+            }
+
+
+            await loadStudents();
+
+            await loadCourses();
+
+            await loadRankings();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showError(
+                "Unable to load the ranking page."
+            );
+
+        }
+
+    });
+
+
+    // ================================
+    // LOAD STUDENTS
+    // ================================
+
+    async function loadStudents() {
+
+        try {
+
+            const snapshot =
+                await db.collection("users").get();
+
+
+            students = [];
+
+
+            snapshot.forEach((doc) => {
+
+                const data = doc.data();
+
+
+                /*
+                    IMPORTANT:
+
+                    Students are loaded from USERS.
+
+                    There is NO department filter.
+
+                    Course is taken directly from
+                    the user's course field.
+                */
+
+                if (
+                    data.role === "student" ||
+                    !data.role
+                ) {
+
+                    students.push({
+
+                        uid: doc.id,
+
+                        studentId:
+                            data.studentId || "",
+
+                        fullName:
+                            data.fullName ||
+                            data.name ||
+                            "Unnamed Student",
+
+                        email:
+                            data.email || "",
+
+                        course:
+                            data.course || "",
+
+                        status:
+                            data.status || ""
+
+                    });
+
+                }
+
+            });
+
+
+            students.sort((a, b) =>
+
+                String(a.fullName)
+                    .localeCompare(
+                        String(b.fullName)
+                    )
+
+            );
+
+
+            populateStudentSelect();
+
+
+            document.getElementById(
+                "totalStudents"
+            ).textContent = students.length;
+
+
+        } catch (error) {
+
+            console.error(
+                "Error loading students:",
+                error
+            );
+
+            showError(
+                "Unable to load students."
+            );
+
+        }
+
+    }
+
+
+    // ================================
+    // LOAD COURSES
+    // ================================
+
+    async function loadCourses() {
+
+        try {
+
+            const snapshot =
+                await db.collection("courses")
+                    .get();
+
+
+            courses = [];
+
+
+            snapshot.forEach((doc) => {
+
+                const data = doc.data();
+
+
+                if (
+                    !data.status ||
+                    data.status === "active"
+                ) {
+
+                    courses.push({
+
+                        id: doc.id,
+
+                        courseName:
+                            data.courseName ||
+                            data.name ||
+                            doc.id
+
+                    });
+
+                }
+
+            });
+
+
+            courses.sort((a, b) =>
+
+                String(a.courseName)
+                    .localeCompare(
+                        String(b.courseName)
+                    )
+
+            );
+
+
+            populateCourseSelect();
+
+
+            document.getElementById(
+                "totalCourses"
+            ).textContent = courses.length;
+
+
+        } catch (error) {
+
+            console.error(
+                "Error loading courses:",
+                error
+            );
+
+            showError(
+                "Unable to load courses."
+            );
+
+        }
+
+    }
+
+
+    // ================================
+    // POPULATE STUDENT SELECT
+    // ================================
+
+    function populateStudentSelect() {
+
+        const select =
+            document.getElementById(
+                "studentSelect"
+            );
+
+
+        select.innerHTML =
+            '<option value="">Select student</option>';
+
+
+        students.forEach((student) => {
+
+            const option =
+                document.createElement("option");
+
+
+            option.value = student.uid;
+
+
+            option.textContent =
+                student.fullName +
+                (
+                    student.studentId
+                        ? " - " + student.studentId
+                        : ""
+                );
+
+
+            select.appendChild(option);
+
+        });
+
+    }
+
+
+    // ================================
+    // POPULATE COURSE SELECT
+    // ================================
+
+    function populateCourseSelect() {
+
+        const select =
+            document.getElementById(
+                "courseSelect"
+            );
+
+
+        const filter =
+            document.getElementById(
+                "filterCourse"
+            );
+
+
+        select.innerHTML =
+            '<option value="">Select course</option>';
+
+
+        filter.innerHTML =
+            '<option value="">All Courses</option>';
+
+
+        courses.forEach((course) => {
+
+            const option =
+                document.createElement("option");
+
+
+            option.value = course.id;
+
+            option.textContent =
+                course.courseName;
+
+
+            select.appendChild(option);
+
+
+            const filterOption =
+                document.createElement("option");
+
+
+            filterOption.value = course.id;
+
+            filterOption.textContent =
+                course.courseName;
+
+
+            filter.appendChild(
+                filterOption
+            );
+
+        });
+
+    }
+
+
+    // ================================
+    // STUDENT SELECT CHANGE
+    // ================================
+
+    document.getElementById(
+        "studentSelect"
+    ).addEventListener(
+        "change",
+        function () {
+
+            const student =
+                students.find(
+                    item =>
+                        item.uid === this.value
+                );
+
+
+            if (!student) {
+
+                document.getElementById(
+                    "studentInfo"
+                ).textContent = "";
+
+                return;
+
+            }
+
+
+            document.getElementById(
+                "studentInfo"
+            ).textContent =
+                student.email +
+                (
+                    student.course
+                        ? " • Course ID: " +
+                          student.course
+                        : ""
+                );
+
+
+            /*
+                Automatically use the student's
+                course ID when available.
+            */
+
+            if (student.course) {
+
+                const courseSelect =
+                    document.getElementById(
+                        "courseSelect"
+                    );
+
+
+                const exists =
+                    Array.from(
+                        courseSelect.options
+                    ).some(
+                        option =>
+                            option.value ===
+                            student.course
+                    );
+
+
+                if (exists) {
+
+                    courseSelect.value =
+                        student.course;
+
+                }
+
+            }
+
+        }
+    );
+
+
+    // ================================
+    // LOAD RANKINGS
+    // ================================
+
+    async function loadRankings() {
+
+        document.getElementById(
+            "tableLoading"
+        ).style.display = "block";
+
+
+        try {
+
+            const snapshot =
+                await db.collection("rankings")
+                    .get();
+
+
+            rankings = [];
+
+
+            snapshot.forEach((doc) => {
+
+                const data = doc.data();
+
+
+                rankings.push({
+
+                    id: doc.id,
+
+                    ...data
+
+                });
+
+            });
+
+
+            rankings.sort(
+                (a, b) => {
+
+                    const positionA =
+                        Number(
+                            a.position || 999999
+                        );
+
+                    const positionB =
+                        Number(
+                            b.position || 999999
+                        );
+
+
+                    return (
+                        positionA -
+                        positionB
+                    );
+
+                }
+            );
+
+
+            renderRankings();
+
+
+            document.getElementById(
+                "rankedStudents"
+            ).textContent =
+                rankings.length;
+
+
+        } catch (error) {
+
+            console.error(
+                "Error loading rankings:",
+                error
+            );
+
+
+            showError(
+                "Unable to load rankings."
+            );
+
+        } finally {
+
+            document.getElementById(
+                "tableLoading"
+            ).style.display = "none";
+
+        }
+
+    }
+
+
+    // ================================
+    // RENDER RANKINGS
+    // ================================
+
+    function renderRankings() {
+
+        const body =
+            document.getElementById(
+                "rankingBody"
+            );
+
+
+        const search =
+            document.getElementById(
+                "searchInput"
+            ).value
+                .trim()
+                .toLowerCase();
+
+
+        const courseFilter =
+            document.getElementById(
+                "filterCourse"
+            ).value;
+
+
+        body.innerHTML = "";
+
+
+        let filtered =
+            rankings.filter((ranking) => {
+
+                const name =
+                    String(
+                        ranking.studentName || ""
+                    ).toLowerCase();
+
+
+                const studentId =
+                    String(
+                        ranking.studentId || ""
+                    ).toLowerCase();
+
+
+                const matchesSearch =
+                    !search ||
+                    name.includes(search) ||
+                    studentId.includes(search);
+
+
+                const matchesCourse =
+                    !courseFilter ||
+                    ranking.courseId ===
+                        courseFilter;
+
+
+                return (
+                    matchesSearch &&
+                    matchesCourse
+                );
+
+            });
+
+
+        filtered.sort(
+            (a, b) =>
+                Number(a.position || 999999) -
+                Number(b.position || 999999)
+        );
+
+
+        if (filtered.length === 0) {
+
+            body.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="empty"
+                    >
+                        No ranking found.
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        filtered.forEach((ranking) => {
+
+            const row =
+                document.createElement("tr");
+
+
+            const courseName =
+                getCourseName(
+                    ranking.courseId,
+                    ranking.courseName
+                );
+
+
+            row.innerHTML = `
+
+                <td class="position">
+                    ${escapeHtml(
+                        ranking.position || "-"
+                    )}
+                </td>
+
+                <td>
+                    <strong>
+                        ${escapeHtml(
+                            ranking.studentName ||
+                            "Unknown Student"
+                        )}
+                    </strong>
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        ranking.studentId || "-"
+                    )}
+                </td>
+
+                <td>
+
+                    <span class="course-badge">
+
+                        ${escapeHtml(
+                            courseName
+                        )}
+
+                    </span>
+
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        ranking.totalScore ??
+                        "-"
+                    )}
+                </td>
+
+                <td class="grade">
+                    ${escapeHtml(
+                        ranking.grade || "-"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        ranking.rankingPoints ??
+                        "-"
+                    )}
+                </td>
+
+                <td>
+
+                    <div class="actions">
+
+                        <button
+                            class="secondary"
+                            onclick="editRanking('${ranking.id}')"
+                        >
+                            Edit
+                        </button>
+
+                        <button
+                            class="danger"
+                            onclick="deleteRanking('${ranking.id}')"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            body.appendChild(row);
+
+        });
+
+    }
+
+
+    // ================================
+    // SAVE RANKING
+    // ================================
+
+    async function saveRanking() {
+
+        hideMessages();
+
+
+        const studentUid =
+            document.getElementById(
+                "studentSelect"
+            ).value;
+
+
+        const courseId =
+            document.getElementById(
+                "courseSelect"
+            ).value;
+
+
+        const totalScoreValue =
+            document.getElementById(
+                "totalScore"
+            ).value;
+
+
+        const positionValue =
+            document.getElementById(
+                "position"
+            ).value;
+
+
+        const grade =
+            document.getElementById(
+                "grade"
+            ).value;
+
+
+        const rankingPointsValue =
+            document.getElementById(
+                "rankingPoints"
+            ).value;
+
+
+        const remarks =
+            document.getElementById(
+                "remarks"
+            ).value.trim();
+
+
+        if (!studentUid) {
+
+            showError(
+                "Please select a student."
+            );
+
+            return;
+
+        }
+
+
+        if (!courseId) {
+
+            showError(
+                "Please select a course."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            totalScoreValue === "" ||
+            positionValue === ""
+        ) {
+
+            showError(
+                "Please enter the total score and position."
+            );
+
+            return;
+
+        }
+
+
+        const student =
+            students.find(
+                item =>
+                    item.uid === studentUid
+            );
+
+
+        if (!student) {
+
+            showError(
+                "Selected student could not be found."
+            );
+
+            return;
+
+        }
+
+
+        const course =
+            courses.find(
+                item =>
+                    item.id === courseId
+            );
+
+
+        const rankingData = {
+
+            studentUid:
+
+                student.uid,
+
+            studentId:
+
+                student.studentId || "",
+
+            studentName:
+
+                student.fullName || "",
+
+            studentEmail:
+
+                student.email || "",
+
+            courseId:
+
+                courseId,
+
+            courseName:
+
+                course
+                    ? course.courseName
+                    : courseId,
+
+            totalScore:
+
+                Number(totalScoreValue),
+
+            position:
+
+                Number(positionValue),
+
+            grade:
+
+                grade || "",
+
+            rankingPoints:
+
+                rankingPointsValue === ""
+                    ? 0
+                    : Number(
+                        rankingPointsValue
+                    ),
+
+            remarks:
+
+                remarks,
+
+            status:
+
+                "active",
+
+            updatedAt:
+
+                firebase.firestore
+                    .FieldValue
+                    .serverTimestamp()
+
+        };
+
+
+        const saveButton =
+            document.getElementById(
+                "saveButton"
+            );
+
+
+        saveButton.disabled = true;
+
+        saveButton.textContent =
+            "Saving...";
+
+
+        try {
+
+            const currentUser =
+                auth.currentUser;
+
+
+            if (!currentUser) {
+
+                throw new Error(
+                    "You are not signed in."
+                );
+
+            }
+
+
+            if (editingRankingId) {
+
+                await db.collection("rankings")
+                    .doc(editingRankingId)
+                    .update(
+                        rankingData
+                    );
+
+
+                showSuccess(
+                    "Ranking updated successfully."
+                );
+
+            } else {
+
+                rankingData.createdAt =
+                    firebase.firestore
+                        .FieldValue
+                        .serverTimestamp();
+
+
+                rankingData.createdBy =
+                    currentUser.uid;
+
+
+                await db.collection("rankings")
+                    .add(
+                        rankingData
+                    );
+
+
+                showSuccess(
+                    "Ranking saved successfully."
+                );
+
+            }
+
+
+            await loadRankings();
+
+            clearForm();
+
+
+        } catch (error) {
+
+            console.error(
+                "Error saving ranking:",
+                error
+            );
+
+
+            showError(
+                "Unable to save ranking: " +
+                error.message
+            );
+
+        } finally {
+
+            saveButton.disabled = false;
+
+            saveButton.textContent =
+                editingRankingId
+                    ? "Update Ranking"
+                    : "Save Ranking";
+
+        }
+
+    }
+
+
+    // ================================
+    // EDIT RANKING
+    // ================================
+
+    function editRanking(id) {
+
+        const ranking =
+            rankings.find(
+                item =>
+                    item.id === id
+            );
+
+
+        if (!ranking) {
+
+            showError(
+                "Ranking record not found."
+            );
+
+            return;
+
+        }
+
+
+        editingRankingId = id;
+
+
+        document.getElementById(
+            "formTitle"
+        ).textContent =
+            "Edit Ranking";
+
+
+        document.getElementById(
+            "studentSelect"
+        ).value =
+            ranking.studentUid || "";
+
+
+        document.getElementById(
+            "courseSelect"
+        ).value =
+            ranking.courseId || "";
+
+
+        document.getElementById(
+            "totalScore"
+        ).value =
+            ranking.totalScore ?? "";
+
+
+        document.getElementById(
+            "position"
+        ).value =
+            ranking.position ?? "";
+
+
+        document.getElementById(
+            "grade"
+        ).value =
+            ranking.grade || "";
+
+
+        document.getElementById(
+            "rankingPoints"
+        ).value =
+            ranking.rankingPoints ?? "";
+
+
+        document.getElementById(
+            "remarks"
+        ).value =
+            ranking.remarks || "";
+
+
+        const student =
+            students.find(
+                item =>
+                    item.uid ===
+                    ranking.studentUid
+            );
+
+
+        if (student) {
+
+            document.getElementById(
+                "studentInfo"
+            ).textContent =
+                student.email +
+                (
+                    student.course
+                        ? " • Course ID: " +
+                          student.course
+                        : ""
+                );
+
+        }
+
+
+        document.getElementById(
+            "saveButton"
+        ).textContent =
+            "Update Ranking";
+
+
+        document.getElementById(
+            "cancelButton"
+        ).style.display =
+            "inline-block";
+
+
+        window.scrollTo({
+
+            top: 0,
+
+            behavior: "smooth"
+
+        });
+
+    }
+
+
+    // ================================
+    // DELETE RANKING
+    // ================================
+
+    async function deleteRanking(id) {
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to delete this ranking?"
+            );
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+
+        try {
+
+            await db.collection("rankings")
+                .doc(id)
+                .delete();
+
+
+            showSuccess(
+                "Ranking deleted successfully."
+            );
+
+
+            await loadRankings();
+
+
+        } catch (error) {
+
+            console.error(
+                "Error deleting ranking:",
+                error
+            );
+
+
+            showError(
+                "Unable to delete ranking: " +
+                error.message
+            );
+
+        }
+
+    }
+
+
+    // ================================
+    // CANCEL EDIT
+    // ================================
+
+    function cancelEdit() {
+
+        clearForm();
+
+    }
+
+
+    // ================================
+    // CLEAR FORM
+    // ================================
+
+    function clearForm() {
+
+        editingRankingId = null;
+
+
+        document.getElementById(
+            "formTitle"
+        ).textContent =
+            "Add Ranking";
+
+
+        document.getElementById(
+            "studentSelect"
+        ).value = "";
+
+
+        document.getElementById(
+            "courseSelect"
+        ).value = "";
+
+
+        document.getElementById(
+            "totalScore"
+        ).value = "";
+
+
+        document.getElementById(
+            "position"
+        ).value = "";
+
+
+        document.getElementById(
+            "grade"
+        ).value = "";
+
+
+        document.getElementById(
+            "rankingPoints"
+        ).value = "";
+
+
+        document.getElementById(
+            "remarks"
+        ).value = "";
+
+
+        document.getElementById(
+            "studentInfo"
+        ).textContent = "";
+
+
+        document.getElementById(
+            "saveButton"
+        ).textContent =
+            "Save Ranking";
+
+
+        document.getElementById(
+            "cancelButton"
+        ).style.display =
+            "none";
+
+    }
+
+
+    // ================================
+    // GET COURSE NAME
+    // ================================
+
+    function getCourseName(
+        courseId,
+        fallback
+    ) {
+
+        const course =
+            courses.find(
+                item =>
+                    item.id === courseId
+            );
+
+
+        if (course) {
+
+            return course.courseName;
+
+        }
+
+
+        return fallback ||
+            courseId ||
+            "-";
+
+    }
+
+
+    // ================================
+    // ESCAPE HTML
+    // ================================
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return "";
+
+        }
+
+
+        return String(value)
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    // ================================
+    // MESSAGES
+    // ================================
+
+    function showError(message) {
+
+        const element =
+            document.getElementById(
+                "errorMessage"
+            );
+
+
+        element.textContent =
+            message;
+
+
+        element.style.display =
+            "block";
+
+
+        document.getElementById(
+            "successMessage"
+        ).style.display =
+            "none";
+
+    }
+
+
+    function showSuccess(message) {
+
+        const element =
+            document.getElementById(
+                "successMessage"
+            );
+
+
+        element.textContent =
+            message;
+
+
+        element.style.display =
+            "block";
+
+
+        document.getElementById(
+            "errorMessage"
+        ).style.display =
+            "none";
+
+    }
+
+
+    function hideMessages() {
+
+        document.getElementById(
+            "errorMessage"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "successMessage"
+        ).style.display =
+            "none";
+
+    }
+
+</script>
+
+</body>
+
+</html>

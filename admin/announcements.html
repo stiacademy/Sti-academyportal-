@@ -1,1 +1,2026 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Announcements | STI Academy Admin</title>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: #ffffff;
+        }
+
+        header {
+            background: #080808;
+            border-bottom: 1px solid #1683ff;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #1683ff;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .dashboard-btn {
+            background: #1683ff;
+            color: #ffffff;
+        }
+
+        .logout-btn {
+            background: #222222;
+            color: #ffffff;
+            border: 1px solid #444444;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 25px 18px 50px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #0d0d0d;
+            border: 1px solid #222222;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-card h3 {
+            margin: 0 0 8px;
+            font-size: 14px;
+            color: #aaaaaa;
+        }
+
+        .stat-card strong {
+            font-size: 28px;
+            color: #1683ff;
+        }
+
+        .section {
+            background: #0b0b0b;
+            border: 1px solid #222222;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 22px;
+        }
+
+        .section h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: #111111;
+            border: 1px solid #333333;
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #1683ff;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .save-btn {
+            background: #1683ff;
+            color: #ffffff;
+        }
+
+        .cancel-btn {
+            background: #222222;
+            color: #ffffff;
+            display: none;
+        }
+
+        .search-box {
+            margin-bottom: 18px;
+        }
+
+        .announcement-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .announcement-card {
+            background: #111111;
+            border: 1px solid #292929;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .announcement-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .announcement-title {
+            margin: 0 0 7px;
+            font-size: 19px;
+        }
+
+        .announcement-date {
+            color: #777777;
+            font-size: 13px;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .published {
+            background: rgba(22, 131, 255, 0.15);
+            color: #1683ff;
+        }
+
+        .draft {
+            background: #252525;
+            color: #aaaaaa;
+        }
+
+        .announcement-message {
+            margin-top: 18px;
+            color: #cccccc;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .announcement-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .info-box {
+            background: #090909;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .info-box small {
+            display: block;
+            color: #777777;
+            margin-bottom: 5px;
+        }
+
+        .info-box strong {
+            font-size: 14px;
+        }
+
+        .announcement-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .edit-btn {
+            background: #1683ff;
+            color: #ffffff;
+        }
+
+        .toggle-btn {
+            background: #222222;
+            color: #ffffff;
+        }
+
+        .delete-btn {
+            background: #8b1e1e;
+            color: #ffffff;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px;
+            color: #777777;
+        }
+
+        @media (max-width: 800px) {
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .announcement-info {
+                grid-template-columns: 1fr;
+            }
+
+            .announcement-top {
+                flex-direction: column;
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions button {
+                flex: 1;
+            }
+
+            .section {
+                padding: 16px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<header>
+
+    <h1>STI Academy | Announcements</h1>
+
+    <div class="header-actions">
+
+        <button
+            class="dashboard-btn"
+            id="dashboardBtn"
+        >
+            Dashboard
+        </button>
+
+        <button
+            class="logout-btn"
+            id="logoutBtn"
+        >
+            Sign Out
+        </button>
+
+    </div>
+
+</header>
+
+
+<div class="container">
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <h3>Total Announcements</h3>
+
+            <strong id="totalAnnouncements">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Published</h3>
+
+            <strong id="publishedAnnouncements">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Drafts</h3>
+
+            <strong id="draftAnnouncements">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- ADD ANNOUNCEMENT -->
+
+    <div class="section">
+
+        <h2 id="formTitle">
+            Add Announcement
+        </h2>
+
+
+        <form id="announcementForm">
+
+
+            <div class="form-grid">
+
+
+                <div class="full">
+
+                    <label for="announcementTitle">
+                        Announcement Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="announcementTitle"
+                        placeholder="Example: Important Class Update"
+                        required
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="audienceType">
+                        Audience
+                    </label>
+
+                    <select
+                        id="audienceType"
+                        required
+                    >
+
+                        <option value="all">
+                            All Students
+                        </option>
+
+                        <option value="course">
+                            Specific Course
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    id="courseField"
+                    style="display: none;"
+                >
+
+                    <label for="audienceCourse">
+                        Course
+                    </label>
+
+                    <select
+                        id="audienceCourse"
+                    >
+
+                        <option value="">
+                            Select Course
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <label for="announcementStatus">
+                        Status
+                    </label>
+
+                    <select
+                        id="announcementStatus"
+                        required
+                    >
+
+                        <option value="published">
+                            Published
+                        </option>
+
+                        <option value="draft">
+                            Draft
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="full">
+
+                    <label for="announcementMessage">
+                        Announcement Message
+                    </label>
+
+                    <textarea
+                        id="announcementMessage"
+                        placeholder="Write your announcement here..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="form-buttons">
+
+                <button
+                    type="submit"
+                    class="save-btn"
+                    id="saveBtn"
+                >
+                    Add Announcement
+                </button>
+
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    id="cancelBtn"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+
+    <!-- ANNOUNCEMENT LIST -->
+
+    <div class="section">
+
+        <h2>
+            Announcements
+        </h2>
+
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="announcementSearch"
+                placeholder="Search announcements..."
+            >
+
+        </div>
+
+
+        <div
+            class="announcement-list"
+            id="announcementList"
+        ></div>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   FIREBASE
+========================= */
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain: "sti-academy.firebaseapp.com",
+
+    projectId: "sti-academy",
+
+    storageBucket: "sti-academy.firebasestorage.app",
+
+    messagingSenderId: "709840641262",
+
+    appId: "1:709840641262:web:714b09bf661afa159f27ff",
+
+    measurementId: "G-7ZRZ3P28YP"
+
+};
+
+
+if (!firebase.apps.length) {
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+}
+
+
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.firestore();
+
+
+let allAnnouncements = [];
+
+let allCourses = [];
+
+let editingAnnouncementId = null;
+
+
+/* =========================
+   AUTH
+========================= */
+
+auth.onAuthStateChanged(
+    async user => {
+
+        if (!user) {
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+
+        try {
+
+            const adminDoc =
+                await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+            if (!adminDoc.exists) {
+
+                alert(
+                    "Admin account not found."
+                );
+
+                await auth.signOut();
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            const adminData =
+                adminDoc.data();
+
+
+            if (adminData.role !== "admin") {
+
+                alert(
+                    "You do not have admin access."
+                );
+
+                await auth.signOut();
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            await loadCourses();
+
+            await loadAnnouncements();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Unable to verify admin access."
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================
+   COURSE NAME FORMAT
+========================= */
+
+function formatCourseName(name) {
+
+    return String(name || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\b\w/g, letter => letter.toUpperCase());
+
+}
+
+
+/* =========================
+   LOAD COURSES
+========================= */
+
+async function loadCourses() {
+
+    try {
+
+        const snapshot =
+            await db
+                .collection("courses")
+                .get();
+
+
+        allCourses =
+            snapshot.docs.map(
+                doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })
+            );
+
+
+        populateCourseSelect();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to load courses."
+        );
+
+    }
+
+}
+
+
+/* =========================
+   COURSE SELECT
+========================= */
+
+function populateCourseSelect() {
+
+    const select =
+        document.getElementById(
+            "audienceCourse"
+        );
+
+
+    select.innerHTML = `
+        <option value="">
+            Select Course
+        </option>
+    `;
+
+
+    allCourses
+        .filter(
+            course =>
+                course.status !== "inactive"
+        )
+        .sort(
+            (a, b) =>
+                String(
+                    a.courseName || ""
+                ).localeCompare(
+                    String(
+                        b.courseName || ""
+                    )
+                )
+        )
+        .forEach(course => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                course.id;
+
+
+            option.textContent =
+                formatCourseName(
+                    course.courseName ||
+                    course.courseId ||
+                    course.id
+                );
+
+
+            select.appendChild(option);
+
+        });
+
+}
+
+
+/* =========================
+   AUDIENCE CHANGE
+========================= */
+
+document
+    .getElementById("audienceType")
+    .addEventListener(
+        "change",
+        function() {
+
+            const courseField =
+                document.getElementById(
+                    "courseField"
+                );
+
+
+            const courseSelect =
+                document.getElementById(
+                    "audienceCourse"
+                );
+
+
+            if (this.value === "course") {
+
+                courseField.style.display =
+                    "block";
+
+                courseSelect.required =
+                    true;
+
+            } else {
+
+                courseField.style.display =
+                    "none";
+
+                courseSelect.required =
+                    false;
+
+                courseSelect.value =
+                    "";
+
+            }
+
+        }
+    );
+
+
+/* =========================
+   LOAD ANNOUNCEMENTS
+========================= */
+
+async function loadAnnouncements() {
+
+    try {
+
+        let snapshot;
+
+        try {
+
+            snapshot =
+                await db
+                    .collection("announcements")
+                    .orderBy(
+                        "createdAt",
+                        "desc"
+                    )
+                    .get();
+
+        } catch (error) {
+
+            console.error(
+                "Ordered announcement query failed:",
+                error
+            );
+
+            snapshot =
+                await db
+                    .collection("announcements")
+                    .get();
+
+        }
+
+
+        allAnnouncements =
+            snapshot.docs.map(
+                doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })
+            );
+
+
+        allAnnouncements.sort(
+            (a, b) => {
+
+                const dateA =
+                    a.createdAt &&
+                    a.createdAt.toDate
+                        ? a.createdAt.toDate()
+                        : new Date(0);
+
+
+                const dateB =
+                    b.createdAt &&
+                    b.createdAt.toDate
+                        ? b.createdAt.toDate()
+                        : new Date(0);
+
+
+                return dateB - dateA;
+
+            }
+        );
+
+
+        updateStats();
+
+        renderAnnouncements(
+            allAnnouncements
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to load announcements."
+        );
+
+    }
+
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+function updateStats() {
+
+    const total =
+        allAnnouncements.length;
+
+
+    const published =
+        allAnnouncements.filter(
+            announcement =>
+                announcement.status ===
+                "published"
+        ).length;
+
+
+    const drafts =
+        allAnnouncements.filter(
+            announcement =>
+                announcement.status !==
+                "published"
+        ).length;
+
+
+    document.getElementById(
+        "totalAnnouncements"
+    ).textContent =
+        total;
+
+
+    document.getElementById(
+        "publishedAnnouncements"
+    ).textContent =
+        published;
+
+
+    document.getElementById(
+        "draftAnnouncements"
+    ).textContent =
+        drafts;
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderAnnouncements(
+    announcements
+) {
+
+    const list =
+        document.getElementById(
+            "announcementList"
+        );
+
+
+    if (!announcements.length) {
+
+        list.innerHTML = `
+            <div class="empty">
+                No announcements found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+        announcements
+            .map(
+                announcement => {
+
+                    const status =
+                        announcement.status ||
+                        "draft";
+
+
+                    const audience =
+                        announcement.audienceType ===
+                        "course"
+                            ? (
+                                announcement.audienceName ||
+                                "Specific Course"
+                            )
+                            : "All Students";
+
+
+                    const date =
+                        formatDate(
+                            announcement.createdAt
+                        );
+
+
+                    return `
+
+                        <div
+                            class="announcement-card"
+                        >
+
+
+                            <div
+                                class="announcement-top"
+                            >
+
+                                <div>
+
+                                    <h3
+                                        class="announcement-title"
+                                    >
+                                        ${escapeHtml(
+                                            announcement.title ||
+                                            ""
+                                        )}
+                                    </h3>
+
+                                    <div
+                                        class="announcement-date"
+                                    >
+                                        ${escapeHtml(
+                                            date
+                                        )}
+                                    </div>
+
+                                </div>
+
+
+                                <span
+                                    class="status ${
+                                        status ===
+                                        "published"
+                                            ? "published"
+                                            : "draft"
+                                    }"
+                                >
+                                    ${
+                                        status ===
+                                        "published"
+                                            ? "Published"
+                                            : "Draft"
+                                    }
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="announcement-info"
+                            >
+
+                                <div
+                                    class="info-box"
+                                >
+
+                                    <small>
+                                        Audience
+                                    </small>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            audience
+                                        )}
+                                    </strong>
+
+                                </div>
+
+
+                                <div
+                                    class="info-box"
+                                >
+
+                                    <small>
+                                        Created By
+                                    </small>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            announcement.createdBy ||
+                                            "-"
+                                        )}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="announcement-message"
+                            >
+                                ${escapeHtml(
+                                    announcement.message ||
+                                    ""
+                                )}
+                            </div>
+
+
+                            <div
+                                class="announcement-actions"
+                            >
+
+                                <button
+                                    class="edit-btn"
+                                    onclick="editAnnouncement('${escapeAttribute(announcement.id)}')"
+                                >
+                                    Edit
+                                </button>
+
+
+                                <button
+                                    class="toggle-btn"
+                                    onclick="toggleAnnouncement('${escapeAttribute(announcement.id)}')"
+                                >
+                                    ${
+                                        status ===
+                                        "published"
+                                            ? "Move to Draft"
+                                            : "Publish"
+                                    }
+                                </button>
+
+
+                                <button
+                                    class="delete-btn"
+                                    onclick="deleteAnnouncement('${escapeAttribute(announcement.id)}')"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* =========================
+   ADD / UPDATE
+========================= */
+
+document
+    .getElementById(
+        "announcementForm"
+    )
+    .addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            const title =
+                document
+                    .getElementById(
+                        "announcementTitle"
+                    )
+                    .value
+                    .trim();
+
+
+            const message =
+                document
+                    .getElementById(
+                        "announcementMessage"
+                    )
+                    .value
+                    .trim();
+
+
+            const audienceType =
+                document
+                    .getElementById(
+                        "audienceType"
+                    )
+                    .value;
+
+
+            const audienceCourse =
+                document
+                    .getElementById(
+                        "audienceCourse"
+                    )
+                    .value;
+
+
+            const status =
+                document
+                    .getElementById(
+                        "announcementStatus"
+                    )
+                    .value;
+
+
+            if (!title || !message) {
+
+                alert(
+                    "Please fill all required fields."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                audienceType === "course" &&
+                !audienceCourse
+            ) {
+
+                alert(
+                    "Please select a course."
+                );
+
+                return;
+
+            }
+
+
+            const user =
+                auth.currentUser;
+
+
+            if (!user) {
+
+                alert(
+                    "No admin account is currently logged in."
+                );
+
+                return;
+
+            }
+
+
+            const saveBtn =
+                document.getElementById(
+                    "saveBtn"
+                );
+
+
+            saveBtn.disabled =
+                true;
+
+
+            saveBtn.textContent =
+                "Saving...";
+
+
+            try {
+
+                let audienceName =
+                    "All Students";
+
+
+                if (
+                    audienceType ===
+                    "course"
+                ) {
+
+                    const selectedCourse =
+                        allCourses.find(
+                            course =>
+                                course.id ===
+                                audienceCourse
+                        );
+
+
+                    if (!selectedCourse) {
+
+                        alert(
+                            "Selected course was not found."
+                        );
+
+                        return;
+
+                    }
+
+
+                    audienceName =
+                        formatCourseName(
+                            selectedCourse.courseName ||
+                            selectedCourse.courseId ||
+                            selectedCourse.id
+                        );
+
+                }
+
+
+                const data = {
+
+                    title,
+
+                    message,
+
+                    audienceType,
+
+                    audienceCourseId:
+                        audienceType ===
+                        "course"
+                            ? audienceCourse
+                            : "",
+
+                    audienceName,
+
+                    status,
+
+                    updatedAt:
+                        firebase.firestore
+                            .FieldValue
+                            .serverTimestamp(),
+
+                    updatedBy:
+                        user.uid
+
+                };
+
+
+                if (editingAnnouncementId) {
+
+                    await db
+                        .collection(
+                            "announcements"
+                        )
+                        .doc(
+                            editingAnnouncementId
+                        )
+                        .update(
+                            data
+                        );
+
+
+                    alert(
+                        "Announcement updated successfully."
+                    );
+
+                } else {
+
+                    await db
+                        .collection(
+                            "announcements"
+                        )
+                        .add({
+
+                            ...data,
+
+                            createdAt:
+                                firebase.firestore
+                                    .FieldValue
+                                    .serverTimestamp(),
+
+                            createdBy:
+                                user.uid
+
+                        });
+
+
+                    alert(
+                        "Announcement added successfully."
+                    );
+
+                }
+
+
+                resetForm();
+
+                await loadAnnouncements();
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "Unable to save announcement: " +
+                    error.message
+                );
+
+            } finally {
+
+                saveBtn.disabled =
+                    false;
+
+
+                saveBtn.textContent =
+                    editingAnnouncementId
+                        ? "Update Announcement"
+                        : "Add Announcement";
+
+            }
+
+        }
+    );
+
+
+/* =========================
+   EDIT
+========================= */
+
+function editAnnouncement(
+    announcementId
+) {
+
+    const announcement =
+        allAnnouncements.find(
+            item =>
+                item.id ===
+                announcementId
+        );
+
+
+    if (!announcement) {
+
+        alert(
+            "Announcement not found."
+        );
+
+        return;
+
+    }
+
+
+    editingAnnouncementId =
+        announcementId;
+
+
+    document.getElementById(
+        "announcementTitle"
+    ).value =
+        announcement.title || "";
+
+
+    document.getElementById(
+        "announcementMessage"
+    ).value =
+        announcement.message || "";
+
+
+    document.getElementById(
+        "audienceType"
+    ).value =
+        announcement.audienceType ||
+        "all";
+
+
+    document.getElementById(
+        "announcementStatus"
+    ).value =
+        announcement.status ||
+        "draft";
+
+
+    const courseField =
+        document.getElementById(
+            "courseField"
+        );
+
+
+    const courseSelect =
+        document.getElementById(
+            "audienceCourse"
+        );
+
+
+    if (
+        announcement.audienceType ===
+        "course"
+    ) {
+
+        courseField.style.display =
+            "block";
+
+        courseSelect.required =
+            true;
+
+        courseSelect.value =
+            announcement.audienceCourseId ||
+            "";
+
+    } else {
+
+        courseField.style.display =
+            "none";
+
+        courseSelect.required =
+            false;
+
+        courseSelect.value =
+            "";
+
+    }
+
+
+    document.getElementById(
+        "formTitle"
+    ).textContent =
+        "Edit Announcement";
+
+
+    document.getElementById(
+        "saveBtn"
+    ).textContent =
+        "Update Announcement";
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).style.display =
+        "inline-block";
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+/* =========================
+   TOGGLE
+========================= */
+
+async function toggleAnnouncement(
+    announcementId
+) {
+
+    const announcement =
+        allAnnouncements.find(
+            item =>
+                item.id ===
+                announcementId
+        );
+
+
+    if (!announcement) {
+
+        alert(
+            "Announcement not found."
+        );
+
+        return;
+
+    }
+
+
+    const newStatus =
+        announcement.status ===
+        "published"
+            ? "draft"
+            : "published";
+
+
+    try {
+
+        await db
+            .collection(
+                "announcements"
+            )
+            .doc(
+                announcementId
+            )
+            .update({
+
+                status:
+                    newStatus,
+
+                updatedAt:
+                    firebase.firestore
+                        .FieldValue
+                        .serverTimestamp(),
+
+                updatedBy:
+                    auth.currentUser.uid
+
+            });
+
+
+        await loadAnnouncements();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to change announcement status."
+        );
+
+    }
+
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
+async function deleteAnnouncement(
+    announcementId
+) {
+
+    const announcement =
+        allAnnouncements.find(
+            item =>
+                item.id ===
+                announcementId
+        );
+
+
+    if (!announcement) {
+
+        alert(
+            "Announcement not found."
+        );
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this announcement?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await db
+            .collection(
+                "announcements"
+            )
+            .doc(
+                announcementId
+            )
+            .delete();
+
+
+        alert(
+            "Announcement deleted successfully."
+        );
+
+
+        await loadAnnouncements();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to delete announcement."
+        );
+
+    }
+
+}
+
+
+/* =========================
+   CANCEL EDIT
+========================= */
+
+document
+    .getElementById(
+        "cancelBtn"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            resetForm();
+
+        }
+    );
+
+
+function resetForm() {
+
+    editingAnnouncementId =
+        null;
+
+
+    document
+        .getElementById(
+            "announcementForm"
+        )
+        .reset();
+
+
+    document.getElementById(
+        "audienceType"
+    ).value =
+        "all";
+
+
+    document.getElementById(
+        "announcementStatus"
+    ).value =
+        "published";
+
+
+    document.getElementById(
+        "courseField"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "audienceCourse"
+    ).required =
+        false;
+
+
+    document.getElementById(
+        "formTitle"
+    ).textContent =
+        "Add Announcement";
+
+
+    document.getElementById(
+        "saveBtn"
+    ).textContent =
+        "Add Announcement";
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).style.display =
+        "none";
+
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+document
+    .getElementById(
+        "announcementSearch"
+    )
+    .addEventListener(
+        "input",
+        function() {
+
+            const search =
+                this.value
+                    .trim()
+                    .toLowerCase();
+
+
+            if (!search) {
+
+                renderAnnouncements(
+                    allAnnouncements
+                );
+
+                return;
+
+            }
+
+
+            const filtered =
+                allAnnouncements.filter(
+                    announcement => {
+
+                        const title =
+                            String(
+                                announcement.title ||
+                                ""
+                            ).toLowerCase();
+
+
+                        const message =
+                            String(
+                                announcement.message ||
+                                ""
+                            ).toLowerCase();
+
+
+                        const audience =
+                            String(
+                                announcement.audienceName ||
+                                ""
+                            ).toLowerCase();
+
+
+                        return (
+                            title.includes(search) ||
+                            message.includes(search) ||
+                            audience.includes(search)
+                        );
+
+                    }
+                );
+
+
+            renderAnnouncements(
+                filtered
+            );
+
+        }
+    );
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+document
+    .getElementById(
+        "dashboardBtn"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+    );
+
+
+/* =========================
+   SIGN OUT
+========================= */
+
+document
+    .getElementById(
+        "logoutBtn"
+    )
+    .addEventListener(
+        "click",
+        async function() {
+
+            try {
+
+                await auth.signOut();
+
+
+                window.location.href =
+                    "../login.html";
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "Unable to sign out."
+                );
+
+            }
+
+        }
+
+    );
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function formatDate(
+    timestamp
+) {
+
+    if (
+        !timestamp ||
+        !timestamp.toDate
+    ) {
+
+        return "Date unavailable";
+
+    }
+
+
+    return timestamp
+        .toDate()
+        .toLocaleString(
+            "en-NG",
+            {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit"
+            }
+        );
+
+}
+
+
+function escapeHtml(
+    value
+) {
+
+    return String(value || "")
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+function escapeAttribute(
+    value
+) {
+
+    return String(value || "")
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+        .replace(
+            /'/g,
+            "\\'"
+        );
+
+}
+
+</script>
+
+</body>
+
+</html>

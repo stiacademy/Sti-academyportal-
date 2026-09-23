@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>STI Academy - Cohorts</title>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: auto;
+            padding: 25px 18px 50px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .card {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin: 0 0 18px;
+            font-size: 19px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 13px;
+            color: #bbb;
+            margin-bottom: 7px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 9px;
+            border: 1px solid #303030;
+            background: #080808;
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #1683ff;
+        }
+
+        input:disabled,
+        select:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .calculation {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 10px;
+            background: #08111c;
+            border: 1px solid #123451;
+        }
+
+        .calculation-title {
+            color: #1683ff;
+            font-size: 13px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .calculation-main {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .calculation-small {
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .error-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: #250909;
+            border: 1px solid #612020;
+            color: #ff9d9d;
+            border-radius: 8px;
+            display: none;
+            font-size: 13px;
+        }
+
+        .success-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: #08200f;
+            border: 1px solid #174c29;
+            color: #8df0ae;
+            border-radius: 8px;
+            display: none;
+            font-size: 13px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 9px;
+            padding: 13px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary-btn {
+            background: #1683ff;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #0d70dc;
+        }
+
+        .secondary-btn {
+            background: #222;
+            color: white;
+            border: 1px solid #333;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cohort-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .cohort-item {
+            background: #090909;
+            border: 1px solid #252525;
+            border-radius: 11px;
+            padding: 17px;
+        }
+
+        .cohort-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .cohort-name {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .course-name {
+            color: #1683ff;
+            font-size: 13px;
+        }
+
+        .status {
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .status.active {
+            background: #092514;
+            color: #70e898;
+        }
+
+        .status.inactive {
+            background: #252525;
+            color: #aaa;
+        }
+
+        .cohort-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .detail {
+            background: #111;
+            border-radius: 8px;
+            padding: 11px;
+        }
+
+        .detail-label {
+            color: #777;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 13px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px 15px;
+            color: #777;
+        }
+
+        .loading {
+            color: #999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .cohort-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cohort-top {
+                flex-direction: column;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Cohorts</h1>
+        <p>
+            Create and manage student cohorts based on active courses.
+        </p>
+    </div>
+
+    <!-- CREATE COHORT -->
+    <div class="card">
+
+        <h2>Create New Cohort</h2>
+
+        <form id="cohortForm">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="cohortName">
+                        Cohort Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cohortName"
+                        placeholder="e.g. October 2026"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="course">
+                        Course
+                    </label>
+
+                    <select
+                        id="course"
+                        required
+                    >
+                        <option value="">
+                            Loading courses...
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="startDate">
+                        Start Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="startDate"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="status">
+                        Status
+                    </label>
+
+                    <select id="status">
+                        <option value="active">
+                            Active
+                        </option>
+
+                        <option value="inactive">
+                            Inactive
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div
+                class="calculation"
+                id="calculationBox"
+                style="display:none;"
+            >
+                <div class="calculation-title">
+                    COHORT DURATION
+                </div>
+
+                <div
+                    class="calculation-main"
+                    id="durationDisplay"
+                >
+                    -
+                </div>
+
+                <div
+                    class="calculation-small"
+                    id="endDateDisplay"
+                >
+                    Expected end date: -
+                </div>
+            </div>
+
+            <div
+                class="error-box"
+                id="errorBox"
+            ></div>
+
+            <div
+                class="success-box"
+                id="successBox"
+            ></div>
+
+            <div class="button-row">
+
+                <button
+                    type="submit"
+                    class="primary-btn"
+                    id="submitBtn"
+                >
+                    Create Cohort
+                </button>
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    id="resetBtn"
+                >
+                    Reset
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- EXISTING COHORTS -->
+
+    <div class="card">
+
+        <h2>Existing Cohorts</h2>
+
+        <div
+            id="cohortList"
+            class="cohort-list"
+        >
+            <div class="loading">
+                Loading cohorts...
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ==========================================
+    // FIREBASE
+    // ==========================================
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+        authDomain: "sti-academy.firebaseapp.com",
+        projectId: "sti-academy",
+        storageBucket: "sti-academy.firebasestorage.app",
+        messagingSenderId: "709840641262",
+        appId: "1:709840641262:web:714b09bf661afa159f27ff",
+        measurementId: "G-7ZRZ3P28YP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+
+    // ==========================================
+    // ELEMENTS
+    // ==========================================
+
+    const cohortForm =
+        document.getElementById("cohortForm");
+
+    const cohortNameInput =
+        document.getElementById("cohortName");
+
+    const courseInput =
+        document.getElementById("course");
+
+    const startDateInput =
+        document.getElementById("startDate");
+
+    const statusInput =
+        document.getElementById("status");
+
+    const calculationBox =
+        document.getElementById("calculationBox");
+
+    const durationDisplay =
+        document.getElementById("durationDisplay");
+
+    const endDateDisplay =
+        document.getElementById("endDateDisplay");
+
+    const errorBox =
+        document.getElementById("errorBox");
+
+    const successBox =
+        document.getElementById("successBox");
+
+    const submitBtn =
+        document.getElementById("submitBtn");
+
+    const resetBtn =
+        document.getElementById("resetBtn");
+
+    const cohortList =
+        document.getElementById("cohortList");
+
+
+    // ==========================================
+    // GLOBAL DATA
+    // ==========================================
+
+    let courses = [];
+
+
+    // ==========================================
+    // AUTH CHECK
+    // ==========================================
+
+    auth.onAuthStateChanged(async (user) => {
+
+        if (!user) {
+            window.location.href = "../login.html";
+            return;
+        }
+
+        try {
+
+            const userDoc =
+                await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+            if (!userDoc.exists) {
+                alert("User account not found.");
+                await auth.signOut();
+                return;
+            }
+
+            const userData =
+                userDoc.data();
+
+            if (
+                userData.role !== "admin"
+            ) {
+                alert("Access denied.");
+                window.location.href =
+                    "../index.html";
+                return;
+            }
+
+            await loadCourses();
+            await loadCohorts();
+
+        } catch (error) {
+
+            console.error(error);
+
+            showError(
+                "Unable to load the page. Please try again."
+            );
+
+        }
+
+    });
+
+
+    // ==========================================
+    // LOAD COURSES
+    // ==========================================
+
+    async function loadCourses() {
+
+        courseInput.innerHTML =
+            `<option value="">
+                Loading courses...
+            </option>`;
+
+        try {
+
+            const snapshot =
+                await db
+                    .collection("courses")
+                    .get();
+
+            courses = [];
+
+            snapshot.forEach((doc) => {
+
+                const data =
+                    doc.data();
+
+                if (
+                    data.status === "active"
+                ) {
+
+                    courses.push({
+                        id: doc.id,
+                        ...data
+                    });
+
+                }
+
+            });
+
+            courses.sort((a, b) =>
+                String(
+                    a.courseName || a.id
+                ).localeCompare(
+                    String(
+                        b.courseName || b.id
+                    )
+                )
+            );
+
+            courseInput.innerHTML =
+                `<option value="">
+                    Select a course
+                </option>`;
+
+            if (courses.length === 0) {
+
+                courseInput.innerHTML =
+                    `<option value="">
+                        No active courses found
+                    </option>`;
+
+                return;
+            }
+
+            courses.forEach((course) => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    course.id;
+
+                option.textContent =
+                    `${course.courseName || course.id}`;
+
+                courseInput.appendChild(option);
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Course loading error:",
+                error
+            );
+
+            courseInput.innerHTML =
+                `<option value="">
+                    Unable to load courses
+                </option>`;
+
+            showError(
+                "Unable to load courses."
+            );
+
+        }
+
+    }
+
+
+    // ==========================================
+    // GET SELECTED COURSE
+    // ==========================================
+
+    function getSelectedCourse() {
+
+        return courses.find(
+            course =>
+                course.id === courseInput.value
+        );
+
+    }
+
+
+    // ==========================================
+    // GET COURSE DURATION
+    // ==========================================
+    /*
+        This function supports BOTH formats:
+
+        NEW:
+        durationValue: 6
+        durationUnit: "months"
+
+        OLD:
+        duration: "6 months"
+    */
+
+    function getCourseDuration(course) {
+
+        if (!course) {
+            return null;
+        }
+
+        let durationValue =
+            Number(
+                course.durationValue
+            );
+
+        let durationUnit =
+            course.durationUnit;
+
+
+        // --------------------------------------
+        // NEW STRUCTURED FORMAT
+        // --------------------------------------
+
+        if (
+            Number.isFinite(durationValue) &&
+            durationValue >= 1 &&
+            durationUnit
+        ) {
+
+            durationUnit =
+                normalizeDurationUnit(
+                    durationUnit
+                );
+
+            if (durationUnit) {
+
+                return {
+                    value: durationValue,
+                    unit: durationUnit
+                };
+
+            }
+
+        }
+
+
+        // --------------------------------------
+        // OLD FORMAT
+        // duration: "6 months"
+        // --------------------------------------
+
+        const oldDuration =
+            String(
+                course.duration || ""
+            )
+            .trim()
+            .toLowerCase();
+
+        const match =
+            oldDuration.match(
+                /^(\d+(?:\.\d+)?)\s*(days?|weeks?|months?)$/
+            );
+
+        if (match) {
+
+            durationValue =
+                Number(match[1]);
+
+            durationUnit =
+                match[2]
+                    .replace(/s$/, "") + "s";
+
+            return {
+                value: durationValue,
+                unit: durationUnit
+            };
+
+        }
+
+        return null;
+
+    }
+
+
+    // ==========================================
+    // NORMALIZE DURATION UNIT
+    // ==========================================
+
+    function normalizeDurationUnit(unit) {
+
+        const value =
+            String(unit || "")
+                .trim()
+                .toLowerCase();
+
+        if (
+            value === "day" ||
+            value === "days"
+        ) {
+            return "days";
+        }
+
+        if (
+            value === "week" ||
+            value === "weeks"
+        ) {
+            return "weeks";
+        }
+
+        if (
+            value === "month" ||
+            value === "months"
+        ) {
+            return "months";
+        }
+
+        return null;
+
+    }
+
+
+    // ==========================================
+    // ADD MONTHS SAFELY
+    // ==========================================
+
+    function addMonths(
+        date,
+        months
+    ) {
+
+        const result =
+            new Date(date);
+
+        const originalDay =
+            result.getDate();
+
+        result.setDate(1);
+
+        result.setMonth(
+            result.getMonth() + months
+        );
+
+        const lastDay =
+            new Date(
+                result.getFullYear(),
+                result.getMonth() + 1,
+                0
+            ).getDate();
+
+        result.setDate(
+            Math.min(
+                originalDay,
+                lastDay
+            )
+        );
+
+        return result;
+
+    }
+
+
+    // ==========================================
+    // CALCULATE END DATE
+    // ==========================================
+
+    function calculateEndDate(
+        startDate,
+        durationValue,
+        durationUnit
+    ) {
+
+        if (
+            !startDate ||
+            !Number.isFinite(
+                Number(durationValue)
+            ) ||
+            !durationUnit
+        ) {
+            return null;
+        }
+
+        const result =
+            new Date(
+                startDate + "T00:00:00"
+            );
+
+        const value =
+            Number(durationValue);
+
+        if (
+            durationUnit === "months"
+        ) {
+
+            return addMonths(
+                result,
+                value
+            );
+
+        }
+
+        if (
+            durationUnit === "weeks"
+        ) {
+
+            result.setDate(
+                result.getDate() +
+                (value * 7)
+            );
+
+            return result;
+
+        }
+
+        if (
+            durationUnit === "days"
+        ) {
+
+            result.setDate(
+                result.getDate() +
+                value
+            );
+
+            return result;
+
+        }
+
+        return null;
+
+    }
+
+
+    // ==========================================
+    // FORMAT DATE
+    // ==========================================
+
+    function formatDate(date) {
+
+        if (!date) {
+            return "-";
+        }
+
+        return new Intl.DateTimeFormat(
+            "en-GB",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }
+        ).format(date);
+
+    }
+
+
+    // ==========================================
+    // FIRESTORE DATE
+    // ==========================================
+
+    function dateToString(date) {
+
+        if (!date) {
+            return "";
+        }
+
+        const year =
+            date.getFullYear();
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(2, "0");
+
+        const day =
+            String(
+                date.getDate()
+            ).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+
+    }
+
+
+    // ==========================================
+    // UPDATE CALCULATION
+    // ==========================================
+
+    function updateCalculation() {
+
+        clearMessages();
+
+        const course =
+            getSelectedCourse();
+
+        const startDate =
+            startDateInput.value;
+
+        if (!course) {
+
+            calculationBox.style.display =
+                "none";
+
+            return;
+
+        }
+
+        const duration =
+            getCourseDuration(course);
+
+        if (!duration) {
+
+            calculationBox.style.display =
+                "block";
+
+            durationDisplay.textContent =
+                "Duration not configured";
+
+            endDateDisplay.textContent =
+                "This course needs a valid duration in Courses.";
+
+            return;
+
+        }
+
+        if (!startDate) {
+
+            calculationBox.style.display =
+                "block";
+
+            durationDisplay.textContent =
+                `${duration.value} ${duration.unit}`;
+
+            endDateDisplay.textContent =
+                "Select a start date to calculate the expected end date.";
+
+            return;
+
+        }
+
+        const endDate =
+            calculateEndDate(
+                startDate,
+                duration.value,
+                duration.unit
+            );
+
+        if (!endDate) {
+
+            calculationBox.style.display =
+                "block";
+
+            durationDisplay.textContent =
+                `${duration.value} ${duration.unit}`;
+
+            endDateDisplay.textContent =
+                "Unable to calculate end date.";
+
+            return;
+
+        }
+
+        calculationBox.style.display =
+            "block";
+
+        durationDisplay.textContent =
+            `${duration.value} ${duration.unit}`;
+
+        endDateDisplay.textContent =
+            `Expected end date: ${formatDate(endDate)}`;
+
+    }
+
+
+    // ==========================================
+    // EVENT LISTENERS
+    // ==========================================
+
+    courseInput.addEventListener(
+        "change",
+        updateCalculation
+    );
+
+    startDateInput.addEventListener(
+        "change",
+        updateCalculation
+    );
+
+
+    // ==========================================
+    // CREATE COHORT
+    // ==========================================
+
+    cohortForm.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
+
+            clearMessages();
+
+            const cohortName =
+                cohortNameInput.value.trim();
+
+            const course =
+                getSelectedCourse();
+
+            const startDate =
+                startDateInput.value;
+
+            const status =
+                statusInput.value;
+
+            if (!cohortName) {
+
+                showError(
+                    "Please enter a cohort name."
+                );
+
+                return;
+
+            }
+
+            if (!course) {
+
+                showError(
+                    "Please select a course."
+                );
+
+                return;
+
+            }
+
+            if (!startDate) {
+
+                showError(
+                    "Please select a start date."
+                );
+
+                return;
+
+            }
+
+
+            // ----------------------------------
+            // GET DURATION
+            // ----------------------------------
+
+            const duration =
+                getCourseDuration(course);
+
+
+            if (!duration) {
+
+                showError(
+                    "This course does not have a valid duration. Please configure the course duration first."
+                );
+
+                return;
+
+            }
+
+
+            // ----------------------------------
+            // CALCULATE END DATE
+            // ----------------------------------
+
+            const endDate =
+                calculateEndDate(
+                    startDate,
+                    duration.value,
+                    duration.unit
+                );
+
+
+            if (!endDate) {
+
+                showError(
+                    "The cohort end date could not be calculated."
+                );
+
+                return;
+
+            }
+
+
+            const endDateString =
+                dateToString(endDate);
+
+
+            // ----------------------------------
+            // PREVENT DUPLICATE COHORT
+            // ----------------------------------
+
+            submitBtn.disabled = true;
+
+            submitBtn.textContent =
+                "Creating...";
+
+
+            try {
+
+                const existing =
+                    await db
+                        .collection("cohorts")
+                        .where(
+                            "cohortName",
+                            "==",
+                            cohortName
+                        )
+                        .where(
+                            "courseId",
+                            "==",
+                            course.id
+                        )
+                        .get();
+
+                if (!existing.empty) {
+
+                    showError(
+                        "A cohort with this name already exists for this course."
+                    );
+
+                    submitBtn.disabled =
+                        false;
+
+                    submitBtn.textContent =
+                        "Create Cohort";
+
+                    return;
+
+                }
+
+
+                // ----------------------------------
+                // CREATE COHORT
+                // ----------------------------------
+
+                await db
+                    .collection("cohorts")
+                    .add({
+
+                        cohortName:
+
+                            cohortName,
+
+                        courseId:
+
+                            course.id,
+
+                        courseName:
+
+                            course.courseName ||
+                            course.id,
+
+                        startDate:
+
+                            startDate,
+
+                        durationValue:
+
+                            duration.value,
+
+                        durationUnit:
+
+                            duration.unit,
+
+                        endDate:
+
+                            endDateString,
+
+                        status:
+
+                            status,
+
+                        createdAt:
+
+                            firebase.firestore
+                                .FieldValue
+                                .serverTimestamp(),
+
+                        createdBy:
+
+                            auth.currentUser.uid
+
+                    });
+
+
+                showSuccess(
+                    `Cohort created successfully. Expected end date: ${formatDate(endDate)}`
+                );
+
+
+                cohortForm.reset();
+
+                calculationBox.style.display =
+                    "none";
+
+                await loadCohorts();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Create cohort error:",
+                    error
+                );
+
+                showError(
+                    "Unable to create cohort. Please try again."
+                );
+
+            }
+
+
+            submitBtn.disabled =
+                false;
+
+            submitBtn.textContent =
+                "Create Cohort";
+
+        }
+    );
+
+
+    // ==========================================
+    // LOAD COHORTS
+    // ==========================================
+
+    async function loadCohorts() {
+
+        cohortList.innerHTML =
+            `<div class="loading">
+                Loading cohorts...
+            </div>`;
+
+        try {
+
+            const snapshot =
+                await db
+                    .collection("cohorts")
+                    .orderBy(
+                        "startDate",
+                        "desc"
+                    )
+                    .get();
+
+            if (snapshot.empty) {
+
+                cohortList.innerHTML =
+                    `<div class="empty">
+                        No cohorts created yet.
+                    </div>`;
+
+                return;
+
+            }
+
+            cohortList.innerHTML =
+                "";
+
+            snapshot.forEach(
+                (doc) => {
+
+                    const cohort =
+                        doc.data();
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+                    item.className =
+                        "cohort-item";
+
+
+                    const statusClass =
+                        cohort.status === "active"
+                            ? "active"
+                            : "inactive";
+
+
+                    item.innerHTML = `
+
+                        <div class="cohort-top">
+
+                            <div>
+
+                                <div class="cohort-name">
+                                    ${escapeHtml(
+                                        cohort.cohortName ||
+                                        "Unnamed Cohort"
+                                    )}
+                                </div>
+
+                                <div class="course-name">
+                                    ${escapeHtml(
+                                        cohort.courseName ||
+                                        cohort.courseId ||
+                                        "Unknown Course"
+                                    )}
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="status ${statusClass}"
+                            >
+                                ${escapeHtml(
+                                    cohort.status ||
+                                    "inactive"
+                                )}
+                            </div>
+
+                        </div>
+
+
+                        <div class="cohort-details">
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    START DATE
+                                </div>
+
+                                <div class="detail-value">
+                                    ${formatStoredDate(
+                                        cohort.startDate
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    DURATION
+                                </div>
+
+                                <div class="detail-value">
+                                    ${
+                                        cohort.durationValue
+                                            ? `${escapeHtml(
+                                                String(
+                                                    cohort.durationValue
+                                                )
+                                            )} ${escapeHtml(
+                                                cohort.durationUnit ||
+                                                ""
+                                            )}`
+                                            : getOldDurationText(
+                                                cohort
+                                            )
+                                    }
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    EXPECTED END
+                                </div>
+
+                                <div class="detail-value">
+                                    ${formatStoredDate(
+                                        cohort.endDate
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    COURSE ID
+                                </div>
+
+                                <div class="detail-value">
+                                    ${escapeHtml(
+                                        cohort.courseId ||
+                                        "-"
+                                    )}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                    cohortList.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Load cohorts error:",
+                error
+            );
+
+            cohortList.innerHTML =
+                `<div class="empty">
+                    Unable to load cohorts.
+                </div>`;
+
+        }
+
+    }
+
+
+    // ==========================================
+    // OLD COHORT DURATION FALLBACK
+    // ==========================================
+
+    function getOldDurationText(cohort) {
+
+        if (
+            cohort.duration
+        ) {
+
+            return escapeHtml(
+                String(
+                    cohort.duration
+                )
+            );
+
+        }
+
+        return "-";
+
+    }
+
+
+    // ==========================================
+    // FORMAT STORED DATE
+    // ==========================================
+
+    function formatStoredDate(value) {
+
+        if (!value) {
+            return "-";
+        }
+
+        if (
+            typeof value === "string"
+        ) {
+
+            const parts =
+                value.split("-");
+
+            if (
+                parts.length === 3
+            ) {
+
+                const date =
+                    new Date(
+                        Number(parts[0]),
+                        Number(parts[1]) - 1,
+                        Number(parts[2])
+                    );
+
+                return formatDate(
+                    date
+                );
+
+            }
+
+            return escapeHtml(
+                value
+            );
+
+        }
+
+        if (
+            value.toDate
+        ) {
+
+            return formatDate(
+                value.toDate()
+            );
+
+        }
+
+        return "-";
+
+    }
+
+
+    // ==========================================
+    // RESET
+    // ==========================================
+
+    resetBtn.addEventListener(
+        "click",
+        () => {
+
+            cohortForm.reset();
+
+            calculationBox.style.display =
+                "none";
+
+            clearMessages();
+
+        }
+    );
+
+
+    // ==========================================
+    // MESSAGES
+    // ==========================================
+
+    function showError(message) {
+
+        errorBox.textContent =
+            message;
+
+        errorBox.style.display =
+            "block";
+
+        successBox.style.display =
+            "none";
+
+    }
+
+
+    function showSuccess(message) {
+
+        successBox.textContent =
+            message;
+
+        successBox.style.display =
+            "block";
+
+        errorBox.style.display =
+            "none";
+
+    }
+
+
+    function clearMessages() {
+
+        errorBox.textContent =
+            "";
+
+        successBox.textContent =
+            "";
+
+        errorBox.style.display =
+            "none";
+
+        successBox.style.display =
+            "none";
+
+    }
+
+
+    // ==========================================
+    // ESCAPE HTML
+    // ==========================================
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+</script>
+
+</body>
+</html>

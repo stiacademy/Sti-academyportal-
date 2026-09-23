@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>STI Academy - Lessons</title>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #050505;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1150px;
+            margin: auto;
+            padding: 25px 18px 50px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .card {
+            background: #101010;
+            border: 1px solid #242424;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin: 0 0 18px;
+            font-size: 19px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: #bbb;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 9px;
+            border: 1px solid #303030;
+            background: #080808;
+            color: #fff;
+            outline: none;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #1683ff;
+        }
+
+        input:disabled,
+        select:disabled {
+            opacity: 0.55;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 9px;
+            padding: 13px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: #1683ff;
+            color: #fff;
+        }
+
+        .secondary {
+            background: #222;
+            color: #fff;
+            border: 1px solid #333;
+        }
+
+        .danger {
+            background: #3a1111;
+            color: #ff9999;
+            border: 1px solid #652020;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            border-radius: 9px;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .error {
+            background: #250909;
+            border: 1px solid #612020;
+            color: #ff9d9d;
+        }
+
+        .success {
+            background: #08200f;
+            border: 1px solid #174c29;
+            color: #8df0ae;
+        }
+
+        .lesson-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .lesson-item {
+            background: #090909;
+            border: 1px solid #252525;
+            border-radius: 11px;
+            padding: 17px;
+        }
+
+        .lesson-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .lesson-number {
+            color: #1683ff;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .lesson-title {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .lesson-course {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .status {
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status.active {
+            background: #092514;
+            color: #70e898;
+        }
+
+        .status.inactive {
+            background: #252525;
+            color: #aaa;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .detail {
+            background: #111;
+            border-radius: 8px;
+            padding: 11px;
+        }
+
+        .detail-label {
+            color: #777;
+            font-size: 10px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 13px;
+            word-break: break-word;
+        }
+
+        .description {
+            margin-top: 15px;
+            padding: 12px;
+            background: #111;
+            border-radius: 8px;
+            color: #aaa;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .actions button {
+            padding: 9px 12px;
+            font-size: 12px;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+            padding: 35px 15px;
+        }
+
+        .loading {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .note {
+            color: #777;
+            font-size: 12px;
+            margin: -8px 0 16px;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .lesson-top {
+                flex-direction: column;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Lessons</h1>
+        <p>
+            Create and organize lessons and topics for STI Academy courses.
+        </p>
+    </div>
+
+
+    <!-- CREATE LESSON -->
+
+    <div class="card">
+
+        <h2 id="formTitle">
+            Add New Lesson
+        </h2>
+
+        <p class="note">
+            Lessons belong to a course. A cohort can optionally be selected
+            when a lesson is specific to a particular cohort.
+        </p>
+
+        <form id="lessonForm">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="course">
+                        Course
+                    </label>
+
+                    <select id="course" required>
+                        <option value="">
+                            Loading courses...
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="cohort">
+                        Cohort
+                    </label>
+
+                    <select id="cohort">
+                        <option value="">
+                            All cohorts
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="lessonNumber">
+                        Lesson Number
+                    </label>
+
+                    <input
+                        type="number"
+                        id="lessonNumber"
+                        min="1"
+                        step="1"
+                        placeholder="e.g. 1"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="lessonTitle">
+                        Lesson Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="lessonTitle"
+                        placeholder="e.g. Introduction to HTML"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="topic">
+                        Topic
+                    </label>
+
+                    <input
+                        type="text"
+                        id="topic"
+                        placeholder="e.g. HTML Basics"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="lessonType">
+                        Lesson Type
+                    </label>
+
+                    <select id="lessonType">
+
+                        <option value="lesson">
+                            Lesson
+                        </option>
+
+                        <option value="practical">
+                            Practical
+                        </option>
+
+                        <option value="project">
+                            Project
+                        </option>
+
+                        <option value="revision">
+                            Revision
+                        </option>
+
+                        <option value="assessment">
+                            Assessment
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="estimatedMinutes">
+                        Estimated Duration
+                    </label>
+
+                    <input
+                        type="number"
+                        id="estimatedMinutes"
+                        min="1"
+                        step="1"
+                        placeholder="e.g. 90"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="status">
+                        Status
+                    </label>
+
+                    <select id="status">
+
+                        <option value="active">
+                            Active
+                        </option>
+
+                        <option value="inactive">
+                            Inactive
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label for="description">
+                        Lesson Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        placeholder="Explain what students should learn from this lesson..."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label for="objectives">
+                        Learning Objectives
+                    </label>
+
+                    <textarea
+                        id="objectives"
+                        placeholder="Example: Students should understand HTML structure, tags and basic page elements."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="errorMessage"
+                class="message error"
+            ></div>
+
+            <div
+                id="successMessage"
+                class="message success"
+            ></div>
+
+
+            <div class="button-row">
+
+                <button
+                    type="submit"
+                    class="primary"
+                    id="submitButton"
+                >
+                    Add Lesson
+                </button>
+
+                <button
+                    type="button"
+                    class="secondary"
+                    id="resetButton"
+                >
+                    Reset
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- LESSON LIST -->
+
+    <div class="card">
+
+        <h2>Lessons</h2>
+
+        <div
+            id="lessonList"
+            class="lesson-list"
+        >
+            <div class="loading">
+                Loading lessons...
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ==========================================
+    // FIREBASE
+    // ==========================================
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+        authDomain: "sti-academy.firebaseapp.com",
+        projectId: "sti-academy",
+        storageBucket: "sti-academy.firebasestorage.app",
+        messagingSenderId: "709840641262",
+        appId: "1:709840641262:web:714b09bf661afa159f27ff",
+        measurementId: "G-7ZRZ3P28YP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+
+    // ==========================================
+    // ELEMENTS
+    // ==========================================
+
+    const lessonForm =
+        document.getElementById("lessonForm");
+
+    const courseInput =
+        document.getElementById("course");
+
+    const cohortInput =
+        document.getElementById("cohort");
+
+    const lessonNumberInput =
+        document.getElementById("lessonNumber");
+
+    const lessonTitleInput =
+        document.getElementById("lessonTitle");
+
+    const topicInput =
+        document.getElementById("topic");
+
+    const lessonTypeInput =
+        document.getElementById("lessonType");
+
+    const estimatedMinutesInput =
+        document.getElementById("estimatedMinutes");
+
+    const statusInput =
+        document.getElementById("status");
+
+    const descriptionInput =
+        document.getElementById("description");
+
+    const objectivesInput =
+        document.getElementById("objectives");
+
+    const lessonList =
+        document.getElementById("lessonList");
+
+    const formTitle =
+        document.getElementById("formTitle");
+
+    const submitButton =
+        document.getElementById("submitButton");
+
+    const resetButton =
+        document.getElementById("resetButton");
+
+    const errorMessage =
+        document.getElementById("errorMessage");
+
+    const successMessage =
+        document.getElementById("successMessage");
+
+
+    // ==========================================
+    // DATA
+    // ==========================================
+
+    let courses = [];
+    let cohorts = [];
+    let editingLessonId = null;
+
+
+    // ==========================================
+    // AUTH
+    // ==========================================
+
+    auth.onAuthStateChanged(
+        async (user) => {
+
+            if (!user) {
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+            }
+
+            try {
+
+                const userDoc =
+                    await db
+                        .collection("users")
+                        .doc(user.uid)
+                        .get();
+
+                if (
+                    !userDoc.exists ||
+                    userDoc.data().role !== "admin"
+                ) {
+
+                    alert("Access denied.");
+
+                    window.location.href =
+                        "../index.html";
+
+                    return;
+                }
+
+                await loadCourses();
+                await loadLessons();
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "Unable to load the page."
+                );
+
+            }
+
+        }
+    );
+
+
+    // ==========================================
+    // LOAD COURSES
+    // ==========================================
+
+    async function loadCourses() {
+
+        const snapshot =
+            await db
+                .collection("courses")
+                .get();
+
+        courses = [];
+
+        snapshot.forEach(
+            (doc) => {
+
+                const data =
+                    doc.data();
+
+                if (
+                    data.status === "active"
+                ) {
+
+                    courses.push({
+                        id: doc.id,
+                        ...data
+                    });
+
+                }
+
+            }
+        );
+
+        courses.sort(
+            (a, b) =>
+                String(
+                    a.courseName || a.id
+                ).localeCompare(
+                    String(
+                        b.courseName || b.id
+                    )
+                )
+        );
+
+        courseInput.innerHTML =
+            `<option value="">
+                Select a course
+            </option>`;
+
+        courses.forEach(
+            (course) => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    course.id;
+
+                option.textContent =
+                    course.courseName ||
+                    course.id;
+
+                courseInput.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    // ==========================================
+    // LOAD COHORTS
+    // ==========================================
+
+    async function loadCohorts(
+        courseId,
+        selectedId = ""
+    ) {
+
+        cohortInput.innerHTML =
+            `<option value="">
+                All cohorts
+            </option>`;
+
+        cohorts = [];
+
+        if (!courseId) {
+            return;
+        }
+
+        try {
+
+            const snapshot =
+                await db
+                    .collection("cohorts")
+                    .where(
+                        "courseId",
+                        "==",
+                        courseId
+                    )
+                    .get();
+
+            snapshot.forEach(
+                (doc) => {
+
+                    cohorts.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+
+                }
+            );
+
+            cohorts.sort(
+                (a, b) =>
+                    String(
+                        b.startDate || ""
+                    ).localeCompare(
+                        String(
+                            a.startDate || ""
+                        )
+                    )
+            );
+
+            cohorts.forEach(
+                (cohort) => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        cohort.id;
+
+                    option.textContent =
+                        cohort.cohortName ||
+                        cohort.id;
+
+                    cohortInput.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+            if (selectedId) {
+
+                cohortInput.value =
+                    selectedId;
+
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+            showError(
+                "Unable to load cohorts."
+            );
+
+        }
+
+    }
+
+
+    // ==========================================
+    // COURSE CHANGE
+    // ==========================================
+
+    courseInput.addEventListener(
+        "change",
+        () => {
+
+            loadCohorts(
+                courseInput.value
+            );
+
+        }
+    );
+
+
+    // ==========================================
+    // SUBMIT
+    // ==========================================
+
+    lessonForm.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
+
+            clearMessages();
+
+            const course =
+                courses.find(
+                    item =>
+                        item.id ===
+                        courseInput.value
+                );
+
+            if (!course) {
+
+                showError(
+                    "Please select a course."
+                );
+
+                return;
+            }
+
+
+            const lessonNumber =
+                Number(
+                    lessonNumberInput.value
+                );
+
+            if (
+                !Number.isInteger(
+                    lessonNumber
+                ) ||
+                lessonNumber < 1
+            ) {
+
+                showError(
+                    "Lesson number must be a positive whole number."
+                );
+
+                return;
+            }
+
+
+            const estimatedMinutes =
+                estimatedMinutesInput.value
+                    ? Number(
+                        estimatedMinutesInput.value
+                    )
+                    : null;
+
+
+            if (
+                estimatedMinutes !== null &&
+                (
+                    !Number.isFinite(
+                        estimatedMinutes
+                    ) ||
+                    estimatedMinutes < 1
+                )
+            ) {
+
+                showError(
+                    "Estimated duration must be a valid number of minutes."
+                );
+
+                return;
+            }
+
+
+            submitButton.disabled =
+                true;
+
+            submitButton.textContent =
+                editingLessonId
+                    ? "Saving..."
+                    : "Adding...";
+
+
+            try {
+
+                const selectedCohort =
+                    cohorts.find(
+                        item =>
+                            item.id ===
+                            cohortInput.value
+                    );
+
+
+                const lessonData = {
+
+                    courseId:
+                        course.id,
+
+                    courseName:
+                        course.courseName ||
+                        course.id,
+
+                    department:
+                        course.department ||
+                        "",
+
+                    cohortId:
+                        selectedCohort
+                            ? selectedCohort.id
+                            : "",
+
+                    cohortName:
+                        selectedCohort
+                            ? (
+                                selectedCohort.cohortName ||
+                                selectedCohort.id
+                            )
+                            : "All cohorts",
+
+                    lessonNumber:
+                        lessonNumber,
+
+                    lessonTitle:
+                        lessonTitleInput.value.trim(),
+
+                    topic:
+                        topicInput.value.trim(),
+
+                    lessonType:
+                        lessonTypeInput.value,
+
+                    estimatedMinutes:
+                        estimatedMinutes,
+
+                    status:
+                        statusInput.value,
+
+                    description:
+                        descriptionInput.value.trim(),
+
+                    objectives:
+                        objectivesInput.value.trim(),
+
+                    updatedAt:
+                        firebase.firestore
+                            .FieldValue
+                            .serverTimestamp(),
+
+                    updatedBy:
+                        auth.currentUser.uid
+
+                };
+
+
+                if (
+                    !lessonData.lessonTitle
+                ) {
+
+                    showError(
+                        "Please enter a lesson title."
+                    );
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.textContent =
+                        editingLessonId
+                            ? "Save Changes"
+                            : "Add Lesson";
+
+                    return;
+                }
+
+
+                if (editingLessonId) {
+
+                    await db
+                        .collection("lessons")
+                        .doc(editingLessonId)
+                        .update(
+                            lessonData
+                        );
+
+                    showSuccess(
+                        "Lesson updated successfully."
+                    );
+
+                } else {
+
+                    lessonData.createdAt =
+                        firebase.firestore
+                            .FieldValue
+                            .serverTimestamp();
+
+                    lessonData.createdBy =
+                        auth.currentUser.uid;
+
+                    await db
+                        .collection("lessons")
+                        .add(
+                            lessonData
+                        );
+
+                    showSuccess(
+                        "Lesson added successfully."
+                    );
+
+                }
+
+
+                resetForm();
+
+                await loadLessons();
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "Unable to save lesson. Please try again."
+                );
+
+            }
+
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                editingLessonId
+                    ? "Save Changes"
+                    : "Add Lesson";
+
+        }
+    );
+
+
+    // ==========================================
+    // LOAD LESSONS
+    // ==========================================
+
+    async function loadLessons() {
+
+        lessonList.innerHTML =
+            `<div class="loading">
+                Loading lessons...
+            </div>`;
+
+        try {
+
+            const snapshot =
+                await db
+                    .collection("lessons")
+                    .get();
+
+            const lessons = [];
+
+            snapshot.forEach(
+                (doc) => {
+
+                    lessons.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+
+                }
+            );
+
+
+            lessons.sort(
+                (a, b) => {
+
+                    const courseCompare =
+                        String(
+                            a.courseName || ""
+                        ).localeCompare(
+                            String(
+                                b.courseName || ""
+                            )
+                        );
+
+                    if (
+                        courseCompare !== 0
+                    ) {
+                        return courseCompare;
+                    }
+
+                    return (
+                        Number(
+                            a.lessonNumber || 0
+                        ) -
+                        Number(
+                            b.lessonNumber || 0
+                        )
+                    );
+
+                }
+            );
+
+
+            if (lessons.length === 0) {
+
+                lessonList.innerHTML =
+                    `<div class="empty">
+                        No lessons created yet.
+                    </div>`;
+
+                return;
+            }
+
+
+            lessonList.innerHTML =
+                "";
+
+
+            lessons.forEach(
+                (lesson) => {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+                    item.className =
+                        "lesson-item";
+
+
+                    const status =
+                        lesson.status ||
+                        "active";
+
+
+                    item.innerHTML = `
+
+                        <div class="lesson-top">
+
+                            <div>
+
+                                <div class="lesson-number">
+                                    LESSON ${escapeHtml(
+                                        lesson.lessonNumber ||
+                                        "-"
+                                    )}
+                                </div>
+
+                                <div class="lesson-title">
+                                    ${escapeHtml(
+                                        lesson.lessonTitle ||
+                                        "Untitled Lesson"
+                                    )}
+                                </div>
+
+                                <div class="lesson-course">
+                                    ${escapeHtml(
+                                        lesson.courseName ||
+                                        lesson.courseId ||
+                                        "-"
+                                    )}
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="status ${status === "active" ? "active" : "inactive"}"
+                            >
+                                ${escapeHtml(
+                                    status
+                                )}
+                            </div>
+
+                        </div>
+
+
+                        <div class="details">
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    TOPIC
+                                </div>
+
+                                <div class="detail-value">
+                                    ${escapeHtml(
+                                        lesson.topic ||
+                                        "-"
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    TYPE
+                                </div>
+
+                                <div class="detail-value">
+                                    ${escapeHtml(
+                                        lesson.lessonType ||
+                                        "lesson"
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    DURATION
+                                </div>
+
+                                <div class="detail-value">
+                                    ${
+                                        lesson.estimatedMinutes
+                                            ? escapeHtml(
+                                                String(
+                                                    lesson.estimatedMinutes
+                                                )
+                                            ) + " minutes"
+                                            : "-"
+                                    }
+                                </div>
+
+                            </div>
+
+
+                            <div class="detail">
+
+                                <div class="detail-label">
+                                    COHORT
+                                </div>
+
+                                <div class="detail-value">
+                                    ${escapeHtml(
+                                        lesson.cohortName ||
+                                        "All cohorts"
+                                    )}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        ${
+                            lesson.description
+                                ? `
+                                    <div class="description">
+                                        ${escapeHtml(
+                                            lesson.description
+                                        )}
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        <div class="actions">
+
+                            <button
+                                type="button"
+                                class="secondary"
+                                onclick="editLesson('${lesson.id}')"
+                            >
+                                Edit
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="danger"
+                                onclick="deleteLesson('${lesson.id}')"
+                            >
+                                Delete
+                            </button>
+
+                        </div>
+
+                    `;
+
+
+                    lessonList.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(error);
+
+            lessonList.innerHTML =
+                `<div class="empty">
+                    Unable to load lessons.
+                </div>`;
+
+        }
+
+    }
+
+
+    // ==========================================
+    // EDIT LESSON
+    // ==========================================
+
+    window.editLesson =
+        async function(id) {
+
+            try {
+
+                const doc =
+                    await db
+                        .collection("lessons")
+                        .doc(id)
+                        .get();
+
+                if (!doc.exists) {
+
+                    showError(
+                        "Lesson not found."
+                    );
+
+                    return;
+                }
+
+
+                const lesson =
+                    doc.data();
+
+
+                editingLessonId =
+                    id;
+
+
+                formTitle.textContent =
+                    "Edit Lesson";
+
+                submitButton.textContent =
+                    "Save Changes";
+
+
+                courseInput.value =
+                    lesson.courseId ||
+                    "";
+
+
+                await loadCohorts(
+                    lesson.courseId ||
+                    "",
+                    lesson.cohortId ||
+                    ""
+                );
+
+
+                lessonNumberInput.value =
+                    lesson.lessonNumber ||
+                    "";
+
+                lessonTitleInput.value =
+                    lesson.lessonTitle ||
+                    "";
+
+                topicInput.value =
+                    lesson.topic ||
+                    "";
+
+                lessonTypeInput.value =
+                    lesson.lessonType ||
+                    "lesson";
+
+                estimatedMinutesInput.value =
+                    lesson.estimatedMinutes ||
+                    "";
+
+                statusInput.value =
+                    lesson.status ||
+                    "active";
+
+                descriptionInput.value =
+                    lesson.description ||
+                    "";
+
+                objectivesInput.value =
+                    lesson.objectives ||
+                    "";
+
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "Unable to load lesson."
+                );
+
+            }
+
+        };
+
+
+    // ==========================================
+    // DELETE LESSON
+    // ==========================================
+
+    window.deleteLesson =
+        async function(id) {
+
+            const confirmed =
+                confirm(
+                    "Delete this lesson permanently? This action cannot be undone."
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            try {
+
+                await db
+                    .collection("lessons")
+                    .doc(id)
+                    .delete();
+
+
+                showSuccess(
+                    "Lesson deleted."
+                );
+
+
+                await loadLessons();
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "Unable to delete lesson."
+                );
+
+            }
+
+        };
+
+
+    // ==========================================
+    // RESET
+    // ==========================================
+
+    resetButton.addEventListener(
+        "click",
+        resetForm
+    );
+
+
+    function resetForm() {
+
+        lessonForm.reset();
+
+        editingLessonId =
+            null;
+
+        formTitle.textContent =
+            "Add New Lesson";
+
+        submitButton.textContent =
+            "Add Lesson";
+
+        cohortInput.innerHTML =
+            `<option value="">
+                All cohorts
+            </option>`;
+
+        clearMessages();
+
+    }
+
+
+    // ==========================================
+    // MESSAGES
+    // ==========================================
+
+    function showError(message) {
+
+        errorMessage.textContent =
+            message;
+
+        errorMessage.style.display =
+            "block";
+
+        successMessage.style.display =
+            "none";
+
+    }
+
+
+    function showSuccess(message) {
+
+        successMessage.textContent =
+            message;
+
+        successMessage.style.display =
+            "block";
+
+        errorMessage.style.display =
+            "none";
+
+    }
+
+
+    function clearMessages() {
+
+        errorMessage.textContent =
+            "";
+
+        successMessage.textContent =
+            "";
+
+        errorMessage.style.display =
+            "none";
+
+        successMessage.style.display =
+            "none";
+
+    }
+
+
+    // ==========================================
+    // ESCAPE HTML
+    // ==========================================
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+</script>
+
+</body>
+</html>

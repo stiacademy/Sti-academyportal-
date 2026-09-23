@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>STI Academy Admin Support</title>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+header {
+    width: 100%;
+    background: #050505;
+    border-bottom: 1px solid #161616;
+    padding: 18px 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.logo-area {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    color: #1683ff;
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.logo-subtitle {
+    color: #777;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-name {
+    color: #aaa;
+    font-size: 13px;
+}
+
+.sign-out-btn {
+    border: none;
+    background: #1683ff;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 7px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sign-out-btn:hover {
+    background: #0d70dc;
+}
+
+.page {
+    width: 94%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 0 60px;
+}
+
+.page-heading {
+    margin-bottom: 25px;
+}
+
+.page-heading h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+}
+
+.page-heading p {
+    margin: 0;
+    color: #888;
+    font-size: 14px;
+}
+
+.admin-status-box {
+    background: #07111d;
+    border: 1px solid #123c63;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 25px;
+}
+
+.admin-status-title {
+    color: #1683ff;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.admin-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.status-item {
+    background: #05090d;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.status-label {
+    display: block;
+    color: #666;
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.status-value {
+    color: #fff;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.controls select,
+.controls input {
+    width: 100%;
+    padding: 13px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #222;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+}
+
+.controls select:focus,
+.controls input:focus {
+    border-color: #1683ff;
+}
+
+.message {
+    padding: 13px 15px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.message.success {
+    background: #082b18;
+    border: 1px solid #176b3a;
+    color: #35e889;
+}
+
+.message.error {
+    background: #310909;
+    border: 1px solid #641414;
+    color: #ff7777;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.loading {
+    text-align: center;
+    padding: 45px 15px;
+    color: #1683ff;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 45px 15px;
+    border: 1px dashed #222;
+    border-radius: 10px;
+    color: #666;
+    font-size: 13px;
+}
+
+.request-list {
+    display: grid;
+    gap: 15px;
+}
+
+.request-card {
+    background: #070707;
+    border: 1px solid #191919;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.request-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.student-name {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.student-id {
+    color: #1683ff;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.request-status {
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    color: #ffd84d;
+    background: #2b2405;
+}
+
+.status-in-progress {
+    color: #1683ff;
+    background: #071d36;
+}
+
+.status-resolved {
+    color: #35e889;
+    background: #082b18;
+}
+
+.status-closed {
+    color: #aaa;
+    background: #222;
+}
+
+.student-info {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.info-row {
+    color: #bbb;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.info-label {
+    color: #666;
+}
+
+.request-section {
+    border-top: 1px solid #171717;
+    padding-top: 17px;
+    margin-top: 17px;
+}
+
+.request-label {
+    color: #777;
+    font-size: 11px;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+}
+
+.request-subject {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.request-description {
+    color: #bbb;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.response-area {
+    display: grid;
+    gap: 12px;
+    margin-top: 17px;
+}
+
+.response-area textarea,
+.response-area select {
+    width: 100%;
+    background: #000;
+    color: #fff;
+    border: 1px solid #252525;
+    border-radius: 8px;
+    padding: 13px;
+    outline: none;
+    font-size: 13px;
+}
+
+.response-area textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.response-area textarea:focus,
+.response-area select:focus {
+    border-color: #1683ff;
+}
+
+.save-btn {
+    border: none;
+    background: #1683ff;
+    color: #fff;
+    padding: 11px 17px;
+    border-radius: 7px;
+    font-weight: 700;
+    cursor: pointer;
+    justify-self: start;
+}
+
+.save-btn:hover {
+    background: #0d70dc;
+}
+
+.save-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.current-response {
+    color: #bbb;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.request-meta {
+    color: #555;
+    font-size: 11px;
+    margin-top: 15px;
+}
+
+@media (max-width: 700px) {
+
+    header {
+        padding: 16px;
+    }
+
+    .page {
+        width: 92%;
+        padding-top: 22px;
+    }
+
+    .page-heading h1 {
+        font-size: 25px;
+    }
+
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .student-info {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 430px) {
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .admin-name {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo-area">
+
+        <div class="logo">
+            STI Academy
+        </div>
+
+        <div class="logo-subtitle">
+            School of Technology and Innovation
+        </div>
+
+    </div>
+
+    <div class="header-right">
+
+        <div
+            class="admin-name"
+            id="headerAdminEmail"
+        >
+            Checking...
+        </div>
+
+        <button
+            class="sign-out-btn"
+            id="signOutBtn"
+            type="button"
+        >
+            Sign Out
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="page">
+
+    <div class="page-heading">
+
+        <h1>
+            Support
+        </h1>
+
+        <p>
+            Manage student support requests.
+        </p>
+
+    </div>
+
+
+    <div class="admin-status-box">
+
+        <div class="admin-status-title">
+            Administrator Access
+        </div>
+
+        <div class="admin-status-grid">
+
+            <div class="status-item">
+
+                <span class="status-label">
+                    Email
+                </span>
+
+                <span
+                    class="status-value"
+                    id="adminEmail"
+                >
+                    Checking...
+                </span>
+
+            </div>
+
+
+            <div class="status-item">
+
+                <span class="status-label">
+                    Role
+                </span>
+
+                <span
+                    class="status-value"
+                    id="adminRole"
+                >
+                    Checking...
+                </span>
+
+            </div>
+
+
+            <div class="status-item">
+
+                <span class="status-label">
+                    Account Status
+                </span>
+
+                <span
+                    class="status-value"
+                    id="adminStatus"
+                >
+                    Checking...
+                </span>
+
+            </div>
+
+
+            <div class="status-item">
+
+                <span class="status-label">
+                    Authentication
+                </span>
+
+                <span
+                    class="status-value"
+                    id="authStatus"
+                >
+                    Checking...
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="message hidden"
+        id="message"
+    ></div>
+
+
+    <div
+        class="controls"
+        id="controls"
+    >
+
+        <select id="statusFilter">
+
+            <option value="all">
+                All Requests
+            </option>
+
+            <option value="pending">
+                Pending
+            </option>
+
+            <option value="in-progress">
+                In Progress
+            </option>
+
+            <option value="resolved">
+                Resolved
+            </option>
+
+            <option value="closed">
+                Closed
+            </option>
+
+        </select>
+
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search student, ID, email, subject..."
+        >
+
+    </div>
+
+
+    <div
+        class="loading"
+        id="loading"
+    >
+        Starting support page...
+    </div>
+
+
+    <div
+        class="request-list"
+        id="requestList"
+    ></div>
+
+</main>
+
+
+<script>
+
+/* =========================================================
+EXACT STI ACADEMY FIREBASE CONFIG
+========================================================= */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain:
+        "sti-academy.firebaseapp.com",
+
+    projectId:
+        "sti-academy",
+
+    storageBucket:
+        "sti-academy.firebasestorage.app",
+
+    messagingSenderId:
+        "709840261642",
+
+    appId:
+        "1:709840261642:web:714b09bf661afa159f27ff",
+
+    measurementId:
+        "G-7ZRZ3P28YP"
+
+};
+
+
+/* =========================================================
+INITIALIZE FIREBASE
+========================================================= */
+
+if (!firebase.apps.length) {
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+}
+
+const auth = firebase.auth();
+
+const db = firebase.firestore();
+
+
+/* =========================================================
+ELEMENTS
+========================================================= */
+
+const headerAdminEmail =
+    document.getElementById(
+        "headerAdminEmail"
+    );
+
+const adminEmail =
+    document.getElementById(
+        "adminEmail"
+    );
+
+const adminRole =
+    document.getElementById(
+        "adminRole"
+    );
+
+const adminStatus =
+    document.getElementById(
+        "adminStatus"
+    );
+
+const authStatus =
+    document.getElementById(
+        "authStatus"
+    );
+
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
+const requestList =
+    document.getElementById(
+        "requestList"
+    );
+
+const statusFilter =
+    document.getElementById(
+        "statusFilter"
+    );
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+const signOutBtn =
+    document.getElementById(
+        "signOutBtn"
+    );
+
+
+/* =========================================================
+VARIABLES
+========================================================= */
+
+let allRequests = [];
+
+
+/* =========================================================
+AUTHENTICATION
+========================================================= */
+
+auth.onAuthStateChanged(async user => {
+
+    console.log(
+        "Firebase Auth state changed:",
+        user
+            ? user.email
+            : "NO USER"
+    );
+
+
+    if (!user) {
+
+        authStatus.textContent =
+            "Not signed in";
+
+        adminEmail.textContent =
+            "Not signed in";
+
+        adminRole.textContent =
+            "Unavailable";
+
+        adminStatus.textContent =
+            "Unavailable";
+
+        headerAdminEmail.textContent =
+            "Not signed in";
+
+        loading.classList.add(
+            "hidden"
+        );
+
+        requestList.innerHTML = `
+
+            <div class="empty-state">
+
+                No active Firebase session was found.
+
+                <br><br>
+
+                Please sign in from the STI Academy login page.
+
+                <br><br>
+
+                <a
+                    href="login.html"
+                    style="
+                        color:#1683ff;
+                        text-decoration:none;
+                        font-weight:bold;
+                    "
+                >
+                    Return to Login
+                </a>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    await verifyAdministrator(user);
+
+});
+
+
+/* =========================================================
+VERIFY ADMIN
+========================================================= */
+
+async function verifyAdministrator(user) {
+
+    authStatus.textContent =
+        "Authenticated";
+
+    adminEmail.textContent =
+        user.email || "Unknown";
+
+    headerAdminEmail.textContent =
+        user.email || "Administrator";
+
+
+    try {
+
+        const adminDoc =
+            await db
+                .collection("users")
+                .doc(user.uid)
+                .get();
+
+
+        if (!adminDoc.exists) {
+
+            adminRole.textContent =
+                "No account record";
+
+            adminStatus.textContent =
+                "Not found";
+
+            loading.classList.add(
+                "hidden"
+            );
+
+            requestList.innerHTML = `
+
+                <div class="empty-state">
+
+                    Firebase authentication succeeded,
+                    but no STI Academy user record exists
+                    for this account.
+
+                    <br><br>
+
+                    UID:
+                    ${escapeHtml(user.uid)}
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        const adminData =
+            adminDoc.data();
+
+
+        adminRole.textContent =
+            adminData.role || "Missing";
+
+        adminStatus.textContent =
+            adminData.status || "Missing";
+
+
+        if (adminData.role !== "admin") {
+
+            loading.classList.add(
+                "hidden"
+            );
+
+            requestList.innerHTML = `
+
+                <div class="empty-state">
+
+                    This account is authenticated,
+                    but its portal role is:
+
+                    <br><br>
+
+                    <strong>
+                        ${escapeHtml(
+                            adminData.role || "missing"
+                        )}
+                    </strong>
+
+                    <br><br>
+
+                    This page requires an administrator account.
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        if (adminData.status !== "active") {
+
+            loading.classList.add(
+                "hidden"
+            );
+
+            requestList.innerHTML = `
+
+                <div class="empty-state">
+
+                    Your administrator account exists,
+                    but its status is:
+
+                    <br><br>
+
+                    <strong>
+                        ${escapeHtml(
+                            adminData.status || "missing"
+                        )}
+                    </strong>
+
+                    <br><br>
+
+                    The account must have status:
+                    <strong>active</strong>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        adminRole.textContent =
+            "admin";
+
+        adminStatus.textContent =
+            "active";
+
+
+        await loadRequests();
+
+    } catch (error) {
+
+        console.error(
+            "ADMIN VERIFICATION ERROR:",
+            error
+        );
+
+        authStatus.textContent =
+            "Firestore error";
+
+        loading.classList.add(
+            "hidden"
+        );
+
+        requestList.innerHTML = `
+
+            <div class="empty-state">
+
+                Firebase authentication succeeded,
+                but the administrator profile could not be loaded.
+
+                <br><br>
+
+                <strong>
+                    ${escapeHtml(
+                        error.message
+                    )}
+                </strong>
+
+                <br><br>
+
+                UID:
+                ${escapeHtml(user.uid)}
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+LOAD SUPPORT REQUESTS
+========================================================= */
+
+async function loadRequests() {
+
+    loading.classList.remove(
+        "hidden"
+    );
+
+    requestList.innerHTML =
+        "";
+
+
+    try {
+
+        const snapshot =
+            await db
+                .collection("supportRequests")
+                .get();
+
+
+        allRequests = [];
+
+
+        snapshot.forEach(doc => {
+
+            allRequests.push({
+
+                id: doc.id,
+
+                ...doc.data()
+
+            });
+
+        });
+
+
+        allRequests.sort(
+            (a, b) => {
+
+                const aTime =
+                    a.createdAt &&
+                    a.createdAt.toMillis
+                        ? a.createdAt.toMillis()
+                        : 0;
+
+                const bTime =
+                    b.createdAt &&
+                    b.createdAt.toMillis
+                        ? b.createdAt.toMillis()
+                        : 0;
+
+                return bTime - aTime;
+
+            }
+        );
+
+
+        loading.classList.add(
+            "hidden"
+        );
+
+
+        renderRequests();
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load support requests:",
+            error
+        );
+
+        loading.classList.add(
+            "hidden"
+        );
+
+        requestList.innerHTML = `
+
+            <div class="empty-state">
+
+                Unable to load support requests.
+
+                <br><br>
+
+                <strong>
+                    ${escapeHtml(
+                        error.message
+                    )}
+                </strong>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+RENDER REQUESTS
+========================================================= */
+
+function renderRequests() {
+
+    const selectedStatus =
+        statusFilter.value;
+
+    const search =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+    const filtered =
+        allRequests.filter(request => {
+
+            const status =
+                request.status ||
+                "pending";
+
+
+            if (
+                selectedStatus !== "all" &&
+                status !== selectedStatus
+            ) {
+
+                return false;
+
+            }
+
+
+            const studentName =
+                String(
+                    request.studentName || ""
+                ).toLowerCase();
+
+            const studentId =
+                String(
+                    request.studentId || ""
+                ).toLowerCase();
+
+            const email =
+                String(
+                    request.email || ""
+                ).toLowerCase();
+
+            const subject =
+                String(
+                    request.subject || ""
+                ).toLowerCase();
+
+            const category =
+                String(
+                    request.category || ""
+                ).toLowerCase();
+
+
+            return (
+                studentName.includes(search) ||
+                studentId.includes(search) ||
+                email.includes(search) ||
+                subject.includes(search) ||
+                category.includes(search)
+            );
+
+        });
+
+
+    if (!filtered.length) {
+
+        requestList.innerHTML = `
+
+            <div class="empty-state">
+
+                No support requests found.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    requestList.innerHTML =
+        filtered
+            .map(createRequestCard)
+            .join("");
+
+}
+
+
+/* =========================================================
+CREATE REQUEST CARD
+========================================================= */
+
+function createRequestCard(request) {
+
+    const status =
+        request.status ||
+        "pending";
+
+
+    const statusClass =
+        getStatusClass(status);
+
+
+    const submitted =
+        formatDate(
+            request.createdAt
+        );
+
+
+    return `
+
+        <div class="request-card">
+
+            <div class="request-top">
+
+                <div>
+
+                    <div class="student-name">
+
+                        ${escapeHtml(
+                            request.studentName ||
+                            "Unknown Student"
+                        )}
+
+                    </div>
+
+                    <div class="student-id">
+
+                        ${escapeHtml(
+                            request.studentId ||
+                            "No Student ID"
+                        )}
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="request-status ${statusClass}"
+                >
+
+                    ${escapeHtml(
+                        formatStatus(status)
+                    )}
+
+                </div>
+
+            </div>
+
+
+            <div class="student-info">
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Email:
+                    </span>
+
+                    ${escapeHtml(
+                        request.email ||
+                        "Not provided"
+                    )}
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Category:
+                    </span>
+
+                    ${escapeHtml(
+                        request.category ||
+                        "General"
+                    )}
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Submitted:
+                    </span>
+
+                    ${escapeHtml(
+                        submitted
+                    )}
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Request ID:
+                    </span>
+
+                    ${escapeHtml(
+                        request.id
+                    )}
+
+                </div>
+
+            </div>
+
+
+            <div class="request-section">
+
+                <div class="request-label">
+                    Subject
+                </div>
+
+                <div class="request-subject">
+
+                    ${escapeHtml(
+                        request.subject ||
+                        "No subject"
+                    )}
+
+                </div>
+
+            </div>
+
+
+            <div class="request-section">
+
+                <div class="request-label">
+                    Description
+                </div>
+
+                <div class="request-description">
+
+                    ${escapeHtml(
+                        request.description ||
+                        "No description provided."
+                    )}
+
+                </div>
+
+            </div>
+
+
+            ${
+                request.response
+                    ? `
+
+                        <div class="request-section">
+
+                            <div class="request-label">
+                                Current Response
+                            </div>
+
+                            <div class="current-response">
+
+                                ${escapeHtml(
+                                    request.response
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    `
+                    : ""
+            }
+
+
+            <div class="request-section">
+
+                <div class="request-label">
+                    Admin Response
+                </div>
+
+
+                <div class="response-area">
+
+                    <textarea
+                        id="response-${escapeAttribute(
+                            request.id
+                        )}"
+                        placeholder="Write a response to the student..."
+                    >${escapeHtml(
+                        request.response ||
+                        ""
+                    )}</textarea>
+
+
+                    <select
+                        id="status-${escapeAttribute(
+                            request.id
+                        )}"
+                    >
+
+                        <option
+                            value="pending"
+                            ${
+                                status === "pending"
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            Pending
+                        </option>
+
+
+                        <option
+                            value="in-progress"
+                            ${
+                                status === "in-progress"
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            In Progress
+                        </option>
+
+
+                        <option
+                            value="resolved"
+                            ${
+                                status === "resolved"
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            Resolved
+                        </option>
+
+
+                        <option
+                            value="closed"
+                            ${
+                                status === "closed"
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            Closed
+                        </option>
+
+                    </select>
+
+
+                    <button
+                        type="button"
+                        class="save-btn"
+                        onclick="saveResponse('${escapeAttribute(
+                            request.id
+                        )}')"
+                    >
+                        Save Response
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="request-meta">
+
+                Student UID:
+                ${escapeHtml(
+                    request.studentUid ||
+                    "Not available"
+                )}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+SAVE RESPONSE
+========================================================= */
+
+window.saveResponse =
+async function(requestId) {
+
+    const responseInput =
+        document.getElementById(
+            "response-" + requestId
+        );
+
+    const statusInput =
+        document.getElementById(
+            "status-" + requestId
+        );
+
+
+    if (!responseInput || !statusInput) {
+
+        return;
+
+    }
+
+
+    const response =
+        responseInput.value.trim();
+
+    const status =
+        statusInput.value;
+
+
+    const currentUser =
+        auth.currentUser;
+
+
+    if (!currentUser) {
+
+        showMessage(
+            "Your administrator session is not available.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        await db
+            .collection("supportRequests")
+            .doc(requestId)
+            .update({
+
+                response:
+                    response,
+
+                status:
+                    status,
+
+                updatedAt:
+                    firebase.firestore
+                        .FieldValue
+                        .serverTimestamp(),
+
+                updatedBy:
+                    currentUser.uid
+
+            });
+
+
+        showMessage(
+            "Support request updated successfully.",
+            "success"
+        );
+
+
+        await loadRequests();
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to save response:",
+            error
+        );
+
+        showMessage(
+            "Unable to save response: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+};
+
+
+/* =========================================================
+FILTERS
+========================================================= */
+
+statusFilter.addEventListener(
+    "change",
+    renderRequests
+);
+
+searchInput.addEventListener(
+    "input",
+    renderRequests
+);
+
+
+/* =========================================================
+SIGN OUT
+========================================================= */
+
+signOutBtn.addEventListener(
+    "click",
+    async () => {
+
+        try {
+
+            await auth.signOut();
+
+            window.location.href =
+                "login.html";
+
+        } catch (error) {
+
+            alert(
+                "Unable to sign out."
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+MESSAGE
+========================================================= */
+
+function showMessage(
+    text,
+    type
+) {
+
+    message.textContent =
+        text;
+
+    message.className =
+        "message " + type;
+
+}
+
+
+/* =========================================================
+STATUS
+========================================================= */
+
+function getStatusClass(
+    status
+) {
+
+    if (status === "in-progress") {
+
+        return "status-in-progress";
+
+    }
+
+    if (status === "resolved") {
+
+        return "status-resolved";
+
+    }
+
+    if (status === "closed") {
+
+        return "status-closed";
+
+    }
+
+    return "status-pending";
+
+}
+
+
+function formatStatus(
+    status
+) {
+
+    if (status === "in-progress") {
+
+        return "In Progress";
+
+    }
+
+    if (status === "resolved") {
+
+        return "Resolved";
+
+    }
+
+    if (status === "closed") {
+
+        return "Closed";
+
+    }
+
+    return "Pending";
+
+}
+
+
+/* =========================================================
+DATE
+========================================================= */
+
+function formatDate(
+    timestamp
+) {
+
+    if (
+        !timestamp ||
+        !timestamp.toDate
+    ) {
+
+        return "Not available";
+
+    }
+
+
+    return timestamp
+        .toDate()
+        .toLocaleString();
+
+}
+
+
+/* =========================================================
+HTML ESCAPING
+========================================================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+function escapeAttribute(
+    value
+) {
+
+    return String(value)
+
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+
+        .replace(
+            /'/g,
+            "\\'"
+        );
+
+}
+
+</script>
+
+</body>
+
+</html>

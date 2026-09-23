@@ -1,0 +1,2920 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Exam Submissions | STI Academy</title>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+<style>
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: #050505;
+        color: #ffffff;
+    }
+
+    .header {
+        background: #080808;
+        border-bottom: 1px solid #1d1d1d;
+        padding: 18px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .brand {
+        color: #168cff;
+        font-size: 21px;
+        font-weight: bold;
+    }
+
+    .subtitle {
+        color: #777;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .back-btn {
+        background: #111;
+        color: #fff;
+        border: 1px solid #252525;
+        padding: 10px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .back-btn:hover {
+        border-color: #168cff;
+        color: #168cff;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 25px 18px 50px;
+    }
+
+    .page-title {
+        margin-bottom: 25px;
+    }
+
+    .page-title h1 {
+        font-size: 26px;
+        margin-bottom: 5px;
+    }
+
+    .page-title p {
+        color: #777;
+        font-size: 14px;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: #0c0c0c;
+        border: 1px solid #1d1d1d;
+        border-radius: 12px;
+        padding: 18px;
+    }
+
+    .stat-label {
+        color: #777;
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        color: #168cff;
+        font-size: 27px;
+        font-weight: bold;
+    }
+
+    .filter-card {
+        background: #0c0c0c;
+        border: 1px solid #1d1d1d;
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 20px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: 1fr 220px 180px;
+        gap: 12px;
+    }
+
+    input,
+    select {
+        width: 100%;
+        background: #080808;
+        color: #fff;
+        border: 1px solid #282828;
+        border-radius: 8px;
+        padding: 11px 12px;
+        outline: none;
+    }
+
+    input:focus,
+    select:focus {
+        border-color: #168cff;
+    }
+
+    .table-card {
+        background: #0c0c0c;
+        border: 1px solid #1d1d1d;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1050px;
+    }
+
+    th {
+        background: #090909;
+        color: #888;
+        font-size: 11px;
+        text-align: left;
+        padding: 14px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    td {
+        border-top: 1px solid #1b1b1b;
+        padding: 15px 14px;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    tr:hover td {
+        background: #101010;
+    }
+
+    .student-name {
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .student-id {
+        color: #168cff;
+        font-size: 11px;
+        margin-top: 3px;
+    }
+
+    .exam-name {
+        font-weight: bold;
+    }
+
+    .date {
+        color: #888;
+        font-size: 12px;
+    }
+
+    .status,
+    .attendance {
+        display: inline-block;
+        padding: 6px 9px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .pending {
+        background: rgba(255, 190, 0, 0.1);
+        color: #ffc400;
+    }
+
+    .passed {
+        background: rgba(0, 210, 120, 0.1);
+        color: #00d878;
+    }
+
+    .failed {
+        background: rgba(255, 70, 70, 0.1);
+        color: #ff6464;
+    }
+
+    .graded {
+        background: rgba(22, 140, 255, 0.1);
+        color: #168cff;
+    }
+
+    .present {
+        background: rgba(0, 210, 120, 0.1);
+        color: #00d878;
+    }
+
+    .absent {
+        background: rgba(255, 70, 70, 0.1);
+        color: #ff6464;
+    }
+
+    .score {
+        font-weight: bold;
+    }
+
+    .view-btn {
+        display: inline-block;
+        text-decoration: none;
+        background: #111;
+        border: 1px solid #292929;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 7px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .view-btn:hover {
+        color: #168cff;
+        border-color: #168cff;
+    }
+
+    .loading,
+    .empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: #777;
+    }
+
+    .empty h3 {
+        color: #fff;
+        margin-bottom: 7px;
+    }
+
+    .error {
+        background: rgba(255, 60, 60, 0.08);
+        border: 1px solid rgba(255, 60, 60, 0.25);
+        color: #ff7070;
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+        font-size: 13px;
+    }
+
+    .info {
+        background: rgba(22, 140, 255, 0.08);
+        border: 1px solid rgba(22, 140, 255, 0.2);
+        color: #8fc7ff;
+        padding: 13px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+        font-size: 13px;
+    }
+
+    .exam-filter-title {
+        color: #aaa;
+        font-size: 12px;
+        margin-bottom: 7px;
+    }
+
+    @media (max-width: 850px) {
+
+        .stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+    @media (max-width: 500px) {
+
+        .header {
+            padding: 15px;
+        }
+
+        .brand {
+            font-size: 18px;
+        }
+
+        .container {
+            padding: 20px 14px 40px;
+        }
+
+        .page-title h1 {
+            font-size: 22px;
+        }
+
+        .stats {
+            gap: 10px;
+        }
+
+        .stat-card {
+            padding: 14px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+        }
+
+    }
+
+</style>
+
+</head><body><header class="header"><div>
+
+    <div class="brand">
+        STI Academy
+    </div>
+
+    <div class="subtitle">
+        Exam Submissions
+    </div>
+
+</div>
+
+
+<button
+    class="back-btn"
+    onclick="goBack()"
+>
+    ← Back
+</button>
+
+</header><main class="container"><div class="page-title">
+
+    <h1>Exam Submissions</h1>
+
+    <p>
+        View student examination submissions and attendance.
+    </p>
+
+</div>
+
+
+<div
+    id="errorBox"
+    class="error"
+></div>
+
+
+<div
+    id="infoBox"
+    class="info"
+></div>
+
+
+<section class="stats">
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            Total Records
+        </div>
+
+        <div
+            class="stat-value"
+            id="totalSubmissions"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            Passed
+        </div>
+
+        <div
+            class="stat-value"
+            id="passedSubmissions"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            Failed
+        </div>
+
+        <div
+            class="stat-value"
+            id="failedSubmissions"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            Pending
+        </div>
+
+        <div
+            class="stat-value"
+            id="pendingSubmissions"
+        >
+            0
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="filter-card">
+
+    <div class="filter-grid">
+
+        <div>
+
+            <div class="exam-filter-title">
+                Search
+            </div>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search student name, ID or exam..."
+                oninput="applyFilters()"
+            >
+
+        </div>
+
+
+        <div>
+
+            <div class="exam-filter-title">
+                Exam
+            </div>
+
+            <select
+                id="examFilter"
+                onchange="applyFilters()"
+            >
+
+                <option value="all">
+                    All Exams
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div>
+
+            <div class="exam-filter-title">
+                Attendance
+            </div>
+
+            <select
+                id="attendanceFilter"
+                onchange="applyFilters()"
+            >
+
+                <option value="all">
+                    All Attendance
+                </option>
+
+                <option value="Present">
+                    Present
+                </option>
+
+                <option value="Absent">
+                    Absent
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="table-card">
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Student
+                    </th>
+
+                    <th>
+                        Exam
+                    </th>
+
+                    <th>
+                        Attendance
+                    </th>
+
+                    <th>
+                        Submitted
+                    </th>
+
+                    <th>
+                        Score
+                    </th>
+
+                    <th>
+                        Percentage
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="submissionTable">
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="loading"
+                    >
+                        Loading submissions...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+</main><script>
+
+
+/* =========================================
+   FIREBASE CONFIG
+========================================= */
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+    authDomain: "sti-academy.firebaseapp.com",
+
+    projectId: "sti-academy",
+
+    storageBucket: "sti-academy.firebasestorage.app",
+
+    messagingSenderId: "709840261642",
+
+    appId: "1:709840261642:web:714b09bf661afa159f27ff",
+
+    measurementId: "G-7ZRZ3P28YP"
+
+};
+
+
+firebase.initializeApp(
+    firebaseConfig
+);
+
+
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.firestore();
+
+
+/* =========================================
+   STATE
+========================================= */
+
+let allSubmissions = [];
+
+let allExams = [];
+
+let examMap = {};
+
+let allStudents = [];
+
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const submissionTable =
+    document.getElementById(
+        "submissionTable"
+    );
+
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+
+const examFilter =
+    document.getElementById(
+        "examFilter"
+    );
+
+
+const attendanceFilter =
+    document.getElementById(
+        "attendanceFilter"
+    );
+
+
+const errorBox =
+    document.getElementById(
+        "errorBox"
+    );
+
+
+const infoBox =
+    document.getElementById(
+        "infoBox"
+    );
+
+
+/* =========================================
+   AUTH
+========================================= */
+
+auth.onAuthStateChanged(
+    async user => {
+
+        if (!user) {
+
+            window.location.href =
+                "../login.html";
+
+            return;
+
+        }
+
+
+        try {
+
+            const userDoc =
+                await db
+                    .collection("users")
+                    .doc(user.uid)
+                    .get();
+
+
+            if (
+                !userDoc.exists ||
+                userDoc.data().role !== "admin" ||
+                userDoc.data().status !== "active"
+            ) {
+
+                await auth.signOut();
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            await loadData();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                error
+            );
+
+            showError(
+                "Unable to verify administrator account."
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   LOAD DATA
+========================================= */
+
+async function loadData() {
+
+    try {
+
+        /*
+         * Load exams first.
+         */
+
+        const examSnapshot =
+            await db
+                .collection("exams")
+                .get();
+
+
+        allExams = [];
+
+        examMap = {};
+
+
+        examSnapshot.forEach(
+            doc => {
+
+                const exam = {
+
+                    id: doc.id,
+
+                    ...doc.data()
+
+                };
+
+
+                allExams.push(
+                    exam
+                );
+
+
+                examMap[doc.id] =
+                    exam;
+
+            }
+        );
+
+
+        /*
+         * Calculate missing total marks.
+         */
+
+        await loadMissingExamTotals();
+
+
+        /*
+         * Load students.
+         *
+         * These are used to create Absent
+         * records after an exam has ended.
+         */
+
+        await loadStudents();
+
+
+        /*
+         * Load existing submissions.
+         */
+
+        await loadSubmissions();
+
+
+        /*
+         * Make sure existing attempts
+         * have attendance = Present.
+         */
+
+        await markExistingAttemptsPresent();
+
+
+        /*
+         * Create Absent records for students
+         * who missed exams that have ended.
+         */
+
+        await createAbsentRecords();
+
+
+        /*
+         * Reload submissions so the newly
+         * created Absent records appear.
+         */
+
+        await loadSubmissions();
+
+
+        populateExamFilter();
+
+
+        updateStats();
+
+
+        renderSubmissions(
+            allSubmissions
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "LOAD ERROR:",
+            error
+        );
+
+
+        showError(
+            "Unable to load exam submissions: " +
+            error.message
+        );
+
+
+        submissionTable.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty"
+                >
+
+                    <h3>
+                        Unable to load submissions
+                    </h3>
+
+                    <p>
+                        ${escapeHtml(
+                            error.message
+                        )}
+                    </p>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================
+   LOAD STUDENTS
+========================================= */
+
+async function loadStudents() {
+
+    allStudents = [];
+
+
+    try {
+
+        const snapshot =
+            await db
+                .collection("students")
+                .get();
+
+
+        snapshot.forEach(
+            doc => {
+
+                allStudents.push({
+
+                    id: doc.id,
+
+                    ...doc.data()
+
+                });
+
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        console.warn(
+            "Could not load students collection:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   LOAD SUBMISSIONS
+========================================= */
+
+async function loadSubmissions() {
+
+    const submissionSnapshot =
+        await db
+            .collection(
+                "examSubmissions"
+            )
+            .get();
+
+
+    allSubmissions = [];
+
+
+    submissionSnapshot.forEach(
+        doc => {
+
+            allSubmissions.push({
+
+                id: doc.id,
+
+                ...doc.data()
+
+            });
+
+        }
+    );
+
+
+    allSubmissions.sort(
+        (a, b) =>
+            getTime(
+                b.submittedAt ||
+                b.updatedAt ||
+                b.createdAt
+            ) -
+            getTime(
+                a.submittedAt ||
+                a.updatedAt ||
+                a.createdAt
+            )
+    );
+
+}
+
+
+/* =========================================
+   LOAD MISSING EXAM TOTALS
+========================================= */
+
+async function loadMissingExamTotals() {
+
+    const missingExams =
+        allExams.filter(
+            exam =>
+                exam.totalMarks === undefined ||
+                exam.totalMarks === null
+        );
+
+
+    if (!missingExams.length) {
+
+        return;
+
+    }
+
+
+    for (
+        const exam of missingExams
+    ) {
+
+        try {
+
+            let totalMarks = 0;
+
+
+            const questionSnapshot =
+                await db
+                    .collection(
+                        "examQuestions"
+                    )
+                    .where(
+                        "examId",
+                        "==",
+                        exam.id
+                    )
+                    .get();
+
+
+            questionSnapshot.forEach(
+                questionDoc => {
+
+                    const question =
+                        questionDoc.data();
+
+
+                    const marks =
+                        Number(
+                            question.marks ??
+                            question.mark ??
+                            0
+                        );
+
+
+                    if (
+                        !isNaN(marks)
+                    ) {
+
+                        totalMarks +=
+                            marks;
+
+                    }
+
+                }
+            );
+
+
+            if (
+                totalMarks === 0 &&
+                Array.isArray(
+                    exam.questions
+                )
+            ) {
+
+                exam.questions.forEach(
+                    question => {
+
+                        const marks =
+                            Number(
+                                question.marks ??
+                                question.mark ??
+                                0
+                            );
+
+
+                        if (
+                            !isNaN(marks)
+                        ) {
+
+                            totalMarks +=
+                                marks;
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            exam.totalMarks =
+                totalMarks;
+
+
+            examMap[exam.id] =
+                exam;
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "Could not calculate total marks:",
+                exam.id,
+                error
+            );
+
+
+            exam.totalMarks =
+                0;
+
+
+            examMap[exam.id] =
+                exam;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================
+   MARK EXISTING ATTEMPTS PRESENT
+========================================= */
+
+async function markExistingAttemptsPresent() {
+
+    const updates = [];
+
+
+    allSubmissions.forEach(
+        submission => {
+
+            /*
+             * An actual exam attempt means
+             * the student was Present.
+             *
+             * Do not overwrite Absent records.
+             */
+
+            if (
+                submission.attendance === "Absent"
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                submission.attendance === "Present"
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * A record with startedAt,
+             * answers, submittedAt or
+             * status In Progress/Pending/
+             * Passed/Failed is an attempt.
+             */
+
+            const isAttempt =
+                !!submission.startedAt ||
+                !!submission.submittedAt ||
+                !!submission.answers ||
+                [
+                    "In Progress",
+                    "Pending",
+                    "Passed",
+                    "Failed",
+                    "Submitted",
+                    "Graded"
+                ].includes(
+                    submission.status
+                );
+
+
+            if (!isAttempt) {
+
+                return;
+
+            }
+
+
+            updates.push(
+                db
+                    .collection(
+                        "examSubmissions"
+                    )
+                    .doc(
+                        submission.id
+                    )
+                    .update({
+
+                        attendance:
+                            "Present",
+
+                        updatedAt:
+                            firebase
+                                .firestore
+                                .FieldValue
+                                .serverTimestamp()
+
+                    })
+            );
+
+        }
+    );
+
+
+    if (updates.length) {
+
+        await Promise.all(
+            updates
+        );
+
+        /*
+         * Update local records too.
+         */
+
+        allSubmissions.forEach(
+            submission => {
+
+                if (
+                    submission.attendance !== "Absent"
+                ) {
+
+                    const isAttempt =
+                        !!submission.startedAt ||
+                        !!submission.submittedAt ||
+                        !!submission.answers ||
+                        [
+                            "In Progress",
+                            "Pending",
+                            "Passed",
+                            "Failed",
+                            "Submitted",
+                            "Graded"
+                        ].includes(
+                            submission.status
+                        );
+
+
+                    if (isAttempt) {
+
+                        submission.attendance =
+                            "Present";
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   CREATE ABSENT RECORDS
+========================================= */
+
+async function createAbsentRecords() {
+
+    const now =
+        new Date();
+
+
+    const endedExams =
+        allExams.filter(
+            exam => {
+
+                const endDate =
+                    timestampToDate(
+                        exam.endTime
+                    );
+
+
+                if (!endDate) {
+
+                    return false;
+
+                }
+
+
+                return now >= endDate;
+
+            }
+        );
+
+
+    if (!endedExams.length) {
+
+        return;
+
+    }
+
+
+    let absentCreated =
+        0;
+
+
+    for (
+        const exam of endedExams
+    ) {
+
+        /*
+         * Get students who already have
+         * a submission/attendance record
+         * for this exam.
+         */
+
+        const existingForExam =
+            allSubmissions.filter(
+                submission =>
+                    submission.examId ===
+                    exam.id
+            );
+
+
+        const existingStudentKeys =
+            new Set();
+
+
+        existingForExam.forEach(
+            submission => {
+
+                if (
+                    submission.studentUid
+                ) {
+
+                    existingStudentKeys.add(
+                        "uid:" +
+                        submission.studentUid
+                    );
+
+                }
+
+
+                if (
+                    submission.studentId
+                ) {
+
+                    existingStudentKeys.add(
+                        "id:" +
+                        submission.studentId
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Find eligible students.
+         */
+
+        const eligibleStudents =
+            allStudents.filter(
+                student =>
+                    studentMatchesExam(
+                        student,
+                        exam
+                    )
+            );
+
+
+        for (
+            const student of eligibleStudents
+        ) {
+
+            const studentUid =
+                student.uid ||
+                student.userId ||
+                "";
+
+
+            const studentId =
+                student.studentId ||
+                student.id ||
+                "";
+
+
+            /*
+             * Skip if an existing record
+             * already belongs to this student.
+             */
+
+            if (
+                studentUid &&
+                existingStudentKeys.has(
+                    "uid:" +
+                    studentUid
+                )
+            ) {
+
+                continue;
+
+            }
+
+
+            if (
+                studentId &&
+                existingStudentKeys.has(
+                    "id:" +
+                    studentId
+                )
+            ) {
+
+                continue;
+
+            }
+
+
+            /*
+             * If neither UID nor Student ID
+             * exists, don't create a record.
+             */
+
+            if (
+                !studentUid &&
+                !studentId
+            ) {
+
+                continue;
+
+            }
+
+
+            const absentData = {
+
+                examId:
+                    exam.id,
+
+                examTitle:
+                    exam.title ||
+                    "Untitled Exam",
+
+                studentUid:
+                    studentUid,
+
+                studentId:
+                    studentId,
+
+                studentName:
+                    student.fullName ||
+                    student.name ||
+                    student.displayName ||
+                    "Unknown Student",
+
+                course:
+                    student.course ||
+                    exam.course ||
+                    "",
+
+                department:
+                    student.department ||
+                    exam.department ||
+                    "",
+
+                cohort:
+                    student.cohort ||
+                    exam.cohort ||
+                    "",
+
+                attendance:
+                    "Absent",
+
+                status:
+                    "Absent",
+
+                submitted:
+                    false,
+
+                score:
+                    0,
+
+                marksObtained:
+                    0,
+
+                totalScore:
+                    0,
+
+                totalMarks:
+                    Number(
+                        exam.totalMarks ||
+                        0
+                    ),
+
+                percentage:
+                    0,
+
+                passMark:
+                    Number(
+                        exam.passMark ||
+                        0
+                    ),
+
+                answers:
+                    {},
+
+                answeredCount:
+                    0,
+
+                createdAt:
+                    firebase
+                        .firestore
+                        .FieldValue
+                        .serverTimestamp(),
+
+                updatedAt:
+                    firebase
+                        .firestore
+                        .FieldValue
+                        .serverTimestamp()
+
+            };
+
+
+            await db
+                .collection(
+                    "examSubmissions"
+                )
+                .add(
+                    absentData
+                );
+
+
+            absentCreated++;
+
+
+            /*
+             * Add locally so we don't create
+             * another duplicate in the same
+             * page session.
+             */
+
+            existingStudentKeys.add(
+                "uid:" +
+                studentUid
+            );
+
+
+            existingStudentKeys.add(
+                "id:" +
+                studentId
+            );
+
+        }
+
+    }
+
+
+    if (
+        absentCreated > 0
+    ) {
+
+        showInfo(
+            absentCreated +
+            " absent exam record" +
+            (
+                absentCreated === 1
+                    ? ""
+                    : "s"
+            ) +
+            " created."
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   STUDENT MATCHES EXAM
+========================================= */
+
+function studentMatchesExam(
+    student,
+    exam
+) {
+
+    const examDepartment =
+        normalize(
+            exam.department
+        );
+
+
+    const examCourse =
+        normalize(
+            exam.course
+        );
+
+
+    const examCohort =
+        normalize(
+            exam.cohort
+        );
+
+
+    const studentDepartment =
+        normalize(
+            student.department
+        );
+
+
+    const studentCourse =
+        normalize(
+            student.course
+        );
+
+
+    const studentCohort =
+        normalize(
+            student.cohort
+        );
+
+
+    /*
+     * Department must match when
+     * the exam has a department.
+     */
+
+    if (
+        examDepartment &&
+        studentDepartment !==
+        examDepartment
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+     * Course must match when the exam
+     * specifies a course.
+     */
+
+    if (
+        examCourse &&
+        studentCourse !==
+        examCourse
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+     * Cohort must match when the exam
+     * specifies a cohort.
+     */
+
+    if (
+        examCohort &&
+        studentCohort !==
+        examCohort
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================
+   NORMALIZE
+========================================= */
+
+function normalize(
+    value
+) {
+
+    return String(
+        value || ""
+    )
+        .trim()
+        .toLowerCase();
+
+}
+
+
+/* =========================================
+   EXAM FILTER
+========================================= */
+
+function populateExamFilter() {
+
+    examFilter.innerHTML = `
+
+        <option value="all">
+            All Exams
+        </option>
+
+    `;
+
+
+    const sortedExams =
+        [...allExams].sort(
+            (a, b) =>
+                String(
+                    a.title || ""
+                ).localeCompare(
+                    String(
+                        b.title || ""
+                    )
+                )
+        );
+
+
+    sortedExams.forEach(
+        exam => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                exam.id;
+
+
+            option.textContent =
+                exam.title ||
+                "Untitled Exam";
+
+
+            examFilter.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   UPDATE STATS
+========================================= */
+
+function updateStats() {
+
+    let passed = 0;
+
+    let failed = 0;
+
+    let pending = 0;
+
+
+    allSubmissions.forEach(
+        submission => {
+
+            const status =
+                getStatus(
+                    submission
+                ).text;
+
+
+            if (
+                status === "Passed"
+            ) {
+
+                passed++;
+
+            }
+
+            else if (
+                status === "Failed"
+            ) {
+
+                failed++;
+
+            }
+
+            else if (
+                status !== "Absent"
+            ) {
+
+                pending++;
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "totalSubmissions"
+    ).textContent =
+        allSubmissions.length;
+
+
+    document.getElementById(
+        "passedSubmissions"
+    ).textContent =
+        passed;
+
+
+    document.getElementById(
+        "failedSubmissions"
+    ).textContent =
+        failed;
+
+
+    document.getElementById(
+        "pendingSubmissions"
+    ).textContent =
+        pending;
+
+}
+
+
+/* =========================================
+   FILTERS
+========================================= */
+
+function applyFilters() {
+
+    const search =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+    const selectedExam =
+        examFilter.value;
+
+
+    const selectedAttendance =
+        attendanceFilter.value;
+
+
+    const filtered =
+        allSubmissions.filter(
+            submission => {
+
+                const exam =
+                    examMap[
+                        submission.examId
+                    ] || {};
+
+
+                const studentName =
+                    String(
+                        submission.studentName ||
+                        submission.fullName ||
+                        ""
+                    ).toLowerCase();
+
+
+                const studentId =
+                    String(
+                        submission.studentId ||
+                        ""
+                    ).toLowerCase();
+
+
+                const examTitle =
+                    String(
+                        exam.title ||
+                        submission.examTitle ||
+                        ""
+                    ).toLowerCase();
+
+
+                const attendance =
+                    getAttendance(
+                        submission
+                    );
+
+
+                const matchesSearch =
+                    !search ||
+                    studentName.includes(
+                        search
+                    ) ||
+                    studentId.includes(
+                        search
+                    ) ||
+                    examTitle.includes(
+                        search
+                    );
+
+
+                const matchesExam =
+                    selectedExam === "all" ||
+                    submission.examId ===
+                    selectedExam;
+
+
+                const matchesAttendance =
+                    selectedAttendance === "all" ||
+                    attendance ===
+                    selectedAttendance;
+
+
+                return (
+                    matchesSearch &&
+                    matchesExam &&
+                    matchesAttendance
+                );
+
+            }
+        );
+
+
+    renderSubmissions(
+        filtered
+    );
+
+}
+
+
+/* =========================================
+   RENDER
+========================================= */
+
+function renderSubmissions(
+    submissions
+) {
+
+    if (
+        !submissions.length
+    ) {
+
+        submissionTable.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty"
+                >
+
+                    <h3>
+                        No records found
+                    </h3>
+
+                    <p>
+                        Student exam attendance
+                        and submissions will appear here.
+                    </p>
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    submissionTable.innerHTML =
+        submissions
+            .map(
+                submission =>
+                    createRow(
+                        submission
+                    )
+            )
+            .join("");
+
+}
+
+
+/* =========================================
+   CREATE ROW
+========================================= */
+
+function createRow(
+    submission
+) {
+
+    const exam =
+        examMap[
+            submission.examId
+        ] || {};
+
+
+    const studentName =
+        submission.studentName ||
+        submission.fullName ||
+        "Unknown Student";
+
+
+    const studentId =
+        submission.studentId ||
+        "N/A";
+
+
+    const examTitle =
+        exam.title ||
+        submission.examTitle ||
+        "Unknown Exam";
+
+
+    const attendance =
+        getAttendance(
+            submission
+        );
+
+
+    const score =
+        getScore(
+            submission,
+            exam
+        );
+
+
+    const percentage =
+        getPercentage(
+            submission,
+            exam
+        );
+
+
+    const status =
+        getStatus(
+            submission,
+            exam
+        );
+
+
+    const submittedDate =
+        formatDate(
+            submission.submittedAt
+        );
+
+
+    const attendanceClass =
+        attendance === "Present"
+            ? "present"
+            : "absent";
+
+
+    const action =
+        submission.attendance ===
+        "Absent"
+            ? `
+                <a
+                    class="view-btn"
+                    href="view-exam-submission.html?id=${encodeURIComponent(
+                        submission.id
+                    )}"
+                >
+                    View
+                </a>
+              `
+            : `
+                <a
+                    class="view-btn"
+                    href="view-exam-submission.html?id=${encodeURIComponent(
+                        submission.id
+                    )}"
+                >
+                    View
+                </a>
+              `;
+
+
+    return `
+
+        <tr>
+
+            <td>
+
+                <div class="student-name">
+
+                    ${escapeHtml(
+                        studentName
+                    )}
+
+                </div>
+
+                <div class="student-id">
+
+                    ${escapeHtml(
+                        studentId
+                    )}
+
+                </div>
+
+            </td>
+
+
+            <td>
+
+                <div class="exam-name">
+
+                    ${escapeHtml(
+                        examTitle
+                    )}
+
+                </div>
+
+            </td>
+
+
+            <td>
+
+                <span
+                    class="attendance ${attendanceClass}"
+                >
+
+                    ${escapeHtml(
+                        attendance
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <td>
+
+                <div class="date">
+
+                    ${escapeHtml(
+                        submittedDate
+                    )}
+
+                </div>
+
+            </td>
+
+
+            <td>
+
+                <span class="score">
+
+                    ${escapeHtml(
+                        score
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <td>
+
+                <span class="score">
+
+                    ${escapeHtml(
+                        percentage
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <td>
+
+                <span
+                    class="status ${status.className}"
+                >
+
+                    ${escapeHtml(
+                        status.text
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <td>
+
+                ${action}
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+/* =========================================
+   ATTENDANCE
+========================================= */
+
+function getAttendance(
+    submission
+) {
+
+    if (
+        submission.attendance ===
+        "Absent"
+    ) {
+
+        return "Absent";
+
+    }
+
+
+    if (
+        submission.attendance ===
+        "Present"
+    ) {
+
+        return "Present";
+
+    }
+
+
+    /*
+     * Older actual submissions that do
+     * not yet have attendance are treated
+     * as Present.
+     */
+
+    const isAttempt =
+        !!submission.startedAt ||
+        !!submission.submittedAt ||
+        !!submission.answers ||
+        [
+            "In Progress",
+            "Pending",
+            "Passed",
+            "Failed",
+            "Submitted",
+            "Graded"
+        ].includes(
+            submission.status
+        );
+
+
+    if (isAttempt) {
+
+        return "Present";
+
+    }
+
+
+    return "Absent";
+
+}
+
+
+/* =========================================
+   GRADE CHECK
+========================================= */
+
+function hasGrade(
+    submission
+) {
+
+    const status =
+        String(
+            submission.status || ""
+        ).toLowerCase();
+
+
+    if (
+        status === "pending" ||
+        status === "in progress" ||
+        status === "submitted" ||
+        status === "absent"
+    ) {
+
+        return false;
+
+    }
+
+
+    const hasScore =
+        submission.score !== undefined &&
+        submission.score !== null;
+
+
+    const hasMarks =
+        submission.marksObtained !== undefined &&
+        submission.marksObtained !== null;
+
+
+    const hasPercentage =
+        submission.percentage !== undefined &&
+        submission.percentage !== null;
+
+
+    const hasGradeField =
+        submission.grade !== undefined &&
+        submission.grade !== null &&
+        String(
+            submission.grade
+        ).trim() !== "";
+
+
+    return (
+        hasScore ||
+        hasMarks ||
+        hasPercentage ||
+        hasGradeField
+    );
+
+}
+
+
+/* =========================================
+   SCORE
+========================================= */
+
+function getScore(
+    submission,
+    exam
+) {
+
+    if (
+        getAttendance(
+            submission
+        ) === "Absent"
+    ) {
+
+        return "0";
+
+    }
+
+
+    if (
+        !hasGrade(
+            submission
+        )
+    ) {
+
+        return "Pending";
+
+    }
+
+
+    const score =
+        submission.score ??
+        submission.marksObtained;
+
+
+    if (
+        score === undefined ||
+        score === null
+    ) {
+
+        return "Pending";
+
+    }
+
+
+    const total =
+        submission.totalMarks ??
+        submission.totalScore ??
+        exam.totalMarks;
+
+
+    if (
+        total !== undefined &&
+        total !== null &&
+        Number(total) > 0
+    ) {
+
+        return `${score}/${total}`;
+
+    }
+
+
+    return String(
+        score
+    );
+
+}
+
+
+/* =========================================
+   PERCENTAGE
+========================================= */
+
+function getPercentage(
+    submission,
+    exam
+) {
+
+    if (
+        getAttendance(
+            submission
+        ) === "Absent"
+    ) {
+
+        return "0.0%";
+
+    }
+
+
+    if (
+        !hasGrade(
+            submission
+        )
+    ) {
+
+        return "Pending";
+
+    }
+
+
+    if (
+        submission.percentage !== undefined &&
+        submission.percentage !== null
+    ) {
+
+        const percentage =
+            Number(
+                submission.percentage
+            );
+
+
+        if (
+            !isNaN(
+                percentage
+            )
+        ) {
+
+            return `${percentage.toFixed(1)}%`;
+
+        }
+
+    }
+
+
+    const score =
+        submission.score ??
+        submission.marksObtained;
+
+
+    const total =
+        submission.totalMarks ??
+        submission.totalScore ??
+        exam.totalMarks;
+
+
+    if (
+        score === undefined ||
+        score === null ||
+        total === undefined ||
+        total === null ||
+        Number(total) <= 0
+    ) {
+
+        return "Pending";
+
+    }
+
+
+    const percentage =
+        Number(score) /
+        Number(total) *
+        100;
+
+
+    if (
+        isNaN(
+            percentage
+        )
+    ) {
+
+        return "Pending";
+
+    }
+
+
+    return `${percentage.toFixed(1)}%`;
+
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+function getStatus(
+    submission,
+    exam
+) {
+
+    if (
+        getAttendance(
+            submission
+        ) === "Absent"
+    ) {
+
+        return {
+
+            className: "absent",
+
+            text: "Absent"
+
+        };
+
+    }
+
+
+    if (
+        !hasGrade(
+            submission
+        )
+    ) {
+
+        return {
+
+            className: "pending",
+
+            text: "Pending"
+
+        };
+
+    }
+
+
+    const savedStatus =
+        String(
+            submission.status || ""
+        ).toLowerCase();
+
+
+    if (
+        savedStatus === "passed"
+    ) {
+
+        return {
+
+            className: "passed",
+
+            text: "Passed"
+
+        };
+
+    }
+
+
+    if (
+        savedStatus === "failed"
+    ) {
+
+        return {
+
+            className: "failed",
+
+            text: "Failed"
+
+        };
+
+    }
+
+
+    const percentage =
+        getNumericPercentage(
+            submission,
+            exam
+        );
+
+
+    if (
+        percentage === null
+    ) {
+
+        return {
+
+            className: "graded",
+
+            text: "Graded"
+
+        };
+
+    }
+
+
+    const passMark =
+        Number(
+            exam.passMark ??
+            submission.passMark ??
+            0
+        );
+
+
+    if (
+        percentage >= passMark
+    ) {
+
+        return {
+
+            className: "passed",
+
+            text: "Passed"
+
+        };
+
+    }
+
+
+    return {
+
+        className: "failed",
+
+        text: "Failed"
+
+    };
+
+}
+
+
+/* =========================================
+   NUMERIC PERCENTAGE
+========================================= */
+
+function getNumericPercentage(
+    submission,
+    exam
+) {
+
+    if (
+        submission.percentage !== undefined &&
+        submission.percentage !== null
+    ) {
+
+        const saved =
+            Number(
+                submission.percentage
+            );
+
+
+        return isNaN(
+            saved
+        )
+            ? null
+            : saved;
+
+    }
+
+
+    const score =
+        submission.score ??
+        submission.marksObtained;
+
+
+    const total =
+        submission.totalMarks ??
+        submission.totalScore ??
+        exam.totalMarks;
+
+
+    if (
+        score === undefined ||
+        score === null ||
+        total === undefined ||
+        total === null ||
+        Number(total) <= 0
+    ) {
+
+        return null;
+
+    }
+
+
+    const percentage =
+        Number(score) /
+        Number(total) *
+        100;
+
+
+    return isNaN(
+        percentage
+    )
+        ? null
+        : percentage;
+
+}
+
+
+/* =========================================
+   TIMESTAMP TO DATE
+========================================= */
+
+function timestampToDate(
+    value
+) {
+
+    if (!value) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        if (
+            value &&
+            typeof value.toDate ===
+            "function"
+        ) {
+
+            return value.toDate();
+
+        }
+
+
+        if (
+            value instanceof Date
+        ) {
+
+            return value;
+
+        }
+
+
+        const date =
+            new Date(
+                value
+            );
+
+
+        if (
+            isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        return date;
+
+    }
+
+    catch (error) {
+
+        return null;
+
+    }
+
+}
+
+
+/* =========================================
+   DATE
+========================================= */
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+
+        return "N/A";
+
+    }
+
+
+    const date =
+        timestampToDate(
+            value
+        );
+
+
+    if (!date) {
+
+        return "N/A";
+
+    }
+
+
+    return date.toLocaleString(
+        "en-NG",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================
+   TIME
+========================================= */
+
+function getTime(
+    value
+) {
+
+    const date =
+        timestampToDate(
+            value
+        );
+
+
+    if (!date) {
+
+        return 0;
+
+    }
+
+
+    return date.getTime();
+
+}
+
+
+/* =========================================
+   INFO
+========================================= */
+
+function showInfo(
+    message
+) {
+
+    infoBox.textContent =
+        message;
+
+    infoBox.style.display =
+        "block";
+
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+function showError(
+    message
+) {
+
+    errorBox.textContent =
+        message;
+
+    errorBox.style.display =
+        "block";
+
+}
+
+
+/* =========================================
+   BACK
+========================================= */
+
+function goBack() {
+
+    window.location.href =
+        "exams.html";
+
+}
+
+
+/* =========================================
+   HTML ESCAPE
+========================================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+</script></body></html>

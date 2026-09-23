@@ -1,0 +1,2722 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+«»
+
+<title>View Exam Submission | STI Academy</title><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script><style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #000;
+        color: #fff;
+    }
+
+    .header {
+        background: #050505;
+        border-bottom: 1px solid #1e90ff;
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .back-btn {
+        color: #1e90ff;
+        text-decoration: none;
+        font-size: 22px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .container {
+        width: 95%;
+        max-width: 1000px;
+        margin: 25px auto;
+    }
+
+    .card {
+        background: #0b0b0b;
+        border: 1px solid #222;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .card h2 {
+        margin-top: 0;
+        color: #1e90ff;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .info-box {
+        background: #111;
+        padding: 14px;
+        border-radius: 8px;
+        border: 1px solid #222;
+    }
+
+    .label {
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .value {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 7px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .pending {
+        background: #332800;
+        color: #ffd43b;
+    }
+
+    .passed {
+        background: #063b1c;
+        color: #37e878;
+    }
+
+    .failed {
+        background: #3b0808;
+        color: #ff5c5c;
+    }
+
+    .question {
+        border: 1px solid #252525;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 18px;
+        background: #080808;
+    }
+
+    .question-number {
+        color: #1e90ff;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .question-text {
+        font-size: 17px;
+        font-weight: bold;
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+
+    .marks-info {
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+
+    .objective-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 15px;
+        background: #092313;
+        color: #37e878;
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .theory-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 15px;
+        background: #332800;
+        color: #ffd43b;
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .option {
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 7px;
+        border: 1px solid #222;
+        background: #111;
+    }
+
+    .option.selected {
+        border-color: #1e90ff;
+    }
+
+    .option.correct {
+        border-color: #22c55e;
+        background: #092313;
+    }
+
+    .option.wrong {
+        border-color: #ef4444;
+        background: #250909;
+    }
+
+    .answer-label {
+        font-size: 13px;
+        color: #888;
+        margin-top: 15px;
+        margin-bottom: 6px;
+    }
+
+    .answer-box {
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 14px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .correct-answer {
+        color: #37e878;
+    }
+
+    .objective-result {
+        margin-top: 15px;
+        padding: 12px;
+        background: #101010;
+        border: 1px solid #222;
+        border-radius: 8px;
+    }
+
+    .correct-mark {
+        color: #37e878;
+        font-weight: bold;
+    }
+
+    .wrong-mark {
+        color: #ff5c5c;
+        font-weight: bold;
+    }
+
+    .theory-section {
+        margin-top: 15px;
+    }
+
+    .marks-input {
+        width: 100%;
+        max-width: 180px;
+        padding: 12px;
+        margin-top: 8px;
+        background: #000;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 7px;
+        font-size: 16px;
+    }
+
+    .marks-input:focus {
+        outline: none;
+        border-color: #1e90ff;
+    }
+
+    .grading-note {
+        color: #888;
+        font-size: 13px;
+        margin-top: 7px;
+    }
+
+    .save-btn {
+        width: 100%;
+        border: none;
+        background: #1e90ff;
+        color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .save-btn:hover {
+        background: #087de0;
+    }
+
+    .save-btn:disabled {
+        background: #333;
+        cursor: not-allowed;
+    }
+
+    .loading,
+    .error,
+    .empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: #888;
+    }
+
+    .error {
+        color: #ff5c5c;
+    }
+
+    .success-message {
+        background: #063b1c;
+        color: #37e878;
+        border: 1px solid #0c6b32;
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+    }
+
+    .pending-note {
+        background: #332800;
+        color: #ffd43b;
+        border: 1px solid #5a4700;
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .final-note {
+        background: #101010;
+        border: 1px solid #222;
+        color: #aaa;
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 650px) {
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .container {
+            width: 92%;
+        }
+
+    }
+
+</style></head><body><div class="header"><a
+    href="exam-submissions.html"
+    class="back-btn"
+>
+    ←
+</a>
+
+<h1>
+    View Exam Submission
+</h1>
+
+</div><div class="container"><div
+    id="loading"
+    class="loading"
+>
+    Loading submission...
+</div>
+
+
+<div
+    id="error"
+    class="error"
+    style="display:none;"
+></div>
+
+
+<div
+    id="content"
+    style="display:none;"
+>
+
+    <div
+        id="successMessage"
+        class="success-message"
+    >
+        Grades saved successfully.
+    </div>
+
+
+    <div
+        id="pendingNote"
+        class="pending-note"
+        style="display:none;"
+    >
+        Objective questions have been automatically marked.
+        Theory questions still need to be graded before the
+        student's final result can be calculated.
+    </div>
+
+
+    <div
+        id="finalNote"
+        class="final-note"
+        style="display:none;"
+    >
+        All questions have been graded. The score shown below
+        is the student's final exam result.
+    </div>
+
+
+    <div class="card">
+
+        <h2 id="examTitle">
+            Exam
+        </h2>
+
+
+        <div class="info-grid">
+
+            <div class="info-box">
+
+                <div class="label">
+                    Student Name
+                </div>
+
+                <div
+                    class="value"
+                    id="studentName"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Student ID
+                </div>
+
+                <div
+                    class="value"
+                    id="studentId"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Course
+                </div>
+
+                <div
+                    class="value"
+                    id="course"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Department
+                </div>
+
+                <div
+                    class="value"
+                    id="department"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Submitted
+                </div>
+
+                <div
+                    class="value"
+                    id="submittedAt"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Status
+                </div>
+
+                <div class="value">
+
+                    <span
+                        id="status"
+                        class="status pending"
+                    >
+                        Pending
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Score
+                </div>
+
+                <div
+                    class="value"
+                    id="score"
+                >
+                    Pending
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Percentage
+                </div>
+
+                <div
+                    class="value"
+                    id="percentage"
+                >
+                    Pending
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Questions
+                </div>
+
+                <div
+                    class="value"
+                    id="questionCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Total Marks
+                </div>
+
+                <div
+                    class="value"
+                    id="totalMarks"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    Pass Mark
+                </div>
+
+                <div
+                    class="value"
+                    id="passMark"
+                >
+                    -
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>
+            Exam Questions
+        </h2>
+
+        <div id="questionsContainer"></div>
+
+    </div>
+
+
+    <div class="card">
+
+        <button
+            id="saveButton"
+            class="save-btn"
+            onclick="saveGrades()"
+        >
+            Save Grades
+        </button>
+
+    </div>
+
+</div>
+
+</div><script>
+
+    const firebaseConfig = {
+
+        apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+
+        authDomain: "sti-academy.firebaseapp.com",
+
+        projectId: "sti-academy",
+
+        storageBucket: "sti-academy.firebasestorage.app",
+
+        messagingSenderId: "709840261642",
+
+        appId: "1:709840261642:web:714b09bf661afa159f27ff",
+
+        measurementId: "G-7ZRZ3P28YP"
+
+    };
+
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+
+    const auth =
+        firebase.auth();
+
+    const db =
+        firebase.firestore();
+
+
+    const submissionId =
+        new URLSearchParams(
+            window.location.search
+        ).get("id");
+
+
+    let submission = null;
+
+    let exam = null;
+
+    let questions = [];
+
+
+    function showError(message) {
+
+        document.getElementById(
+            "loading"
+        ).style.display = "none";
+
+
+        document.getElementById(
+            "content"
+        ).style.display = "none";
+
+
+        const error =
+            document.getElementById(
+                "error"
+            );
+
+        error.textContent =
+            message;
+
+        error.style.display =
+            "block";
+
+    }
+
+
+    function timestampToDate(timestamp) {
+
+        if (!timestamp) {
+            return null;
+        }
+
+
+        if (timestamp.toDate) {
+            return timestamp.toDate();
+        }
+
+
+        if (timestamp.seconds) {
+
+            return new Date(
+                timestamp.seconds * 1000
+            );
+
+        }
+
+
+        const date =
+            new Date(timestamp);
+
+
+        return isNaN(
+            date.getTime()
+        )
+            ? null
+            : date;
+
+    }
+
+
+    function formatDate(timestamp) {
+
+        const date =
+            timestampToDate(
+                timestamp
+            );
+
+
+        if (!date) {
+            return "-";
+        }
+
+
+        return date.toLocaleString();
+
+    }
+
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
+
+
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    function getStudentName() {
+
+        return (
+            submission.studentName ||
+            submission.name ||
+            submission.fullName ||
+            submission.student?.name ||
+            "-"
+        );
+
+    }
+
+
+    function getStudentId() {
+
+        return (
+            submission.studentId ||
+            submission.student?.studentId ||
+            submission.student?.id ||
+            "-"
+        );
+
+    }
+
+
+    function getCourse() {
+
+        return (
+            submission.course ||
+            exam.course ||
+            "-"
+        );
+
+    }
+
+
+    function getDepartment() {
+
+        return (
+            submission.department ||
+            exam.department ||
+            "-"
+        );
+
+    }
+
+
+    function getSubmittedAt() {
+
+        return (
+            submission.submittedAt ||
+            submission.createdAt ||
+            submission.completedAt ||
+            null
+        );
+
+    }
+
+
+    function getAnswers() {
+
+        return (
+            submission.answers ||
+            submission.responses ||
+            submission.studentAnswers ||
+            {}
+        );
+
+    }
+
+
+    function getAnswer(question) {
+
+        const answers =
+            getAnswers();
+
+
+        if (Array.isArray(answers)) {
+
+            const item =
+                answers.find(
+                    answer => {
+
+                        if (!answer) {
+                            return false;
+                        }
+
+
+                        return (
+                            answer.questionId ===
+                                question.id ||
+                            answer.questionNumber ===
+                                question.questionNumber
+                        );
+
+                    }
+                );
+
+
+            if (!item) {
+                return "";
+            }
+
+
+            return (
+                item.answer ??
+                item.selectedAnswer ??
+                item.response ??
+                ""
+            );
+
+        }
+
+
+        if (
+            answers[question.id] !==
+            undefined
+        ) {
+
+            return answers[
+                question.id
+            ];
+
+        }
+
+
+        if (
+            answers[
+                String(question.id)
+            ] !== undefined
+        ) {
+
+            return answers[
+                String(question.id)
+            ];
+
+        }
+
+
+        const numberKey =
+            String(
+                question.questionNumber
+            );
+
+
+        if (
+            answers[numberKey] !==
+            undefined
+        ) {
+
+            return answers[
+                numberKey
+            ];
+
+        }
+
+
+        return "";
+
+    }
+
+
+    function normalizeAnswer(answer) {
+
+        if (
+            answer === null ||
+            answer === undefined
+        ) {
+
+            return "";
+
+        }
+
+
+        if (
+            typeof answer === "object"
+        ) {
+
+            return (
+                answer.answer ??
+                answer.selectedAnswer ??
+                answer.response ??
+                ""
+            );
+
+        }
+
+
+        return String(answer).trim();
+
+    }
+
+
+    function answersMatch(
+        studentAnswer,
+        correctAnswer
+    ) {
+
+        const student =
+            normalizeAnswer(
+                studentAnswer
+            )
+                .toLowerCase()
+                .trim();
+
+
+        const correct =
+            normalizeAnswer(
+                correctAnswer
+            )
+                .toLowerCase()
+                .trim();
+
+
+        if (
+            !student ||
+            !correct
+        ) {
+
+            return false;
+
+        }
+
+
+        return (
+            student === correct
+        );
+
+    }
+
+
+    function getExistingGrade(
+        question
+    ) {
+
+        const grades =
+            submission.questionGrades ||
+            submission.grades ||
+            {};
+
+
+        if (
+            grades[question.id] !==
+            undefined
+        ) {
+
+            return grades[
+                question.id
+            ];
+
+        }
+
+
+        if (
+            grades[
+                String(
+                    question.questionNumber
+                )
+            ] !== undefined
+        ) {
+
+            return grades[
+                String(
+                    question.questionNumber
+                )
+            ];
+
+        }
+
+
+        if (
+            Array.isArray(grades)
+        ) {
+
+            const found =
+                grades.find(
+                    g => {
+
+                        return (
+                            g.questionId ===
+                                question.id ||
+                            g.questionNumber ===
+                                question.questionNumber
+                        );
+
+                    }
+                );
+
+
+            if (found) {
+                return found;
+            }
+
+        }
+
+
+        return null;
+
+    }
+
+
+    function getExistingMarks(
+        question
+    ) {
+
+        const grade =
+            getExistingGrade(
+                question
+            );
+
+
+        if (
+            grade === null ||
+            grade === undefined
+        ) {
+
+            return null;
+
+        }
+
+
+        if (
+            typeof grade ===
+            "number"
+        ) {
+
+            return grade;
+
+        }
+
+
+        return (
+            grade.marks ??
+            grade.score ??
+            grade.marksObtained ??
+            null
+        );
+
+    }
+
+
+    function calculateObjectiveResult() {
+
+        let score = 0;
+
+        let total = 0;
+
+
+        questions.forEach(
+            question => {
+
+                const marks =
+                    Number(
+                        question.marks
+                    ) || 0;
+
+
+                if (
+                    question.type ===
+                    "objective"
+                ) {
+
+                    total +=
+                        marks;
+
+
+                    const studentAnswer =
+                        getAnswer(
+                            question
+                        );
+
+
+                    if (
+                        answersMatch(
+                            studentAnswer,
+                            question.correctAnswer
+                        )
+                    ) {
+
+                        score +=
+                            marks;
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        return {
+            score,
+            total
+        };
+
+    }
+
+
+    function calculateTheoryResult() {
+
+        let score = 0;
+
+        let total = 0;
+
+        let gradedCount = 0;
+
+        let theoryCount = 0;
+
+
+        questions.forEach(
+            question => {
+
+                if (
+                    question.type ===
+                    "objective"
+                ) {
+
+                    return;
+
+                }
+
+
+                theoryCount++;
+
+
+                const marks =
+                    Number(
+                        question.marks
+                    ) || 0;
+
+
+                total +=
+                    marks;
+
+
+                const input =
+                    document.querySelector(
+                        `.theory-marks[data-question-id="${question.id}"]`
+                    );
+
+
+                let obtained = null;
+
+
+                if (
+                    input &&
+                    input.value !== ""
+                ) {
+
+                    obtained =
+                        Number(
+                            input.value
+                        );
+
+                }
+                else {
+
+                    const existing =
+                        getExistingMarks(
+                            question
+                        );
+
+
+                    if (
+                        existing !==
+                            null &&
+                        existing !==
+                            undefined
+                    ) {
+
+                        obtained =
+                            Number(
+                                existing
+                            );
+
+                    }
+
+                }
+
+
+                if (
+                    obtained !== null &&
+                    !isNaN(obtained)
+                ) {
+
+                    score +=
+                        Math.max(
+                            0,
+                            Math.min(
+                                obtained,
+                                marks
+                            )
+                        );
+
+
+                    gradedCount++;
+
+                }
+
+            }
+        );
+
+
+        return {
+            score,
+            total,
+            gradedCount,
+            theoryCount
+        };
+
+    }
+
+
+    function calculateExamState() {
+
+        const objective =
+            calculateObjectiveResult();
+
+
+        const theory =
+            calculateTheoryResult();
+
+
+        const totalMarks =
+            objective.total +
+            theory.total;
+
+
+        const totalScore =
+            objective.score +
+            theory.score;
+
+
+        const theoryComplete =
+            theory.gradedCount ===
+            theory.theoryCount;
+
+
+        return {
+
+            objectiveScore:
+                objective.score,
+
+            objectiveTotal:
+                objective.total,
+
+            theoryScore:
+                theory.score,
+
+            theoryTotal:
+                theory.total,
+
+            theoryCount:
+                theory.theoryCount,
+
+            theoryGradedCount:
+                theory.gradedCount,
+
+            theoryComplete,
+
+            totalScore,
+
+            totalMarks
+
+        };
+
+    }
+
+
+    function updatePreview() {
+
+        const state =
+            calculateExamState();
+
+
+        document.getElementById(
+            "totalMarks"
+        ).textContent =
+            state.totalMarks;
+
+
+        if (
+            state.theoryCount > 0 &&
+            !state.theoryComplete
+        ) {
+
+            document.getElementById(
+                "score"
+            ).textContent =
+                `${state.objectiveScore} / ${state.totalMarks}`;
+
+
+            document.getElementById(
+                "percentage"
+            ).textContent =
+                "Pending";
+
+
+            renderStatus(
+                "Pending"
+            );
+
+
+            document.getElementById(
+                "pendingNote"
+            ).style.display =
+                "block";
+
+
+            document.getElementById(
+                "finalNote"
+            ).style.display =
+                "none";
+
+
+            return;
+
+        }
+
+
+        if (
+            state.totalMarks <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        const percentage =
+            (
+                state.totalScore /
+                state.totalMarks
+            ) * 100;
+
+
+        document.getElementById(
+            "score"
+        ).textContent =
+            `${state.totalScore} / ${state.totalMarks}`;
+
+
+        document.getElementById(
+            "percentage"
+        ).textContent =
+            `${percentage.toFixed(1)}%`;
+
+
+        renderStatus(
+            percentage >=
+                Number(
+                    exam.passMark || 0
+                )
+                ? "Passed"
+                : "Failed"
+        );
+
+
+        document.getElementById(
+            "pendingNote"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "finalNote"
+        ).style.display =
+            "block";
+
+    }
+
+
+    function renderStatus(
+        status
+    ) {
+
+        const element =
+            document.getElementById(
+                "status"
+            );
+
+
+        const normalized =
+            String(
+                status || "Pending"
+            ).toLowerCase();
+
+
+        element.className =
+            "status";
+
+
+        if (
+            normalized ===
+            "passed"
+        ) {
+
+            element.classList.add(
+                "passed"
+            );
+
+            element.textContent =
+                "Passed";
+
+        }
+        else if (
+            normalized ===
+            "failed"
+        ) {
+
+            element.classList.add(
+                "failed"
+            );
+
+            element.textContent =
+                "Failed";
+
+        }
+        else {
+
+            element.classList.add(
+                "pending"
+            );
+
+            element.textContent =
+                "Pending";
+
+        }
+
+    }
+
+
+    function renderQuestions() {
+
+        const container =
+            document.getElementById(
+                "questionsContainer"
+            );
+
+
+        container.innerHTML = "";
+
+
+        if (
+            !questions.length
+        ) {
+
+            container.innerHTML =
+                `
+                <div class="empty">
+                    No questions found for this exam.
+                </div>
+                `;
+
+            return;
+
+        }
+
+
+        questions.forEach(
+            (
+                question,
+                index
+            ) => {
+
+                const studentAnswer =
+                    normalizeAnswer(
+                        getAnswer(
+                            question
+                        )
+                    );
+
+
+                const questionMarks =
+                    Number(
+                        question.marks
+                    ) || 0;
+
+
+                const questionDiv =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                questionDiv.className =
+                    "question";
+
+
+                let html = "";
+
+
+                html += `
+                    <div class="question-number">
+                        Question ${
+                            question.questionNumber ||
+                            index + 1
+                        }
+                    </div>
+
+                    <div class="question-text">
+                        ${escapeHtml(
+                            question.question ||
+                            ""
+                        )}
+                    </div>
+
+                    <div class="marks-info">
+                        ${questionMarks}
+                        mark${
+                            questionMarks ===
+                            1
+                                ? ""
+                                : "s"
+                        }
+                    </div>
+                `;
+
+
+                if (
+                    question.type ===
+                    "objective"
+                ) {
+
+                    html += `
+                        <div class="objective-badge">
+                            Automatically Graded
+                        </div>
+                    `;
+
+
+                    const options =
+                        question.options ||
+                        {};
+
+
+                    /*
+                     * IMPORTANT:
+                     * Always display options
+                     * in A → B → C → D order.
+                     */
+
+                    Object.keys(
+                        options
+                    )
+                        .sort(
+                            (
+                                a,
+                                b
+                            ) =>
+                                a.localeCompare(
+                                    b
+                                )
+                        )
+                        .forEach(
+                            letter => {
+
+                                const optionText =
+                                    options[
+                                        letter
+                                    ];
+
+
+                                const isSelected =
+                                    studentAnswer
+                                        .toLowerCase() ===
+                                    String(
+                                        letter
+                                    )
+                                        .toLowerCase();
+
+
+                                const isCorrect =
+                                    String(
+                                        question.correctAnswer ||
+                                        ""
+                                    )
+                                        .toLowerCase() ===
+                                    String(
+                                        letter
+                                    )
+                                        .toLowerCase();
+
+
+                                let className =
+                                    "option";
+
+
+                                if (
+                                    isSelected
+                                ) {
+
+                                    className +=
+                                        " selected";
+
+                                }
+
+
+                                if (
+                                    isCorrect
+                                ) {
+
+                                    className +=
+                                        " correct";
+
+                                }
+
+
+                                if (
+                                    isSelected &&
+                                    !isCorrect
+                                ) {
+
+                                    className +=
+                                        " wrong";
+
+                                }
+
+
+                                html += `
+                                    <div class="${className}">
+
+                                        <strong>
+                                            ${escapeHtml(
+                                                letter
+                                            )}.
+                                        </strong>
+
+                                        ${escapeHtml(
+                                            optionText
+                                        )}
+
+                                    </div>
+                                `;
+
+                            }
+                        );
+
+
+                    html += `
+                        <div class="answer-label">
+                            Student's Answer
+                        </div>
+
+                        <div class="answer-box">
+                            ${
+                                studentAnswer
+                                    ? escapeHtml(
+                                        studentAnswer
+                                    )
+                                    : "No answer"
+                            }
+                        </div>
+
+                        <div class="answer-label">
+                            Correct Answer
+                        </div>
+
+                        <div class="answer-box correct-answer">
+                            ${
+                                escapeHtml(
+                                    question.correctAnswer ||
+                                    "-"
+                                )
+                            }
+                        </div>
+                    `;
+
+
+                    const objectiveCorrect =
+                        answersMatch(
+                            studentAnswer,
+                            question.correctAnswer
+                        );
+
+
+                    html += `
+                        <div class="objective-result">
+
+                            ${
+                                objectiveCorrect
+                                    ? `
+                                        <span class="correct-mark">
+                                            ${questionMarks}
+                                            /
+                                            ${questionMarks}
+                                            marks
+                                        </span>
+                                      `
+                                    : `
+                                        <span class="wrong-mark">
+                                            0
+                                            /
+                                            ${questionMarks}
+                                            marks
+                                        </span>
+                                      `
+                            }
+
+                        </div>
+                    `;
+
+
+                    if (
+                        question.explanation
+                    ) {
+
+                        html += `
+                            <div class="answer-label">
+                                Explanation
+                            </div>
+
+                            <div class="answer-box">
+                                ${escapeHtml(
+                                    question.explanation
+                                )}
+                            </div>
+                        `;
+
+                    }
+
+                }
+                else {
+
+                    html += `
+                        <div class="theory-badge">
+                            Manual Grading Required
+                        </div>
+                    `;
+
+
+                    const existingMarks =
+                        getExistingMarks(
+                            question
+                        );
+
+
+                    html += `
+                        <div class="answer-label">
+                            Student's Answer
+                        </div>
+
+                        <div class="answer-box">
+                            ${
+                                studentAnswer
+                                    ? escapeHtml(
+                                        studentAnswer
+                                    )
+                                    : "No answer"
+                            }
+                        </div>
+                    `;
+
+
+                    if (
+                        question.modelAnswer
+                    ) {
+
+                        html += `
+                            <div class="answer-label">
+                                Model Answer
+                            </div>
+
+                            <div class="answer-box">
+                                ${escapeHtml(
+                                    question.modelAnswer
+                                )}
+                            </div>
+                        `;
+
+                    }
+                    else if (
+                        question.expectedAnswer
+                    ) {
+
+                        html += `
+                            <div class="answer-label">
+                                Expected Answer
+                            </div>
+
+                            <div class="answer-box">
+                                ${escapeHtml(
+                                    question.expectedAnswer
+                                )}
+                            </div>
+                        `;
+
+                    }
+
+
+                    if (
+                        question.keyPoints
+                    ) {
+
+                        html += `
+                            <div class="answer-label">
+                                Key Points
+                            </div>
+
+                            <div class="answer-box">
+                                ${escapeHtml(
+                                    question.keyPoints
+                                )}
+                            </div>
+                        `;
+
+                    }
+
+
+                    html += `
+                        <div class="theory-section">
+
+                            <div class="answer-label">
+                                Marks Awarded
+                            </div>
+
+                            <input
+                                type="number"
+                                class="marks-input theory-marks"
+                                data-question-id="${escapeHtml(
+                                    question.id
+                                )}"
+                                min="0"
+                                max="${questionMarks}"
+                                step="0.5"
+                                value="${
+                                    existingMarks !==
+                                        null &&
+                                    existingMarks !==
+                                        undefined
+                                        ? escapeHtml(
+                                            existingMarks
+                                        )
+                                        : ""
+                                }"
+                                oninput="updatePreview()"
+                            >
+
+                            <div class="grading-note">
+                                Maximum:
+                                ${questionMarks}
+                                mark${
+                                    questionMarks ===
+                                    1
+                                        ? ""
+                                        : "s"
+                                }
+                            </div>
+
+                        </div>
+                    `;
+
+                }
+
+
+                questionDiv.innerHTML =
+                    html;
+
+
+                container.appendChild(
+                    questionDiv
+                );
+
+            }
+        );
+
+
+        updatePreview();
+
+    }
+
+
+    async function loadSubmission() {
+
+        if (!submissionId) {
+
+            showError(
+                "No submission ID was provided."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            const submissionSnap =
+                await db
+                    .collection(
+                        "examSubmissions"
+                    )
+                    .doc(
+                        submissionId
+                    )
+                    .get();
+
+
+            if (
+                !submissionSnap.exists
+            ) {
+
+                showError(
+                    "Exam submission not found."
+                );
+
+                return;
+
+            }
+
+
+            submission = {
+
+                id:
+                    submissionSnap.id,
+
+                ...submissionSnap.data()
+
+            };
+
+
+            const examId =
+                submission.examId;
+
+
+            if (!examId) {
+
+                showError(
+                    "This submission does not have an exam ID."
+                );
+
+                return;
+
+            }
+
+
+            const examSnap =
+                await db
+                    .collection(
+                        "exams"
+                    )
+                    .doc(
+                        examId
+                    )
+                    .get();
+
+
+            if (
+                !examSnap.exists
+            ) {
+
+                showError(
+                    "Exam not found."
+                );
+
+                return;
+
+            }
+
+
+            exam = {
+
+                id:
+                    examSnap.id,
+
+                ...examSnap.data()
+
+            };
+
+
+            const questionSnap =
+                await db
+                    .collection(
+                        "examQuestions"
+                    )
+                    .where(
+                        "examId",
+                        "==",
+                        exam.id
+                    )
+                    .get();
+
+
+            questions =
+                questionSnap.docs.map(
+                    doc => ({
+
+                        id:
+                            doc.id,
+
+                        ...doc.data()
+
+                    })
+                );
+
+
+            questions.sort(
+                (
+                    a,
+                    b
+                ) =>
+                    Number(
+                        a.questionNumber ||
+                        0
+                    ) -
+                    Number(
+                        b.questionNumber ||
+                        0
+                    )
+            );
+
+
+            document.getElementById(
+                "examTitle"
+            ).textContent =
+                exam.title ||
+                "Exam";
+
+
+            document.getElementById(
+                "studentName"
+            ).textContent =
+                getStudentName();
+
+
+            document.getElementById(
+                "studentId"
+            ).textContent =
+                getStudentId();
+
+
+            document.getElementById(
+                "course"
+            ).textContent =
+                getCourse();
+
+
+            document.getElementById(
+                "department"
+            ).textContent =
+                getDepartment();
+
+
+            document.getElementById(
+                "submittedAt"
+            ).textContent =
+                formatDate(
+                    getSubmittedAt()
+                );
+
+
+            document.getElementById(
+                "questionCount"
+            ).textContent =
+                questions.length;
+
+
+            const calculated =
+                calculateExamState();
+
+
+            document.getElementById(
+                "totalMarks"
+            ).textContent =
+                calculated.totalMarks;
+
+
+            document.getElementById(
+                "passMark"
+            ).textContent =
+                `${exam.passMark ?? 0}%`;
+
+
+            if (
+                calculated.theoryCount >
+                    0 &&
+                !calculated.theoryComplete
+            ) {
+
+                document.getElementById(
+                    "score"
+                ).textContent =
+                    `${calculated.objectiveScore} / ${calculated.totalMarks}`;
+
+
+                document.getElementById(
+                    "percentage"
+                ).textContent =
+                    "Pending";
+
+
+                renderStatus(
+                    "Pending"
+                );
+
+            }
+            else if (
+                submission.graded === true &&
+                submission.percentage !==
+                    undefined
+            ) {
+
+                document.getElementById(
+                    "score"
+                ).textContent =
+                    `${submission.totalScore ??
+                    submission.score ??
+                    submission.marksObtained ??
+                    calculated.totalScore}
+                    /
+                    ${
+                        submission.totalMarks ??
+                        calculated.totalMarks
+                    }`;
+
+
+                document.getElementById(
+                    "percentage"
+                ).textContent =
+                    `${Number(
+                        submission.percentage
+                    ).toFixed(1)}%`;
+
+
+                renderStatus(
+                    Number(
+                        submission.percentage
+                    ) >=
+                    Number(
+                        exam.passMark ||
+                        0
+                    )
+                        ? "Passed"
+                        : "Failed"
+                );
+
+            }
+            else {
+
+                updatePreview();
+
+            }
+
+
+            renderQuestions();
+
+
+            document.getElementById(
+                "loading"
+            ).style.display =
+                "none";
+
+
+            document.getElementById(
+                "content"
+            ).style.display =
+                "block";
+
+        }
+        catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            showError(
+                "Failed to load submission. " +
+                error.message
+            );
+
+        }
+
+    }
+
+
+    async function saveGrades() {
+
+        const button =
+            document.getElementById(
+                "saveButton"
+            );
+
+
+        button.disabled =
+            true;
+
+        button.textContent =
+            "Saving...";
+
+
+        try {
+
+            let totalScore = 0;
+
+            let totalMarks = 0;
+
+            let objectiveScore = 0;
+
+            let objectiveTotal = 0;
+
+            let theoryScore = 0;
+
+            let theoryTotal = 0;
+
+            let theoryCount = 0;
+
+            let theoryGradedCount = 0;
+
+
+            const questionGrades =
+                {};
+
+
+            questions.forEach(
+                question => {
+
+                    const maxMarks =
+                        Number(
+                            question.marks
+                        ) || 0;
+
+
+                    totalMarks +=
+                        maxMarks;
+
+
+                    const studentAnswer =
+                        normalizeAnswer(
+                            getAnswer(
+                                question
+                            )
+                        );
+
+
+                    let marksObtained =
+                        0;
+
+
+                    if (
+                        question.type ===
+                        "objective"
+                    ) {
+
+                        objectiveTotal +=
+                            maxMarks;
+
+
+                        if (
+                            answersMatch(
+                                studentAnswer,
+                                question.correctAnswer
+                            )
+                        ) {
+
+                            marksObtained =
+                                maxMarks;
+
+                            objectiveScore +=
+                                maxMarks;
+
+                        }
+
+                    }
+                    else {
+
+                        theoryCount++;
+
+                        theoryTotal +=
+                            maxMarks;
+
+
+                        const input =
+                            document.querySelector(
+                                `.theory-marks[data-question-id="${question.id}"]`
+                            );
+
+
+                        if (
+                            !input ||
+                            input.value ===
+                                ""
+                        ) {
+
+                            throw new Error(
+                                `Please grade Question ${
+                                    question.questionNumber
+                                } before saving.`
+                            );
+
+                        }
+
+
+                        marksObtained =
+                            Number(
+                                input.value
+                            );
+
+
+                        if (
+                            isNaN(
+                                marksObtained
+                            ) ||
+                            marksObtained < 0 ||
+                            marksObtained >
+                                maxMarks
+                        ) {
+
+                            throw new Error(
+                                `Invalid marks for Question ${
+                                    question.questionNumber
+                                }. Marks must be between 0 and ${
+                                    maxMarks
+                                }.`
+                            );
+
+                        }
+
+
+                        theoryScore +=
+                            marksObtained;
+
+                        theoryGradedCount++;
+
+                    }
+
+
+                    totalScore +=
+                        marksObtained;
+
+
+                    questionGrades[
+                        question.id
+                    ] = {
+
+                        questionId:
+                            question.id,
+
+                        questionNumber:
+                            question.questionNumber ||
+                            0,
+
+                        marks:
+                            marksObtained,
+
+                        maxMarks:
+                            maxMarks,
+
+                        type:
+                            question.type,
+
+                        studentAnswer:
+                            studentAnswer,
+
+                        correctAnswer:
+                            question.correctAnswer ||
+                            null
+
+                    };
+
+                }
+            );
+
+
+            const percentage =
+                totalMarks > 0
+                    ? (
+                        totalScore /
+                        totalMarks
+                    ) * 100
+                    : 0;
+
+
+            const passMark =
+                Number(
+                    exam.passMark ||
+                    0
+                );
+
+
+            const status =
+                percentage >=
+                    passMark
+                    ? "Passed"
+                    : "Failed";
+
+
+            await db
+                .collection(
+                    "examSubmissions"
+                )
+                .doc(
+                    submissionId
+                )
+                .update({
+
+                    questionGrades:
+                        questionGrades,
+
+                    objectiveScore:
+                        objectiveScore,
+
+                    objectiveTotal:
+                        objectiveTotal,
+
+                    theoryScore:
+                        theoryScore,
+
+                    theoryTotal:
+                        theoryTotal,
+
+                    theoryGraded:
+                        true,
+
+                    theoryGradedCount:
+                        theoryGradedCount,
+
+                    theoryQuestionCount:
+                        theoryCount,
+
+                    score:
+                        totalScore,
+
+                    marksObtained:
+                        totalScore,
+
+                    totalScore:
+                        totalScore,
+
+                    totalMarks:
+                        totalMarks,
+
+                    percentage:
+                        percentage,
+
+                    status:
+                        status,
+
+                    result:
+                        status,
+
+                    graded:
+                        true,
+
+                    gradedAt:
+                        firebase.firestore.FieldValue.serverTimestamp(),
+
+                    gradedBy:
+                        auth.currentUser.uid,
+
+                    updatedAt:
+                        firebase.firestore.FieldValue.serverTimestamp()
+
+                });
+
+
+            submission.questionGrades =
+                questionGrades;
+
+            submission.objectiveScore =
+                objectiveScore;
+
+            submission.objectiveTotal =
+                objectiveTotal;
+
+            submission.theoryScore =
+                theoryScore;
+
+            submission.theoryTotal =
+                theoryTotal;
+
+            submission.theoryGraded =
+                true;
+
+            submission.theoryGradedCount =
+                theoryGradedCount;
+
+            submission.theoryQuestionCount =
+                theoryCount;
+
+            submission.score =
+                totalScore;
+
+            submission.marksObtained =
+                totalScore;
+
+            submission.totalScore =
+                totalScore;
+
+            submission.totalMarks =
+                totalMarks;
+
+            submission.percentage =
+                percentage;
+
+            submission.status =
+                status;
+
+            submission.result =
+                status;
+
+            submission.graded =
+                true;
+
+
+            document.getElementById(
+                "score"
+            ).textContent =
+                `${totalScore} / ${totalMarks}`;
+
+
+            document.getElementById(
+                "percentage"
+            ).textContent =
+                `${percentage.toFixed(1)}%`;
+
+
+            renderStatus(
+                status
+            );
+
+
+            document.getElementById(
+                "pendingNote"
+            ).style.display =
+                "none";
+
+
+            document.getElementById(
+                "finalNote"
+            ).style.display =
+                "block";
+
+
+            const success =
+                document.getElementById(
+                    "successMessage"
+                );
+
+
+            success.textContent =
+                "Grades saved successfully. The student's final result is now available.";
+
+
+            success.style.display =
+                "block";
+
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+
+            button.textContent =
+                "Grades Saved";
+
+        }
+        catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            alert(
+                "Failed to save grades:\n\n" +
+                error.message
+            );
+
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "Save Grades";
+
+        }
+
+    }
+
+
+    auth.onAuthStateChanged(
+        async user => {
+
+            if (!user) {
+
+                window.location.href =
+                    "../login.html";
+
+                return;
+
+            }
+
+
+            try {
+
+                const userSnap =
+                    await db
+                        .collection(
+                            "users"
+                        )
+                        .doc(
+                            user.uid
+                        )
+                        .get();
+
+
+                if (
+                    !userSnap.exists
+                ) {
+
+                    showError(
+                        "User account was not found."
+                    );
+
+                    return;
+
+                }
+
+
+                const userData =
+                    userSnap.data();
+
+
+                if (
+                    userData.role !==
+                        "admin" ||
+                    userData.status !==
+                        "active"
+                ) {
+
+                    showError(
+                        "Access denied. Admin access required."
+                    );
+
+                    return;
+
+                }
+
+
+                await loadSubmission();
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                showError(
+                    "Authentication error. " +
+                    error.message
+                );
+
+            }
+
+        }
+    );
+
+</script></body></html>

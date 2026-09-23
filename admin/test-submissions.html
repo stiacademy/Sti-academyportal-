@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Test Submissions | STI Academy</title>
+
+
+    <!-- FIREBASE -->
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+        }
+
+
+        /* HEADER */
+
+        header {
+            background: #080808;
+            border-bottom: 1px solid #1e1e1e;
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: #111;
+            border: 1px solid #222;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            border-color: #168cff;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .blue {
+            color: #168cff;
+        }
+
+
+        /* MAIN */
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px 20px 50px;
+        }
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .page-title p {
+            margin: 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+
+        /* FILTERS */
+
+        .filters {
+            background: #0b0b0b;
+            border: 1px solid #202020;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .field label {
+            display: block;
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            background: #111;
+            color: white;
+            border: 1px solid #292929;
+            border-radius: 8px;
+            padding: 12px;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: #168cff;
+        }
+
+
+        /* STATS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: #0b0b0b;
+            border: 1px solid #202020;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+
+        /* TABLE */
+
+        .table-container {
+            background: #0b0b0b;
+            border: 1px solid #202020;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #1c1c1c;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            background: #0e0e0e;
+        }
+
+        td {
+            color: #ddd;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #101010;
+        }
+
+
+        /* STATUS */
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .passed {
+            background: rgba(0, 200, 100, .12);
+            color: #00d084;
+        }
+
+        .failed {
+            background: rgba(255, 70, 70, .12);
+            color: #ff6464;
+        }
+
+        .pending {
+            background: rgba(255, 180, 0, .12);
+            color: #ffb400;
+        }
+
+
+        /* BUTTON */
+
+        .view-btn {
+            background: #168cff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .view-btn:hover {
+            background: #0877df;
+        }
+
+
+        /* EMPTY */
+
+        .empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: #777;
+        }
+
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+        }
+
+
+        /* MESSAGE */
+
+        .message {
+            display: none;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(255, 70, 70, .1);
+            border: 1px solid rgba(255, 70, 70, .3);
+            color: #ff7070;
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+
+            header {
+                padding: 15px;
+            }
+
+            .logo {
+                font-size: 16px;
+            }
+
+            main {
+                padding: 25px 12px;
+            }
+
+            .page-title h1 {
+                font-size: 23px;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="header-left">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            ← Back
+        </button>
+
+        <div class="logo">
+            STI <span class="blue">Academy</span>
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<main>
+
+
+    <div class="page-title">
+
+        <h1>Test Submissions</h1>
+
+        <p>
+            View and review student test submissions.
+        </p>
+
+    </div>
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+        <div class="field">
+
+            <label>
+                Search Student
+            </label>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by name or student ID..."
+                oninput="filterSubmissions()"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Filter Test
+            </label>
+
+            <select
+                id="testFilter"
+                onchange="filterSubmissions()"
+            >
+
+                <option value="all">
+                    All Tests
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <div class="stat-label">
+                Total Submissions
+            </div>
+
+            <div
+                class="stat-value"
+                id="totalSubmissions"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-label">
+                Passed
+            </div>
+
+            <div
+                class="stat-value"
+                id="passedSubmissions"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-label">
+                Failed
+            </div>
+
+            <div
+                class="stat-value"
+                id="failedSubmissions"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-label">
+                Pending
+            </div>
+
+            <div
+                class="stat-value"
+                id="pendingSubmissions"
+            >
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- TABLE -->
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Student
+                    </th>
+
+                    <th>
+                        Student ID
+                    </th>
+
+                    <th>
+                        Test
+                    </th>
+
+                    <th>
+                        Score
+                    </th>
+
+                    <th>
+                        Percentage
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Submitted
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="submissionsBody">
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="loading"
+                    >
+                        Loading submissions...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</main>
+
+
+
+<script>
+
+
+/* =========================
+   FIREBASE
+========================= */
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+    authDomain: "sti-academy.firebaseapp.com",
+    projectId: "sti-academy",
+    storageBucket: "sti-academy.firebasestorage.app",
+    messagingSenderId: "709840261642",
+    appId: "1:709840261642:web:714b09bf661afa159f27ff",
+    measurementId: "G-7ZRZ3P28YP"
+};
+
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+
+
+/* =========================
+   VARIABLES
+========================= */
+
+let allSubmissions = [];
+let allTests = [];
+
+
+
+/* =========================
+   AUTH
+========================= */
+
+auth.onAuthStateChanged(async user => {
+
+    if (!user) {
+
+        window.location.href = "../login.html";
+
+        return;
+    }
+
+
+    try {
+
+        const userDoc = await db
+            .collection("users")
+            .doc(user.uid)
+            .get();
+
+
+        if (
+            !userDoc.exists ||
+            userDoc.data().role !== "admin" ||
+            userDoc.data().status !== "active"
+        ) {
+
+            await auth.signOut();
+
+            window.location.href = "../login.html";
+
+            return;
+        }
+
+
+        loadData();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Unable to verify your account.",
+            "error"
+        );
+
+    }
+
+});
+
+
+
+/* =========================
+   LOAD DATA
+========================= */
+
+async function loadData() {
+
+    try {
+
+        const [
+            testsSnapshot,
+            submissionsSnapshot
+        ] = await Promise.all([
+
+            db.collection("tests").get(),
+
+            db.collection("testSubmissions").get()
+
+        ]);
+
+
+        allTests = [];
+
+        testsSnapshot.forEach(doc => {
+
+            allTests.push({
+                id: doc.id,
+                ...doc.data()
+            });
+
+        });
+
+
+        allSubmissions = [];
+
+        submissionsSnapshot.forEach(doc => {
+
+            allSubmissions.push({
+                id: doc.id,
+                ...doc.data()
+            });
+
+        });
+
+
+        allSubmissions.sort((a, b) => {
+
+            const dateA =
+                getTimestamp(
+                    a.submittedAt
+                );
+
+            const dateB =
+                getTimestamp(
+                    b.submittedAt
+                );
+
+            return dateB - dateA;
+
+        });
+
+
+        populateTestFilter();
+
+        renderSubmissions(
+            allSubmissions
+        );
+
+        updateStats(
+            allSubmissions
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error loading submissions:",
+            error
+        );
+
+        showMessage(
+            "Could not load test submissions. Please check your Firebase rules and try again.",
+            "error"
+        );
+
+
+        document.getElementById(
+            "submissionsBody"
+        ).innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty"
+                >
+                    Unable to load submissions.
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================
+   TEST FILTER
+========================= */
+
+function populateTestFilter() {
+
+    const select =
+        document.getElementById(
+            "testFilter"
+        );
+
+
+    select.innerHTML = `
+        <option value="all">
+            All Tests
+        </option>
+    `;
+
+
+    allTests
+        .sort((a, b) =>
+            String(a.title || "")
+                .localeCompare(
+                    String(b.title || "")
+                )
+        )
+        .forEach(test => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                test.id;
+
+            option.textContent =
+                test.title ||
+                "Untitled Test";
+
+            select.appendChild(
+                option
+            );
+
+        });
+
+}
+
+
+
+/* =========================
+   FILTER
+========================= */
+
+function filterSubmissions() {
+
+    const search =
+        document
+            .getElementById(
+                "searchInput"
+            )
+            .value
+            .toLowerCase()
+            .trim();
+
+
+    const selectedTest =
+        document
+            .getElementById(
+                "testFilter"
+            )
+            .value;
+
+
+    const filtered =
+        allSubmissions.filter(
+            submission => {
+
+                const name =
+                    String(
+                        submission.studentName ||
+                        submission.fullName ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const studentId =
+                    String(
+                        submission.studentId ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const testId =
+                    submission.testId ||
+                    "";
+
+
+                const matchesSearch =
+                    !search ||
+                    name.includes(search) ||
+                    studentId.includes(search);
+
+
+                const matchesTest =
+                    selectedTest === "all" ||
+                    testId === selectedTest;
+
+
+                return (
+                    matchesSearch &&
+                    matchesTest
+                );
+
+            }
+        );
+
+
+    renderSubmissions(
+        filtered
+    );
+
+    updateStats(
+        filtered
+    );
+
+}
+
+
+
+/* =========================
+   RENDER SUBMISSIONS
+========================= */
+
+function renderSubmissions(
+    submissions
+) {
+
+    const body =
+        document.getElementById(
+            "submissionsBody"
+        );
+
+
+    if (!submissions.length) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty"
+                >
+                    No test submissions found.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+    }
+
+
+    body.innerHTML = "";
+
+
+    submissions.forEach(
+        submission => {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const studentName =
+                submission.studentName ||
+                submission.fullName ||
+                "Unknown Student";
+
+
+            const studentId =
+                submission.studentId ||
+                "N/A";
+
+
+            const testName =
+                getTestName(
+                    submission.testId,
+                    submission.testTitle
+                );
+
+
+            const score =
+                getScore(
+                    submission
+                );
+
+
+            const percentage =
+                getPercentage(
+                    submission
+                );
+
+
+            const status =
+                getStatus(
+                    submission
+                );
+
+
+            const submitted =
+                formatDate(
+                    submission.submittedAt
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHtml(studentName)}
+                </td>
+
+                <td>
+                    ${escapeHtml(studentId)}
+                </td>
+
+                <td>
+                    ${escapeHtml(testName)}
+                </td>
+
+                <td>
+                    ${escapeHtml(score)}
+                </td>
+
+                <td>
+                    ${percentage}
+                </td>
+
+                <td>
+
+                    <span class="status ${status.className}">
+                        ${status.text}
+                    </span>
+
+                </td>
+
+                <td>
+                    ${submitted}
+                </td>
+
+                <td>
+
+                    <button
+                        class="view-btn"
+                        onclick="viewSubmission('${submission.id}')"
+                    >
+                        View
+                    </button>
+
+                </td>
+
+            `;
+
+
+            body.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================
+   STATS
+========================= */
+
+function updateStats(
+    submissions
+) {
+
+    let passed = 0;
+    let failed = 0;
+    let pending = 0;
+
+
+    submissions.forEach(
+        submission => {
+
+            const status =
+                getStatus(
+                    submission
+                );
+
+
+            if (
+                status.className ===
+                "passed"
+            ) {
+
+                passed++;
+
+            } else if (
+                status.className ===
+                "failed"
+            ) {
+
+                failed++;
+
+            } else {
+
+                pending++;
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "totalSubmissions"
+    ).textContent =
+        submissions.length;
+
+
+    document.getElementById(
+        "passedSubmissions"
+    ).textContent =
+        passed;
+
+
+    document.getElementById(
+        "failedSubmissions"
+    ).textContent =
+        failed;
+
+
+    document.getElementById(
+        "pendingSubmissions"
+    ).textContent =
+        pending;
+
+}
+
+
+
+/* =========================
+   TEST NAME
+========================= */
+
+function getTestName(
+    testId,
+    savedTitle
+) {
+
+    if (savedTitle) {
+
+        return savedTitle;
+
+    }
+
+
+    const test =
+        allTests.find(
+            test =>
+                test.id === testId
+        );
+
+
+    return test
+        ? (
+            test.title ||
+            "Untitled Test"
+        )
+        : "Unknown Test";
+
+}
+
+
+
+/* =========================
+   SCORE
+========================= */
+
+function getScore(
+    submission
+) {
+
+    /*
+     * Do not show 0 when the
+     * submission has not been graded.
+     */
+
+    const hasScore =
+        submission.score !== undefined &&
+        submission.score !== null;
+
+
+    const hasMarks =
+        submission.marksObtained !== undefined &&
+        submission.marksObtained !== null;
+
+
+    const hasTotalScore =
+        submission.totalScore !== undefined &&
+        submission.totalScore !== null;
+
+
+    if (!hasScore && !hasMarks && !hasTotalScore) {
+
+        return "Pending";
+
+    }
+
+
+    const score =
+        submission.score ??
+        submission.totalScore ??
+        submission.marksObtained;
+
+
+    const total =
+        submission.totalMarks ??
+        submission.maxMarks;
+
+
+    if (
+        total !== undefined &&
+        total !== null
+    ) {
+
+        return `${score}/${total}`;
+
+    }
+
+
+    return String(score);
+
+}
+
+
+
+/* =========================
+   PERCENTAGE
+========================= */
+
+function getPercentage(
+    submission
+) {
+
+    /*
+     * A submission without a grade
+     * must remain Pending.
+     */
+
+    const hasScore =
+        submission.score !== undefined &&
+        submission.score !== null;
+
+
+    const hasMarks =
+        submission.marksObtained !== undefined &&
+        submission.marksObtained !== null;
+
+
+    const hasTotalScore =
+        submission.totalScore !== undefined &&
+        submission.totalScore !== null;
+
+
+    if (
+        !hasScore &&
+        !hasMarks &&
+        !hasTotalScore
+    ) {
+
+        return "Pending";
+
+    }
+
+
+    /*
+     * Use saved percentage if available.
+     */
+
+    if (
+        submission.percentage !== undefined &&
+        submission.percentage !== null
+    ) {
+
+        return (
+            Math.round(
+                Number(
+                    submission.percentage
+                )
+            ) + "%"
+        );
+
+    }
+
+
+    const score =
+        submission.score ??
+        submission.totalScore ??
+        submission.marksObtained;
+
+
+    const total =
+        submission.totalMarks ??
+        submission.maxMarks;
+
+
+    if (
+        total !== undefined &&
+        total !== null &&
+        Number(total) > 0
+    ) {
+
+        const percentage =
+            (
+                Number(score) /
+                Number(total)
+            ) * 100;
+
+
+        return (
+            Math.round(
+                percentage
+            ) + "%"
+        );
+
+    }
+
+
+    return "Pending";
+
+}
+
+
+
+/* =========================
+   STATUS
+========================= */
+
+function getStatus(
+    submission
+) {
+
+    /*
+     * FIRST:
+     * Check whether this submission
+     * has actually been graded.
+     */
+
+    const hasScore =
+        submission.score !== undefined &&
+        submission.score !== null;
+
+
+    const hasMarks =
+        submission.marksObtained !== undefined &&
+        submission.marksObtained !== null;
+
+
+    const hasTotalScore =
+        submission.totalScore !== undefined &&
+        submission.totalScore !== null;
+
+
+    const hasGrade =
+        hasScore ||
+        hasMarks ||
+        hasTotalScore;
+
+
+    /*
+     * No grade = Pending.
+     *
+     * This check MUST happen before
+     * calculating pass/fail.
+     */
+
+    if (!hasGrade) {
+
+        return {
+            className: "pending",
+            text: "Pending"
+        };
+
+    }
+
+
+    /*
+     * If the submission already has
+     * a saved status, respect it.
+     */
+
+    if (
+        submission.status
+    ) {
+
+        const savedStatus =
+            String(
+                submission.status
+            ).toLowerCase();
+
+
+        if (
+            savedStatus.includes(
+                "pass"
+            )
+        ) {
+
+            return {
+                className: "passed",
+                text: "Passed"
+            };
+
+        }
+
+
+        if (
+            savedStatus.includes(
+                "fail"
+            )
+        ) {
+
+            return {
+                className: "failed",
+                text: "Failed"
+            };
+
+        }
+
+    }
+
+
+    /*
+     * Get the actual score.
+     */
+
+    const score =
+        submission.score ??
+        submission.totalScore ??
+        submission.marksObtained;
+
+
+    /*
+     * Get total marks.
+     */
+
+    const totalMarks =
+        submission.totalMarks ??
+        submission.maxMarks;
+
+
+    /*
+     * If we don't have enough
+     * information to determine
+     * pass/fail, keep it pending.
+     */
+
+    if (
+        totalMarks === undefined ||
+        totalMarks === null ||
+        Number(totalMarks) <= 0
+    ) {
+
+        return {
+            className: "pending",
+            text: "Pending"
+        };
+
+    }
+
+
+    /*
+     * Find the test's pass mark.
+     */
+
+    const test =
+        allTests.find(
+            item =>
+                item.id ===
+                submission.testId
+        );
+
+
+    const passMark =
+        test
+            ? Number(
+                test.passMark ?? 0
+            )
+            : 0;
+
+
+    /*
+     * If there is no pass mark,
+     * we cannot determine the result.
+     */
+
+    if (
+        !passMark
+    ) {
+
+        return {
+            className: "pending",
+            text: "Review"
+        };
+
+    }
+
+
+    /*
+     * Calculate percentage.
+     */
+
+    const percentage =
+        (
+            Number(score) /
+            Number(totalMarks)
+        ) * 100;
+
+
+    const requiredPercentage =
+        (
+            passMark /
+            Number(totalMarks)
+        ) * 100;
+
+
+    if (
+        percentage >=
+        requiredPercentage
+    ) {
+
+        return {
+            className: "passed",
+            text: "Passed"
+        };
+
+    }
+
+
+    return {
+        className: "failed",
+        text: "Failed"
+    };
+
+}
+
+
+
+/* =========================
+   VIEW SUBMISSION
+========================= */
+
+function viewSubmission(
+    submissionId
+) {
+
+    /*
+     * IMPORTANT:
+     * The detailed submission page
+     * is named view-submission.html.
+     */
+
+    window.location.href =
+        `view-submission.html?id=${encodeURIComponent(
+            submissionId
+        )}`;
+
+}
+
+
+
+/* =========================
+   TIMESTAMP
+========================= */
+
+function getTimestamp(
+    value
+) {
+
+    if (!value) {
+
+        return 0;
+
+    }
+
+
+    if (
+        typeof value.toDate ===
+        "function"
+    ) {
+
+        return value
+            .toDate()
+            .getTime();
+
+    }
+
+
+    if (
+        value.seconds !== undefined
+    ) {
+
+        return (
+            Number(
+                value.seconds
+            ) * 1000
+        );
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    return Number.isNaN(
+        date.getTime()
+    )
+        ? 0
+        : date.getTime();
+
+}
+
+
+
+/* =========================
+   FORMAT DATE
+========================= */
+
+function formatDate(
+    value
+) {
+
+    const timestamp =
+        getTimestamp(value);
+
+
+    if (!timestamp) {
+
+        return "N/A";
+
+    }
+
+
+    return new Date(
+        timestamp
+    ).toLocaleString(
+        "en-NG",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+function showMessage(
+    message,
+    type
+) {
+
+    const box =
+        document.getElementById(
+            "message"
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.className =
+        `message ${type}`;
+
+}
+
+
+
+/* =========================
+   BACK
+========================= */
+
+function goBack() {
+
+    window.location.href =
+        "test.html";
+
+}
+
+</script>
+
+
+</body>
+
+</html>

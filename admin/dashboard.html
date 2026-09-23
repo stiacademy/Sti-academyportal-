@@ -1,0 +1,3142 @@
+<!DOCTYPE html>  <html lang="en">  <head>  <meta charset="UTF-8">  <meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+> 
+
+<title>STI Academy Admin Dashboard</title>  <!-- FIREBASE -->  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>  <style>  
+  
+* {  
+    box-sizing: border-box;  
+}  
+  
+html {  
+    scroll-behavior: smooth;  
+}  
+  
+body {  
+    margin: 0;  
+    background: #000;  
+    color: #fff;  
+    font-family: Arial, Helvetica, sans-serif;  
+}  
+  
+header {  
+    width: 100%;  
+    background: #050505;  
+    border-bottom: 1px solid #161616;  
+    padding: 18px 24px;  
+  
+    display: flex;  
+    align-items: center;  
+    justify-content: space-between;  
+  
+    gap: 20px;  
+}  
+  
+.logo-area {  
+    display: flex;  
+    flex-direction: column;  
+}  
+  
+.logo {  
+    color: #1683ff;  
+    font-size: 23px;  
+    font-weight: 800;  
+}  
+  
+.logo-subtitle {  
+    color: #777;  
+    font-size: 12px;  
+    margin-top: 4px;  
+}  
+  
+.header-right {  
+    display: flex;  
+    align-items: center;  
+    gap: 12px;  
+}  
+  
+.admin-name {  
+    color: #aaa;  
+    font-size: 13px;  
+}  
+  
+.sign-out-btn {  
+    border: none;  
+    background: #1683ff;  
+    color: #fff;  
+    padding: 10px 16px;  
+    border-radius: 7px;  
+    font-weight: 700;  
+    cursor: pointer;  
+}  
+  
+.sign-out-btn:hover {  
+    background: #0d70dc;  
+}  
+  
+.page {  
+    width: 94%;  
+    max-width: 1400px;  
+    margin: 0 auto;  
+    padding: 30px 0 60px;  
+}  
+  
+.page-heading {  
+    margin-bottom: 28px;  
+}  
+  
+.page-heading h1 {  
+    margin: 0 0 8px;  
+    font-size: 30px;  
+}  
+  
+.page-heading p {  
+    margin: 0;  
+    color: #888;  
+    font-size: 14px;  
+}  
+  
+.admin-status-box {  
+    background: #07111d;  
+    border: 1px solid #123c63;  
+    border-radius: 12px;  
+    padding: 18px;  
+    margin-bottom: 28px;  
+}  
+  
+.admin-status-title {  
+    color: #1683ff;  
+    font-weight: 700;  
+    margin-bottom: 12px;  
+}  
+  
+.admin-status-grid {  
+    display: grid;  
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));  
+    gap: 12px;  
+}  
+  
+.status-item {  
+    background: #05090d;  
+    border-radius: 8px;  
+    padding: 12px;  
+}  
+  
+.status-label {  
+    display: block;  
+    color: #666;  
+    font-size: 11px;  
+    margin-bottom: 5px;  
+}  
+  
+.status-value {  
+    color: #fff;  
+    font-size: 13px;  
+    word-break: break-word;  
+}  
+  
+.stats {  
+    display: grid;  
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));  
+    gap: 15px;  
+    margin-bottom: 38px;  
+}  
+  
+.stat-card {  
+    background: #070707;  
+    border: 1px solid #171717;  
+    border-radius: 12px;  
+    padding: 20px;  
+    min-height: 125px;  
+}  
+  
+.stat-label {  
+    color: #777;  
+    font-size: 13px;  
+}  
+  
+.stat-number {  
+    color: #1683ff;  
+    font-size: 30px;  
+    font-weight: 800;  
+    margin-top: 13px;  
+}  
+  
+.section-heading {  
+    margin-bottom: 18px;  
+}  
+  
+.section-heading h2 {  
+    margin: 0 0 6px;  
+    font-size: 21px;  
+}  
+  
+.section-heading p {  
+    margin: 0;  
+    color: #777;  
+    font-size: 13px;  
+}  
+  
+.modules {  
+    display: grid;  
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));  
+    gap: 13px;  
+    margin-bottom: 45px;  
+}  
+  
+.module-btn {  
+    width: 100%;  
+    min-height: 112px;  
+    background: #070707;  
+    border: 1px solid #1a1a1a;  
+    border-radius: 12px;  
+    padding: 18px;  
+    color: #fff;  
+    text-align: left;  
+    cursor: pointer;  
+  
+    transition:  
+        border-color .2s ease,  
+        background .2s ease,  
+        transform .2s ease;  
+}  
+  
+.module-btn:hover {  
+    background: #07111c;  
+    border-color: #1683ff;  
+    transform: translateY(-2px);  
+}  
+  
+.module-btn:active {  
+    transform: scale(.98);  
+}  
+  
+.module-title {  
+    display: block;  
+    font-size: 15px;  
+    font-weight: 700;  
+    margin-bottom: 8px;  
+}  
+  
+.module-description {  
+    display: block;  
+    color: #777;  
+    font-size: 12px;  
+    line-height: 1.5;  
+}  
+  
+.student-management {  
+    background: #050505;  
+    border: 1px solid #161616;  
+    border-radius: 14px;  
+    padding: 22px;  
+    margin-bottom: 30px;  
+}  
+  
+.student-heading {  
+    margin-bottom: 24px;  
+}  
+  
+.student-heading h2 {  
+    margin: 0 0 6px;  
+}  
+  
+.student-heading p {  
+    color: #777;  
+    margin: 0;  
+    font-size: 13px;  
+}  
+  
+.form-container {  
+    background: #080808;  
+    border: 1px solid #171717;  
+    border-radius: 12px;  
+    padding: 20px;  
+    margin-bottom: 25px;  
+}  
+  
+.form-container h3 {  
+    margin: 0 0 20px;  
+    font-size: 17px;  
+}  
+  
+.form-grid {  
+    display: grid;  
+    grid-template-columns: repeat(2, minmax(0, 1fr));  
+    gap: 16px;  
+}  
+  
+.form-group {  
+    display: flex;  
+    flex-direction: column;  
+}  
+  
+.form-group.full {  
+    grid-column: 1 / -1;  
+}  
+  
+.form-group label {  
+    color: #aaa;  
+    font-size: 12px;  
+    margin-bottom: 7px;  
+}  
+  
+.form-group input,  
+.form-group select {  
+    width: 100%;  
+    padding: 13px;  
+    border-radius: 7px;  
+    border: 1px solid #252525;  
+    background: #000;  
+    color: #fff;  
+    outline: none;  
+    font-size: 14px;  
+}  
+  
+.form-group input:focus,  
+.form-group select:focus {  
+    border-color: #1683ff;  
+}  
+  
+.form-note {  
+    color: #666;  
+    font-size: 11px;  
+    margin-top: 6px;  
+    line-height: 1.5;  
+}  
+  
+.form-buttons {  
+    display: flex;  
+    gap: 8px;  
+    flex-wrap: wrap;  
+    margin-top: 18px;  
+}  
+  
+.primary-btn {  
+    border: none;  
+    background: #1683ff;  
+    color: #fff;  
+    padding: 12px 19px;  
+    border-radius: 7px;  
+    font-weight: 700;  
+    cursor: pointer;  
+}  
+  
+.secondary-btn {  
+    border: none;  
+    background: #222;  
+    color: #fff;  
+    padding: 12px 19px;  
+    border-radius: 7px;  
+    font-weight: 700;  
+    cursor: pointer;  
+}  
+  
+.primary-btn:hover {  
+    background: #0d70dc;  
+}  
+  
+.secondary-btn:hover {  
+    background: #2b2b2b;  
+}  
+  
+.search-area {  
+    margin-bottom: 18px;  
+}  
+  
+.search-area input {  
+    width: 100%;  
+    padding: 14px;  
+    background: #000;  
+    color: #fff;  
+    border: 1px solid #222;  
+    border-radius: 8px;  
+    outline: none;  
+    font-size: 14px;  
+}  
+  
+.search-area input:focus {  
+    border-color: #1683ff;  
+}  
+  
+.student-count {  
+    color: #777;  
+    font-size: 13px;  
+    margin-bottom: 15px;  
+}  
+  
+.student-list {  
+    display: grid;  
+    gap: 13px;  
+}  
+  
+.student-card {  
+    background: #080808;  
+    border: 1px solid #191919;  
+    border-radius: 12px;  
+    padding: 18px;  
+}  
+  
+.student-top {  
+    display: flex;  
+    justify-content: space-between;  
+    align-items: flex-start;  
+    gap: 15px;  
+    flex-wrap: wrap;  
+    margin-bottom: 15px;  
+}  
+  
+.student-name {  
+    font-size: 17px;  
+    font-weight: 700;  
+}  
+  
+.student-id {  
+    color: #1683ff;  
+    font-size: 12px;  
+    margin-top: 5px;  
+}  
+  
+.student-status {  
+    padding: 6px 10px;  
+    border-radius: 20px;  
+    font-size: 10px;  
+    font-weight: 700;  
+    text-transform: uppercase;  
+}  
+  
+.status-active {  
+    color: #35e889;  
+    background: #082b18;  
+}  
+  
+.status-inactive {  
+    color: #ffd84d;  
+    background: #2b2405;  
+}  
+  
+.status-suspended {  
+    color: #ff6b6b;  
+    background: #310909;  
+}  
+  
+.student-info {  
+    display: grid;  
+    grid-template-columns: repeat(2, minmax(0, 1fr));  
+    gap: 10px;  
+    font-size: 12px;  
+}  
+  
+.info-row {  
+    color: #bbb;  
+    line-height: 1.5;  
+}  
+  
+.info-label {  
+    color: #666;  
+}  
+  
+.portal-active {  
+    color: #35e889;  
+}  
+  
+.portal-inactive {  
+    color: #ffd84d;  
+}  
+  
+.student-actions {  
+    display: flex;  
+    flex-wrap: wrap;  
+    gap: 8px;  
+    margin-top: 17px;  
+}  
+  
+.edit-student-btn,  
+.suspend-student-btn,  
+.reactivate-student-btn {  
+    border-radius: 7px;  
+    padding: 9px 13px;  
+    font-size: 12px;  
+    font-weight: 700;  
+    cursor: pointer;  
+}  
+  
+.edit-student-btn {  
+    background: #1683ff;  
+    border: none;  
+    color: #fff;  
+}  
+  
+.suspend-student-btn {  
+    background: #310909;  
+    border: 1px solid #641414;  
+    color: #ff7777;  
+}  
+  
+.reactivate-student-btn {  
+    background: #082b18;  
+    border: 1px solid #176b3a;  
+    color: #35e889;  
+}  
+  
+.empty-state {  
+    text-align: center;  
+    padding: 35px 15px;  
+    border: 1px dashed #222;  
+    border-radius: 10px;  
+    color: #666;  
+    font-size: 13px;  
+}  
+  
+.loading {  
+    color: #1683ff;  
+}  
+  
+.message {  
+    font-size: 13px;  
+    margin-top: 12px;  
+    line-height: 1.5;  
+}  
+  
+.message.success {  
+    color: #35e889;  
+}  
+  
+.message.error {  
+    color: #ff6b6b;  
+}  
+  
+.hidden {  
+    display: none !important;  
+}  
+  
+button:disabled {  
+    opacity: .55;  
+    cursor: not-allowed;  
+}  
+  
+@media (max-width: 700px) {  
+  
+    header {  
+        padding: 16px;  
+    }  
+  
+    .page {  
+        width: 92%;  
+        padding-top: 22px;  
+    }  
+  
+    .page-heading h1 {  
+        font-size: 25px;  
+    }  
+  
+    .form-grid {  
+        grid-template-columns: 1fr;  
+    }  
+  
+    .form-group.full {  
+        grid-column: auto;  
+    }  
+  
+    .student-info {  
+        grid-template-columns: 1fr;  
+    }  
+  
+    .student-management {  
+        padding: 16px;  
+    }  
+  
+    .modules {  
+        grid-template-columns: repeat(2, minmax(0, 1fr));  
+    }  
+  
+    .module-btn {  
+        min-height: 118px;  
+    }  
+  
+}  
+  
+@media (max-width: 430px) {  
+  
+    .header-right {  
+        width: 100%;  
+        justify-content: space-between;  
+    }  
+  
+    .admin-name {  
+        max-width: 200px;  
+        overflow: hidden;  
+        text-overflow: ellipsis;  
+        white-space: nowrap;  
+    }  
+  
+    .modules {  
+        grid-template-columns: 1fr;  
+    }  
+  
+}  
+  
+</style>  </head>  <body>  <header>  <div class="logo-area">  
+
+    <div class="logo">  
+        STI Academy  
+    </div>  
+
+    <div class="logo-subtitle">  
+        School of Technology and Innovation  
+    </div>  
+
+</div>  
+
+<div class="header-right">  
+
+    <div  
+        class="admin-name"  
+        id="headerAdminEmail"  
+    >  
+        Checking...  
+    </div>  
+
+    <button  
+        class="sign-out-btn"  
+        id="signOutBtn"  
+        type="button"  
+    >  
+        Sign Out  
+    </button>  
+
+</div>
+
+</header>  <main class="page">  <div class="page-heading">  
+
+    <h1>  
+        Admin Dashboard  
+    </h1>  
+
+    <p>  
+        Manage students, tutors, courses and academic activities across STI Academy.  
+    </p>  
+
+</div>  
+
+
+<div class="admin-status-box">  
+
+    <div class="admin-status-title">  
+        Administrator Access  
+    </div>  
+
+    <div class="admin-status-grid">  
+
+        <div class="status-item">  
+
+            <span class="status-label">  
+                Email  
+            </span>  
+
+            <span  
+                class="status-value"  
+                id="adminEmail"  
+            >  
+                Checking...  
+            </span>  
+
+        </div>  
+
+
+        <div class="status-item">  
+
+            <span class="status-label">  
+                Role  
+            </span>  
+
+            <span  
+                class="status-value"  
+                id="adminRole"  
+            >  
+                Checking...  
+            </span>  
+
+        </div>  
+
+
+        <div class="status-item">  
+
+            <span class="status-label">  
+                Account Status  
+            </span>  
+
+            <span  
+                class="status-value"  
+                id="adminStatus"  
+            >  
+                Checking...  
+            </span>  
+
+        </div>  
+
+
+        <div class="status-item">  
+
+            <span class="status-label">  
+                Authentication  
+            </span>  
+
+            <span  
+                class="status-value"  
+                id="authStatus"  
+            >  
+                Checking...  
+            </span>  
+
+        </div>  
+
+    </div>  
+
+</div>  
+
+
+<div class="stats">  
+
+    <div class="stat-card">  
+        <div class="stat-label">  
+            Total Students  
+        </div>  
+
+        <div  
+            class="stat-number"  
+            id="totalStudents"  
+        >  
+            0  
+        </div>  
+    </div>  
+
+
+    <div class="stat-card">  
+        <div class="stat-label">  
+            Active Students  
+        </div>  
+
+        <div  
+            class="stat-number"  
+            id="activeStudents"  
+        >  
+            0  
+        </div>  
+    </div>  
+
+
+    <div class="stat-card">  
+        <div class="stat-label">  
+            Tutors  
+        </div>  
+
+        <div  
+            class="stat-number"  
+            id="totalTutors"  
+        >  
+            0  
+        </div>  
+    </div>  
+
+
+    <div class="stat-card">  
+        <div class="stat-label">  
+            Courses  
+        </div>  
+
+        <div  
+            class="stat-number"  
+            id="totalCourses"  
+        >  
+            0  
+        </div>  
+    </div>  
+
+
+    <div class="stat-card">  
+        <div class="stat-label">  
+            Pending Moderation  
+        </div>  
+
+        <div  
+            class="stat-number"  
+            id="pendingModeration"  
+        >  
+            0  
+        </div>  
+    </div>  
+
+
+    <div class="stat-card">  
+        <div class="stat-label">  
+            Outstanding Payments  
+        </div>  
+
+        <div  
+            class="stat-number"  
+            id="outstandingPayments"  
+        >  
+            0  
+        </div>  
+    </div>  
+
+</div>  
+
+
+<div class="section-heading">  
+
+    <h2>  
+        Academy Management  
+    </h2>  
+
+    <p>  
+        Select a module to manage that part of the academy.  
+    </p>  
+
+</div>  
+
+
+<div class="modules">  
+
+    <button class="module-btn" data-module="Student Management" type="button">  
+        <span class="module-title">Student Management</span>  
+        <span class="module-description">  
+            Add, edit, suspend and reactivate students.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Tutors" type="button">  
+        <span class="module-title">Tutors</span>  
+        <span class="module-description">  
+            Manage tutors and their assigned departments.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Courses" type="button">  
+        <span class="module-title">Courses</span>  
+        <span class="module-description">  
+            Manage STI Academy courses.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Cohorts" type="button">  
+        <span class="module-title">Cohorts</span>  
+        <span class="module-description">  
+            Manage student cohorts and start dates.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Classes" type="button">  
+        <span class="module-title">Classes</span>  
+        <span class="module-description">  
+            Manage class schedules and sessions.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Lessons" type="button">  
+        <span class="module-title">Lessons</span>  
+        <span class="module-description">  
+            Manage lessons and teaching content.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Attendance" type="button">  
+        <span class="module-title">Attendance</span>  
+        <span class="module-description">  
+            Manage attendance sessions and records.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Assignments" type="button">  
+        <span class="module-title">Assignments</span>  
+        <span class="module-description">  
+            Create and manage student assignments.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Tests" type="button">  
+        <span class="module-title">Tests</span>  
+        <span class="module-description">  
+            Manage tests and automatic marking.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Exams" type="button">  
+        <span class="module-title">Exams</span>  
+        <span class="module-description">  
+            Manage examinations and submissions.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Projects" type="button">  
+        <span class="module-title">Projects</span>  
+        <span class="module-description">  
+            Manage practical student projects.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Results" type="button">  
+        <span class="module-title">Results</span>  
+        <span class="module-description">  
+            Manage tests, assignments, projects and exam results.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Rankings" type="button">  
+        <span class="module-title">Rankings</span>  
+        <span class="module-description">  
+            View student academic rankings.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Payments" type="button">  
+        <span class="module-title">Payments</span>  
+        <span class="module-description">  
+            Manage student tuition and payment records.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Referrals" type="button">  
+        <span class="module-title">Referrals</span>  
+        <span class="module-description">  
+            Manage student referral records.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Rewards" type="button">  
+        <span class="module-title">Rewards</span>  
+        <span class="module-description">  
+            Manage student rewards and incentives.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Announcements" type="button">  
+        <span class="module-title">Announcements</span>  
+        <span class="module-description">  
+            Publish academy announcements.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Support" type="button">  
+        <span class="module-title">Support</span>  
+        <span class="module-description">  
+            Manage student support requests.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Moderation" type="button">  
+        <span class="module-title">Moderation</span>  
+        <span class="module-description">  
+            Review moderation records.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Certificates" type="button">  
+        <span class="module-title">Certificates</span>  
+        <span class="module-description">  
+            Manage student certificates.  
+        </span>  
+    </button>  
+
+
+    <button class="module-btn" data-module="Settings" type="button">  
+        <span class="module-title">Settings</span>  
+        <span class="module-description">  
+            Manage portal settings.  
+        </span>  
+    </button>  
+
+</div>  
+
+
+<section  
+    class="student-management"  
+    id="studentManagement"  
+>  
+
+    <div class="student-heading">  
+
+        <h2>  
+            Student Management  
+        </h2>  
+
+        <p>  
+            Add and manage STI Academy student records.  
+        </p>  
+
+    </div>  
+
+
+    <div class="form-container">  
+
+        <h3 id="formTitle">  
+            Add Student  
+        </h3>  
+
+
+        <form id="studentForm">  
+
+            <div class="form-grid">  
+
+                <div class="form-group">  
+
+                    <label for="studentId">  
+                        Student ID  
+                    </label>  
+
+                    <input  
+                        type="text"  
+                        id="studentId"  
+                        placeholder="STIA-WD-0001"  
+                        required  
+                    >  
+
+                </div>  
+
+
+                <div class="form-group">  
+
+                    <label for="fullName">  
+                        Full Name  
+                    </label>  
+
+                    <input  
+                        type="text"  
+                        id="fullName"  
+                        placeholder="Student full name"  
+                        required  
+                    >  
+
+                </div>  
+
+
+                <div class="form-group">  
+
+                    <label for="email">  
+                        Email Address  
+                    </label>  
+
+                    <input  
+                        type="email"  
+                        id="email"  
+                        placeholder="student@example.com"  
+                        required  
+                    >  
+
+                    <div  
+                        class="form-note hidden"  
+                        id="emailNote"  
+                    >  
+                        Email cannot be changed after portal activation.  
+                    </div>  
+
+                </div>  
+
+
+                <div class="form-group">  
+
+                    <label for="department">  
+                        Department  
+                    </label>  
+
+                    <select id="department" required>  
+
+                        <option value="">  
+                            Select Department  
+                        </option>  
+
+                        <option value="Web Development">  
+                            Web Development  
+                        </option>  
+
+                        <option value="Web Design">  
+                            Web Design  
+                        </option>  
+
+                        <option value="Graphic Design">  
+                            Graphic Design  
+                        </option>  
+
+                        <option value="Video Editing">  
+                            Video Editing  
+                        </option>  
+
+                        <option value="Social Media Management">  
+                            Social Media Management  
+                        </option>  
+
+                    </select>  
+
+                </div>  
+
+
+                <div class="form-group">  
+
+                    <label for="course">  
+                        Course  
+                    </label>  
+
+                    <select id="course" required>  
+
+                        <option value="">  
+                            Select Course  
+                        </option>  
+
+                        <option value="Web Development">  
+                            Web Development  
+                        </option>  
+
+                        <option value="Web Design">  
+                            Web Design  
+                        </option>  
+
+                        <option value="Graphic Design">  
+                            Graphic Design  
+                        </option>  
+
+                        <option value="Video Editing">  
+                            Video Editing  
+                        </option>  
+
+                        <option value="Social Media Management">  
+                            Social Media Management  
+                        </option>  
+
+                    </select>  
+
+                </div>  
+
+
+                <div class="form-group">  
+
+                    <label for="cohort">  
+                        Cohort  
+                    </label>  
+
+                    <select id="cohort" required>  
+
+                        <option value="">  
+                            Select Cohort  
+                        </option>  
+
+                        <option value="October 2026">  
+                            October 2026  
+                        </option>  
+
+                        <option value="November 2026">  
+                            November 2026  
+                        </option>  
+
+                        <option value="December 2026">  
+                            December 2026  
+                        </option>  
+
+                    </select>  
+
+                </div>  
+
+
+                <div class="form-group">  
+
+                    <label for="studentStatus">  
+                        Status  
+                    </label>  
+
+                    <select id="studentStatus" required>  
+
+                        <option value="active">  
+                            Active  
+                        </option>  
+
+                        <option value="inactive">  
+                            Inactive  
+                        </option>  
+
+                        <option value="suspended">  
+                            Suspended  
+                        </option>  
+
+                    </select>  
+
+                </div>  
+
+            </div>  
+
+
+            <div class="form-buttons">  
+
+                <button  
+                    type="submit"  
+                    class="primary-btn"  
+                    id="submitBtn"  
+                >  
+                    Add Student  
+                </button>  
+
+
+                <button  
+                    type="button"  
+                    class="secondary-btn hidden"  
+                    id="cancelEditBtn"  
+                >  
+                    Cancel  
+                </button>  
+
+            </div>  
+
+
+            <div  
+                class="message"  
+                id="formMessage"  
+            ></div>  
+
+        </form>  
+
+    </div>  
+
+
+    <div class="search-area">  
+
+        <input  
+            type="text"  
+            id="studentSearch"  
+            placeholder="Search students by name, Student ID or email..."  
+        >  
+
+    </div>  
+
+
+    <div class="student-count">  
+
+        Students found:  
+
+        <strong id="studentCount">  
+            0  
+        </strong>  
+
+    </div>  
+
+
+    <div  
+        class="student-list"  
+        id="studentList"  
+    >  
+
+        <div class="empty-state loading">  
+            Waiting for administrator authentication...  
+        </div>  
+
+    </div>  
+
+</section>
+
+</main>  <script>  
+  
+/* =========================================================  
+   EXACT STI ACADEMY FIREBASE CONFIG  
+========================================================= */  
+  
+const firebaseConfig = {  
+  
+    apiKey:  
+        "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",  
+  
+    authDomain:  
+        "sti-academy.firebaseapp.com",  
+  
+    projectId:  
+        "sti-academy",  
+  
+    storageBucket:  
+        "sti-academy.firebasestorage.app",  
+  
+    messagingSenderId:  
+        "709840261642",  
+  
+    appId:  
+        "1:709840261642:web:714b09bf661afa159f27ff",  
+  
+    measurementId:  
+        "G-7ZRZ3P28YP"  
+  
+};  
+  
+  
+/* =========================================================  
+   INITIALIZE FIREBASE  
+========================================================= */  
+  
+if (!firebase.apps.length) {  
+  
+    firebase.initializeApp(  
+        firebaseConfig  
+    );  
+  
+}  
+  
+const auth = firebase.auth();  
+  
+const db = firebase.firestore();  
+  
+  
+/* =========================================================  
+   VARIABLES  
+========================================================= */  
+  
+let allStudents = [];  
+  
+let editingStudentId = null;  
+  
+  
+/* =========================================================  
+   ELEMENTS  
+========================================================= */  
+  
+const studentForm =  
+    document.getElementById("studentForm");  
+  
+const studentIdInput =  
+    document.getElementById("studentId");  
+  
+const fullNameInput =  
+    document.getElementById("fullName");  
+  
+const emailInput =  
+    document.getElementById("email");  
+  
+const departmentInput =  
+    document.getElementById("department");  
+  
+const courseInput =  
+    document.getElementById("course");  
+  
+const cohortInput =  
+    document.getElementById("cohort");  
+  
+const statusInput =  
+    document.getElementById("studentStatus");  
+  
+const studentList =  
+    document.getElementById("studentList");  
+  
+const studentSearch =  
+    document.getElementById("studentSearch");  
+  
+const studentCount =  
+    document.getElementById("studentCount");  
+  
+const totalStudents =  
+    document.getElementById("totalStudents");  
+  
+const activeStudents =  
+    document.getElementById("activeStudents");  
+  
+const totalTutors =  
+    document.getElementById("totalTutors");  
+  
+const totalCourses =  
+    document.getElementById("totalCourses");  
+  
+const pendingModeration =  
+    document.getElementById("pendingModeration");  
+  
+const outstandingPayments =  
+    document.getElementById("outstandingPayments");  
+  
+const formTitle =  
+    document.getElementById("formTitle");  
+  
+const submitBtn =  
+    document.getElementById("submitBtn");  
+  
+const cancelEditBtn =  
+    document.getElementById("cancelEditBtn");  
+  
+const formMessage =  
+    document.getElementById("formMessage");  
+  
+const emailNote =  
+    document.getElementById("emailNote");  
+  
+const authStatus =  
+    document.getElementById("authStatus");  
+  
+const adminEmail =  
+    document.getElementById("adminEmail");  
+  
+const adminRole =  
+    document.getElementById("adminRole");  
+  
+const adminStatus =  
+    document.getElementById("adminStatus");  
+  
+const headerAdminEmail =  
+    document.getElementById("headerAdminEmail");  
+  
+  
+/* =========================================================  
+   AUTHENTICATION  
+========================================================= */  
+  
+auth.onAuthStateChanged(async user => {  
+  
+    console.log(  
+        "Firebase Auth state changed:",  
+        user  
+            ? user.email  
+            : "NO USER"  
+    );  
+  
+  
+    if (!user) {  
+  
+        authStatus.textContent =  
+            "Not signed in";  
+  
+        adminEmail.textContent =  
+            "Not signed in";  
+  
+        adminRole.textContent =  
+            "Unavailable";  
+  
+        adminStatus.textContent =  
+            "Unavailable";  
+  
+        headerAdminEmail.textContent =  
+            "Not signed in";  
+  
+  
+        studentList.innerHTML = `  
+  
+            <div class="empty-state">  
+  
+                No active Firebase session was found.  
+  
+                <br><br>  
+  
+                Please sign in from the STI Academy login page.  
+  
+                <br><br>  
+  
+                <a  
+                    href="login.html"  
+                    style="  
+                        color:#1683ff;  
+                        text-decoration:none;  
+                        font-weight:bold;  
+                    "  
+                >  
+                    Return to Login  
+                </a>  
+  
+            </div>  
+  
+        `;  
+  
+        return;  
+  
+    }  
+  
+  
+    await verifyAdministrator(user);  
+  
+});  
+  
+  
+/* =========================================================  
+   VERIFY ADMIN  
+========================================================= */  
+  
+async function verifyAdministrator(user) {  
+  
+    authStatus.textContent =  
+        "Authenticated";  
+  
+    adminEmail.textContent =  
+        user.email || "Unknown";  
+  
+    headerAdminEmail.textContent =  
+        user.email || "Administrator";  
+  
+  
+    try {  
+  
+        const adminDoc =  
+            await db  
+                .collection("users")  
+                .doc(user.uid)  
+                .get();  
+  
+  
+        if (!adminDoc.exists) {  
+  
+            adminRole.textContent =  
+                "No account record";  
+  
+            adminStatus.textContent =  
+                "Not found";  
+  
+  
+            studentList.innerHTML = `  
+  
+                <div class="empty-state">  
+  
+                    Firebase authentication succeeded,  
+                    but no STI Academy user record exists  
+                    for this account.  
+  
+                    <br><br>  
+  
+                    UID:  
+                    ${escapeHtml(user.uid)}  
+  
+                </div>  
+  
+            `;  
+  
+            return;  
+  
+        }  
+  
+  
+        const adminData =  
+            adminDoc.data();  
+  
+  
+        adminRole.textContent =  
+            adminData.role || "Missing";  
+  
+        adminStatus.textContent =  
+            adminData.status || "Missing";  
+  
+  
+        if (adminData.role !== "admin") {  
+  
+            studentList.innerHTML = `  
+  
+                <div class="empty-state">  
+  
+                    This account is authenticated,  
+                    but its portal role is:  
+  
+                    <br><br>  
+  
+                    <strong>  
+                        ${escapeHtml(  
+                            adminData.role || "missing"  
+                        )}  
+                    </strong>  
+  
+                    <br><br>  
+  
+                    This dashboard requires an administrator account.  
+  
+                </div>  
+  
+            `;  
+  
+            return;  
+  
+        }  
+  
+  
+        if (adminData.status !== "active") {  
+  
+            studentList.innerHTML = `  
+  
+                <div class="empty-state">  
+  
+                    Your administrator account exists,  
+                    but its status is:  
+  
+                    <br><br>  
+  
+                    <strong>  
+                        ${escapeHtml(  
+                            adminData.status || "missing"  
+                        )}  
+                    </strong>  
+  
+                    <br><br>  
+  
+                    The account must have status:  
+                    <strong>active</strong>  
+  
+                </div>  
+  
+            `;  
+  
+            return;  
+  
+        }  
+  
+  
+        adminRole.textContent =  
+            "admin";  
+  
+        adminStatus.textContent =  
+            "active";  
+  
+  
+        await loadDashboardData();  
+  
+    } catch (error) {  
+  
+        console.error(  
+            "ADMIN VERIFICATION ERROR:",  
+            error  
+        );  
+  
+  
+        authStatus.textContent =  
+            "Firestore error";  
+  
+  
+        studentList.innerHTML = `  
+  
+            <div class="empty-state">  
+  
+                Firebase authentication succeeded,  
+                but the administrator profile could not be loaded.  
+  
+                <br><br>  
+  
+                <strong>  
+                    ${escapeHtml(  
+                        error.message  
+                    )}  
+                </strong>  
+  
+                <br><br>  
+  
+                UID:  
+                ${escapeHtml(user.uid)}  
+  
+            </div>  
+  
+        `;  
+  
+    }  
+  
+}  
+  
+  
+/* =========================================================  
+   DASHBOARD DATA  
+========================================================= */  
+  
+async function loadDashboardData() {  
+  
+    await loadStudents();  
+  
+    await loadTutorCount();  
+  
+    await loadCourseCount();  
+  
+    await loadModerationCount();  
+  
+    await loadOutstandingPayments();  
+  
+}  
+  
+  
+/* =========================================================  
+   STUDENTS  
+========================================================= */  
+  
+async function loadStudents() {  
+  
+    try {  
+  
+        const snapshot =  
+            await db  
+                .collection("students")  
+                .get();  
+  
+  
+        allStudents = [];  
+  
+  
+        snapshot.forEach(doc => {  
+  
+            allStudents.push({  
+  
+                id: doc.id,  
+  
+                ...doc.data()  
+  
+            });  
+  
+        });  
+  
+  
+        updateStudentStats();  
+  
+        renderStudents();  
+  
+  
+    } catch (error) {  
+  
+        console.error(  
+            "Unable to load students:",  
+            error  
+        );  
+  
+  
+        studentList.innerHTML = `  
+  
+            <div class="empty-state">  
+  
+                Unable to load students.  
+  
+                <br><br>  
+  
+                ${escapeHtml(  
+                    error.message  
+                )}  
+  
+            </div>  
+  
+        `;  
+  
+    }  
+  
+}  
+  
+  
+/* =========================================================  
+   STUDENT STATS  
+========================================================= */  
+  
+function updateStudentStats() {  
+  
+    totalStudents.textContent =  
+        allStudents.length;  
+  
+  
+    const active =  
+        allStudents.filter(  
+            student =>  
+                student.status === "active"  
+        ).length;  
+  
+  
+    activeStudents.textContent =  
+        active;  
+  
+}  
+  
+  
+/* =========================================================  
+   TUTORS  
+========================================================= */  
+  
+async function loadTutorCount() {  
+  
+    try {  
+  
+        const snapshot =  
+            await db  
+                .collection("tutors")  
+                .get();  
+  
+  
+        totalTutors.textContent =  
+            snapshot.size;  
+  
+    } catch (error) {  
+  
+        console.error(  
+            "Tutor count error:",  
+            error  
+        );  
+  
+        totalTutors.textContent =  
+            "0";  
+  
+    }  
+  
+}  
+  
+  
+/* =========================================================  
+   COURSES  
+========================================================= */  
+  
+async function loadCourseCount() {  
+  
+    try {  
+  
+        const snapshot =  
+            await db  
+                .collection("courses")  
+                .get();  
+  
+  
+        totalCourses.textContent =  
+            snapshot.size;  
+  
+    } catch (error) {  
+  
+        console.error(  
+            "Course count error:",  
+            error  
+        );  
+  
+        totalCourses.textContent =  
+            "0";  
+  
+    }  
+  
+}  
+  
+  
+/* =========================================================  
+   MODERATION  
+========================================================= */  
+  
+async function loadModerationCount() {  
+  
+    try {  
+  
+        const snapshot =  
+            await db  
+                .collection("moderation")  
+                .where(  
+                    "status",  
+                    "==",  
+                    "pending"  
+                )  
+                .get();  
+  
+  
+        pendingModeration.textContent =  
+            snapshot.size;  
+  
+    } catch (error) {  
+  
+        console.error(  
+            "Moderation count error:",  
+            error  
+        );  
+  
+        pendingModeration.textContent =  
+            "0";  
+  
+    }  
+  
+}  
+  
+  
+/* =========================================================  
+   PAYMENTS  
+========================================================= */  
+  
+async function loadOutstandingPayments() {  
+  
+    try {  
+  
+        const snapshot =  
+            await db  
+                .collection("payments")  
+                .where(  
+                    "status",  
+                    "==",  
+                    "outstanding"  
+                )  
+                .get();  
+  
+  
+        outstandingPayments.textContent =  
+            snapshot.size;  
+  
+    } catch (error) {  
+  
+        console.error(  
+            "Payment count error:",  
+            error  
+        );  
+  
+        outstandingPayments.textContent =  
+            "0";  
+  
+    }  
+  
+}  
+  
+  
+/* =========================================================  
+   RENDER STUDENTS  
+========================================================= */  
+  
+function renderStudents() {  
+  
+    const search =  
+        studentSearch.value  
+            .trim()  
+            .toLowerCase();  
+  
+  
+    const filtered =  
+        allStudents.filter(student => {  
+  
+            const name =  
+                String(  
+                    student.fullName || ""  
+                ).toLowerCase();  
+  
+            const id =  
+                String(  
+                    student.studentId || ""  
+                ).toLowerCase();  
+  
+            const email =  
+                String(  
+                    student.email || ""  
+                ).toLowerCase();  
+  
+  
+            return (  
+                name.includes(search) ||  
+                id.includes(search) ||  
+                email.includes(search)  
+            );  
+  
+        });  
+  
+  
+    studentCount.textContent =  
+        filtered.length;  
+  
+  
+    if (!filtered.length) {  
+  
+        studentList.innerHTML = `  
+  
+            <div class="empty-state">  
+  
+                No students found.  
+  
+            </div>  
+  
+        `;  
+  
+        return;  
+  
+    }  
+  
+  
+    studentList.innerHTML =  
+        filtered  
+            .map(createStudentCard)  
+            .join("");  
+  
+}  
+  
+  
+/* =========================================================  
+   STUDENT CARD  
+========================================================= */  
+  
+function createStudentCard(student) {  
+  
+    const status =  
+        student.status || "active";  
+  
+  
+    let statusClass =  
+        "status-active";  
+  
+  
+    if (status === "inactive") {  
+  
+        statusClass =  
+            "status-inactive";  
+  
+    }  
+  
+  
+    if (status === "suspended") {  
+  
+        statusClass =  
+            "status-suspended";  
+  
+    }  
+  
+  
+    const portalActivated =  
+        student.portalActivated === true;  
+  
+  
+    const portalText =  
+        portalActivated  
+            ? "Activated"  
+            : "Not Activated";  
+  
+  
+    const portalClass =  
+        portalActivated  
+            ? "portal-active"  
+            : "portal-inactive";  
+  
+  
+    let actionButton = "";  
+  
+  
+    if (status === "active") {  
+  
+        actionButton = `  
+  
+            <button  
+                type="button"  
+                class="suspend-student-btn"  
+                onclick="suspendStudent('${escapeAttribute(student.id)}')"  
+            >  
+                Suspend Student  
+            </button>  
+  
+        `;  
+  
+    } else {  
+  
+        actionButton = `  
+  
+            <button  
+                type="button"  
+                class="reactivate-student-btn"  
+                onclick="reactivateStudent('${escapeAttribute(student.id)}')"  
+            >  
+                Reactivate Student  
+            </button>  
+  
+        `;  
+  
+    }  
+  
+  
+    return `  
+  
+        <div class="student-card">  
+  
+            <div class="student-top">  
+  
+                <div>  
+  
+                    <div class="student-name">  
+  
+                        ${escapeHtml(  
+                            student.fullName ||  
+                            "Unnamed Student"  
+                        )}  
+  
+                    </div>  
+  
+                    <div class="student-id">  
+  
+                        ${escapeHtml(  
+                            student.studentId ||  
+                            student.id  
+                        )}  
+  
+                    </div>  
+  
+                </div>  
+  
+  
+                <div  
+                    class="student-status ${statusClass}"  
+                >  
+  
+                    ${escapeHtml(status)}  
+  
+                </div>  
+  
+            </div>  
+  
+  
+            <div class="student-info">  
+  
+                <div class="info-row">  
+  
+                    <span class="info-label">  
+                        Email:  
+                    </span>  
+  
+                    ${escapeHtml(  
+                        student.email ||  
+                        "Not provided"  
+                    )}  
+  
+                </div>  
+  
+  
+                <div class="info-row">  
+  
+                    <span class="info-label">  
+                        Department:  
+                    </span>  
+  
+                    ${escapeHtml(  
+                        student.department ||  
+                        "Not assigned"  
+                    )}  
+  
+                </div>  
+  
+  
+                <div class="info-row">  
+  
+                    <span class="info-label">  
+                        Course:  
+                    </span>  
+  
+                    ${escapeHtml(  
+                        student.course ||  
+                        "Not assigned"  
+                    )}  
+  
+                </div>  
+  
+  
+                <div class="info-row">  
+  
+                    <span class="info-label">  
+                        Cohort:  
+                    </span>  
+  
+                    ${escapeHtml(  
+                        student.cohort ||  
+                        "Not assigned"  
+                    )}  
+  
+                </div>  
+  
+  
+                <div class="info-row">  
+  
+                    <span class="info-label">  
+                        Portal:  
+                    </span>  
+  
+                    <span class="${portalClass}">  
+                        ${portalText}  
+                    </span>  
+  
+                </div>  
+  
+  
+                <div class="info-row">  
+  
+                    <span class="info-label">  
+                        Account:  
+                    </span>  
+  
+                    ${escapeHtml(  
+                        student.accountStatus ||  
+                        status  
+                    )}  
+  
+                </div>  
+  
+            </div>  
+  
+  
+            <div class="student-actions">  
+  
+                <button  
+                    type="button"  
+                    class="edit-student-btn"  
+                    onclick="editStudent('${escapeAttribute(student.id)}')"  
+                >  
+                    Edit Student  
+                </button>  
+  
+                ${actionButton}  
+  
+            </div>  
+  
+        </div>  
+  
+    `;  
+  
+}  
+  
+  
+/* =========================================================  
+   ADD / EDIT STUDENT  
+========================================================= */  
+  
+studentForm.addEventListener(  
+    "submit",  
+    async event => {  
+  
+        event.preventDefault();  
+  
+        clearMessage();  
+  
+  
+        const currentUser =  
+            auth.currentUser;  
+  
+  
+        if (!currentUser) {  
+  
+            showMessage(  
+                "Your administrator session is not available.",  
+                "error"  
+            );  
+  
+            return;  
+  
+        }  
+  
+  
+        const studentId =  
+            studentIdInput.value.trim();  
+  
+        const fullName =  
+            fullNameInput.value.trim();  
+  
+        const email =  
+            emailInput.value  
+                .trim()  
+                .toLowerCase();  
+  
+        const department =  
+            departmentInput.value;  
+  
+        const course =  
+            courseInput.value;  
+  
+        const cohort =  
+            cohortInput.value;  
+  
+        const status =  
+            statusInput.value;  
+  
+  
+        if (  
+            !studentId ||  
+            !fullName ||  
+            !email ||  
+            !department ||  
+            !course ||  
+            !cohort ||  
+            !status  
+        ) {  
+  
+            showMessage(  
+                "Please fill in all fields.",  
+                "error"  
+            );  
+  
+            return;  
+  
+        }  
+  
+  
+        submitBtn.disabled =  
+            true;  
+  
+  
+        submitBtn.textContent =  
+            editingStudentId  
+                ? "Saving..."  
+                : "Adding...";  
+  
+  
+        try {  
+  
+            if (editingStudentId) {  
+  
+                await updateStudent(  
+                    editingStudentId,  
+                    {  
+                        studentId,  
+                        fullName,  
+                        email,  
+                        department,  
+                        course,  
+                        cohort,  
+                        status  
+                    }  
+                );  
+  
+  
+                showMessage(  
+                    "Student updated successfully.",  
+                    "success"  
+                );  
+  
+            } else {  
+  
+                const existing =  
+                    await db  
+                        .collection("students")  
+                        .doc(studentId)  
+                        .get();  
+  
+  
+                if (existing.exists) {  
+  
+                    throw new Error(  
+                        "A student with this Student ID already exists."  
+                    );  
+  
+                }  
+  
+  
+                await db  
+                    .collection("students")  
+                    .doc(studentId)  
+                    .set({  
+  
+                        studentId,  
+  
+                        fullName,  
+  
+                        email,  
+  
+                        department,  
+  
+                        course,  
+  
+                        cohort,  
+  
+                        status,  
+  
+                        accountStatus:  
+                            status,  
+  
+                        portalActivated:  
+                            false,  
+  
+                        uid:  
+                            null,  
+  
+                        createdAt:  
+                            firebase.firestore  
+                                .FieldValue  
+                                .serverTimestamp(),  
+  
+                        createdBy:  
+                            currentUser.uid  
+  
+                    });  
+  
+  
+                showMessage(  
+                    "Student added successfully.",  
+                    "success"  
+                );  
+  
+            }  
+  
+  
+            resetForm();  
+  
+            await loadStudents();  
+  
+  
+        } catch (error) {  
+  
+            console.error(  
+                error  
+            );  
+  
+            showMessage(  
+                error.message ||  
+                "Something went wrong.",  
+                "error"  
+            );  
+  
+        } finally {  
+  
+            submitBtn.disabled =  
+                false;  
+  
+            submitBtn.textContent =  
+                editingStudentId  
+                    ? "Save Changes"  
+                    : "Add Student";  
+  
+        }  
+  
+    }  
+);  
+  
+  
+/* =========================================================  
+   UPDATE STUDENT  
+========================================================= */  
+  
+async function updateStudent(docId, data) {  
+  
+    const student =  
+        allStudents.find(  
+            item =>  
+                item.id === docId  
+        );  
+  
+  
+    if (!student) {  
+  
+        throw new Error(  
+            "Student record could not be found."  
+        );  
+  
+    }  
+  
+  
+    if (  
+        student.studentId !==  
+        data.studentId  
+    ) {  
+  
+        throw new Error(  
+            "Student ID cannot be changed."  
+        );  
+  
+    }  
+  
+  
+    if (  
+        student.portalActivated &&  
+        student.email !== data.email  
+    ) {  
+  
+        throw new Error(  
+            "The email cannot be changed after the student's portal account has been activated."  
+        );  
+  
+    }  
+  
+  
+    const updateData = {  
+  
+        fullName:  
+            data.fullName,  
+  
+        department:  
+            data.department,  
+  
+        course:  
+            data.course,  
+  
+        cohort:  
+            data.cohort,  
+  
+        status:  
+            data.status,  
+  
+        accountStatus:  
+            data.status,  
+  
+        updatedAt:  
+            firebase.firestore  
+                .FieldValue  
+                .serverTimestamp(),  
+  
+        updatedBy:  
+            auth.currentUser.uid  
+  
+    };  
+  
+  
+    if (!student.portalActivated) {  
+  
+        updateData.email =  
+            data.email;  
+  
+    }  
+  
+  
+    await db  
+        .collection("students")  
+        .doc(docId)  
+        .update(updateData);  
+  
+  
+    if (student.uid) {  
+  
+        await db  
+            .collection("users")  
+            .doc(student.uid)  
+            .update({  
+  
+                fullName:  
+                    data.fullName,  
+  
+                status:  
+                    data.status,  
+  
+                accountStatus:  
+                    data.status,  
+  
+                updatedAt:  
+                    firebase.firestore  
+                        .FieldValue  
+                        .serverTimestamp()  
+  
+            });  
+  
+    }  
+  
+}  
+  
+  
+/* =========================================================  
+   EDIT STUDENT  
+========================================================= */  
+  
+window.editStudent =  
+    function(docId) {  
+  
+        const student =  
+            allStudents.find(  
+                item =>  
+                    item.id === docId  
+            );  
+  
+  
+        if (!student) {  
+  
+            showMessage(  
+                "Student record not found.",  
+                "error"  
+            );  
+  
+            return;  
+  
+        }  
+  
+  
+        editingStudentId =  
+            docId;  
+  
+  
+        formTitle.textContent =  
+            "Edit Student";  
+  
+  
+        submitBtn.textContent =  
+            "Save Changes";  
+  
+  
+        cancelEditBtn.classList.remove(  
+            "hidden"  
+        );  
+  
+  
+        studentIdInput.value =  
+            student.studentId ||  
+            student.id;  
+  
+  
+        fullNameInput.value =  
+            student.fullName ||  
+            "";  
+  
+  
+        emailInput.value =  
+            student.email ||  
+            "";  
+  
+  
+        departmentInput.value =  
+            student.department ||  
+            "";  
+  
+  
+        courseInput.value =  
+            student.course ||  
+            "";  
+  
+  
+        cohortInput.value =  
+            student.cohort ||  
+            "";  
+  
+  
+        statusInput.value =  
+            student.status ||  
+            "active";  
+  
+  
+        if (student.portalActivated) {  
+  
+            emailInput.disabled =  
+                true;  
+  
+            emailNote.classList.remove(  
+                "hidden"  
+            );  
+  
+        } else {  
+  
+            emailInput.disabled =  
+                false;  
+  
+            emailNote.classList.add(  
+                "hidden"  
+            );  
+  
+        }  
+  
+  
+        document  
+            .getElementById("studentManagement")  
+            .scrollIntoView({  
+                behavior: "smooth"  
+            });  
+  
+    };  
+  
+  
+/* =========================================================  
+   SUSPEND STUDENT  
+========================================================= */  
+  
+window.suspendStudent =  
+    async function(docId) {  
+  
+        const student =  
+            allStudents.find(  
+                item =>  
+                    item.id === docId  
+            );  
+  
+  
+        if (!student) {  
+  
+            showMessage(  
+                "Student record not found.",  
+                "error"  
+            );  
+  
+            return;  
+  
+        }  
+  
+  
+        const confirmed =  
+            confirm(  
+                "Suspend " +  
+                (  
+                    student.fullName ||  
+                    "this student"  
+                ) +  
+                "?\n\nThe student's records will be preserved."  
+            );  
+  
+  
+        if (!confirmed) {  
+            return;  
+        }  
+  
+  
+        const currentUser =  
+            auth.currentUser;  
+  
+  
+        if (!currentUser) {  
+  
+            showMessage(  
+                "Your administrator session is not available.",  
+                "error"  
+            );  
+  
+            return;  
+  
+        }  
+  
+  
+        try {  
+  
+            await db  
+                .collection("students")  
+                .doc(docId)  
+                .update({  
+  
+                    status:  
+                        "suspended",  
+  
+                    accountStatus:  
+                        "suspended",  
+  
+                    updatedAt:  
+                        firebase.firestore  
+                            .FieldValue  
+                            .serverTimestamp(),  
+  
+                    updatedBy:  
+                        currentUser.uid  
+  
+                });  
+  
+  
+            if (student.uid) {  
+  
+                await db  
+                    .collection("users")  
+                    .doc(student.uid)  
+                    .update({  
+  
+                        status:  
+                            "suspended",  
+  
+                        accountStatus:  
+                            "suspended",  
+  
+                        updatedAt:  
+                            firebase.firestore  
+                                .FieldValue  
+                                .serverTimestamp()  
+  
+                    });  
+  
+            }  
+  
+  
+            showMessage(  
+                "Student suspended successfully.",  
+                "success"  
+            );  
+  
+  
+            await loadStudents();  
+  
+        } catch (error) {  
+  
+            showMessage(  
+                "Unable to suspend student: " +  
+                error.message,  
+                "error"  
+            );  
+  
+        }  
+  
+    };  
+  
+  
+/* =========================================================  
+   REACTIVATE STUDENT  
+========================================================= */  
+  
+window.reactivateStudent =  
+    async function(docId) {  
+  
+        const student =  
+            allStudents.find(  
+                item =>  
+                    item.id === docId  
+            );  
+  
+  
+        if (!student) {  
+  
+            showMessage(  
+                "Student record not found.",  
+                "error"  
+            );  
+  
+            return;  
+  
+        }  
+  
+  
+        const confirmed =  
+            confirm(  
+                "Reactivate " +  
+                (  
+                    student.fullName ||  
+                    "this student"  
+                ) +  
+                "?"  
+            );  
+  
+  
+        if (!confirmed) {  
+            return;  
+        }  
+  
+  
+        const currentUser =  
+            auth.currentUser;  
+  
+  
+        if (!currentUser) {  
+  
+            showMessage(  
+                "Your administrator session is not available.",  
+                "error"  
+            );  
+  
+            return;  
+  
+        }  
+  
+  
+        try {  
+  
+            await db  
+                .collection("students")  
+                .doc(docId)  
+                .update({  
+  
+                    status:  
+                        "active",  
+  
+                    accountStatus:  
+                        "active",  
+  
+                    updatedAt:  
+                        firebase.firestore  
+                            .FieldValue  
+                            .serverTimestamp(),  
+  
+                    updatedBy:  
+                        currentUser.uid  
+  
+                });  
+  
+  
+            if (student.uid) {  
+  
+                await db  
+                    .collection("users")  
+                    .doc(student.uid)  
+                    .update({  
+  
+                        status:  
+                            "active",  
+  
+                        accountStatus:  
+                            "active",  
+  
+                        updatedAt:  
+                            firebase.firestore  
+                                .FieldValue  
+                                .serverTimestamp()  
+  
+                    });  
+  
+            }  
+  
+  
+            showMessage(  
+                "Student reactivated successfully.",  
+                "success"  
+            );  
+  
+  
+            await loadStudents();  
+  
+        } catch (error) {  
+  
+            showMessage(  
+                "Unable to reactivate student: " +  
+                error.message,  
+                "error"  
+            );  
+  
+        }  
+  
+    };  
+  
+  
+/* =========================================================  
+   CANCEL EDIT  
+========================================================= */  
+  
+cancelEditBtn.addEventListener(  
+    "click",  
+    resetForm  
+);  
+  
+  
+/* =========================================================  
+   RESET FORM  
+========================================================= */  
+  
+function resetForm() {  
+  
+    editingStudentId =  
+        null;  
+  
+    studentForm.reset();  
+  
+    formTitle.textContent =  
+        "Add Student";  
+  
+    submitBtn.textContent =  
+        "Add Student";  
+  
+    cancelEditBtn.classList.add(  
+        "hidden"  
+    );  
+  
+    emailInput.disabled =  
+        false;  
+  
+    emailNote.classList.add(  
+        "hidden"  
+    );  
+  
+    clearMessage();  
+  
+}  
+  
+  
+/* =========================================================  
+   SEARCH  
+========================================================= */  
+  
+studentSearch.addEventListener(  
+    "input",  
+    renderStudents  
+);  
+  
+  
+/* =========================================================  
+   MODULE PAGES  
+========================================================= */  
+  
+const modulePages = {  
+  
+    "Tutors":  
+        "tutors.html",  
+  
+    "Courses":  
+        "courses.html",  
+  
+    "Cohorts":  
+        "cohorts.html",  
+  
+    "Classes":  
+        "classes.html",  
+  
+    "Lessons":  
+        "lessons.html",  
+  
+    "Attendance":  
+        "attendance.html",  
+  
+    "Assignments":  
+        "assignments.html",  
+  
+    "Tests":  
+        "test.html",  
+  
+    "Exams":  
+        "exams.html",  
+  
+    "Projects":  
+        "projects.html",  
+  
+    "Results":  
+        "results.html",  
+  
+    "Rankings":  
+        "rankings.html",  
+  
+    "Payments":  
+        "payments.html",  
+  
+    "Referrals":  
+        "referrals.html",  
+  
+    "Rewards":  
+        "rewards.html",  
+  
+    "Announcements":  
+        "announcements.html",  
+  
+    "Support":  
+        "support.html",  
+  
+    "Certificates":  
+        "certificates.html",  
+ 
+};  
+  
+  
+/* =========================================================  
+   MODULE NAVIGATION  
+========================================================= */  
+  
+document  
+    .querySelectorAll(".module-btn")  
+    .forEach(button => {  
+  
+        button.addEventListener(  
+            "click",  
+            function() {  
+  
+                const moduleName =  
+                    this.dataset.module;  
+  
+  
+                if (  
+                    moduleName ===  
+                    "Student Management"  
+                ) {  
+  
+                    document  
+                        .getElementById(  
+                            "studentManagement"  
+                        )  
+                        .scrollIntoView({  
+                            behavior:  
+                                "smooth"  
+                        });  
+  
+                    return;  
+  
+                }  
+  
+  
+                const page =  
+                    modulePages[moduleName];  
+  
+  
+                if (!page) {  
+  
+                    console.error(  
+                        "No page configured for module:",  
+                        moduleName  
+                    );  
+  
+                    return;  
+  
+                }  
+  
+  
+                console.log(  
+                    "Opening module:",  
+                    moduleName,  
+                    "->",  
+                    page  
+                );  
+  
+  
+                window.location.href =  
+                    page;  
+  
+            }  
+        );  
+  
+    });  
+  
+  
+/* =========================================================  
+   SIGN OUT  
+========================================================= */  
+  
+document  
+    .getElementById("signOutBtn")  
+    .addEventListener(  
+        "click",  
+        async () => {  
+  
+            try {  
+  
+                await auth.signOut();  
+  
+                window.location.href =  
+                    "login.html";  
+  
+            } catch (error) {  
+  
+                alert(  
+                    "Unable to sign out."  
+                );  
+  
+            }  
+  
+        }  
+    );  
+  
+  
+/* =========================================================  
+   MESSAGE FUNCTIONS  
+========================================================= */  
+  
+function showMessage(text, type) {  
+  
+    formMessage.textContent =  
+        text;  
+  
+    formMessage.className =  
+        "message " + type;  
+  
+}  
+  
+  
+function clearMessage() {  
+  
+    formMessage.textContent =  
+        "";  
+  
+    formMessage.className =  
+        "message";  
+  
+}  
+  
+  
+/* =========================================================  
+   HTML ESCAPING  
+========================================================= */  
+  
+function escapeHtml(value) {  
+  
+    return String(value)  
+  
+        .replace(/&/g, "&amp;")  
+  
+        .replace(/</g, "&lt;")  
+  
+        .replace(/>/g, "&gt;")  
+  
+        .replace(/"/g, "&quot;")  
+  
+        .replace(/'/g, "&#039;");  
+  
+}  
+  
+  
+function escapeAttribute(value) {  
+  
+    return String(value)  
+  
+        .replace(/\\/g, "\\\\")  
+  
+        .replace(/'/g, "\\'");  
+  
+}  
+  
+</script>
+</body>  
+</html>  

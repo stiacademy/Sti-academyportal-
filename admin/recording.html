@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Recordings | STI Academy Admin</title>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+        }
+
+        header {
+            background: #080808;
+            border-bottom: 1px solid #1b1b1b;
+            padding: 18px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #168cff;
+            font-size: 22px;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            color: #999;
+            font-size: 13px;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: #0d0d0d;
+            border: 1px solid #1d1d1d;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #bbb;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 9px;
+            border: 1px solid #292929;
+            background: #050505;
+            color: white;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #168cff;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            border: 0;
+            border-radius: 9px;
+            padding: 11px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary {
+            background: #168cff;
+            color: white;
+        }
+
+        .secondary {
+            background: #202020;
+            color: white;
+        }
+
+        .danger {
+            background: #8b1e1e;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .message {
+            margin-top: 12px;
+            font-size: 14px;
+            color: #66b5ff;
+        }
+
+        .recording {
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: #090909;
+        }
+
+        .recording h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+        }
+
+        .meta {
+            color: #999;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            background: #17283a;
+            color: #66b5ff;
+            margin-top: 7px;
+        }
+
+        .empty {
+            color: #777;
+            text-align: center;
+            padding: 30px 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 700px) {
+            main {
+                padding: 14px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>STI Academy Admin</h1>
+    <p>Recording Management</p>
+</header>
+
+<main>
+
+    <section class="card">
+        <h2 id="formTitle">Add Recording</h2>
+
+        <form id="recordingForm">
+
+            <div class="grid">
+
+                <div>
+                    <label>Course</label>
+                    <select id="course" required>
+                        <option value="">Select course</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Cohort</label>
+                    <select id="cohort">
+                        <option value="">All cohorts</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Lesson</label>
+                    <select id="lesson">
+                        <option value="">No specific lesson</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Class</label>
+                    <select id="class">
+                        <option value="">No specific class</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Recording Title</label>
+                    <input
+                        type="text"
+                        id="recordingTitle"
+                        placeholder="e.g. Introduction to HTML"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label>Recording URL</label>
+                    <input
+                        type="url"
+                        id="recordingUrl"
+                        placeholder="https://..."
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label>Thumbnail URL</label>
+                    <input
+                        type="url"
+                        id="thumbnailUrl"
+                        placeholder="Optional thumbnail URL"
+                    >
+                </div>
+
+                <div>
+                    <label>Duration (minutes)</label>
+                    <input
+                        type="number"
+                        id="durationMinutes"
+                        min="1"
+                        placeholder="e.g. 90"
+                    >
+                </div>
+
+                <div>
+                    <label>Recording Date</label>
+                    <input
+                        type="date"
+                        id="recordingDate"
+                    >
+                </div>
+
+                <div>
+                    <label>Status</label>
+                    <select id="status">
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                        <option value="hidden">Hidden</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Access</label>
+                    <select id="accessType">
+                        <option value="students">Students</option>
+                        <option value="tutors">Tutors</option>
+                        <option value="admin">Admin Only</option>
+                    </select>
+                </div>
+
+                <div class="full">
+                    <label>Description</label>
+                    <textarea
+                        id="description"
+                        placeholder="Describe what this recording covers..."
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="primary" id="saveButton">
+                    Save Recording
+                </button>
+
+                <button
+                    type="button"
+                    class="secondary hidden"
+                    id="cancelEdit"
+                >
+                    Cancel Edit
+                </button>
+            </div>
+
+            <div id="formMessage" class="message"></div>
+
+        </form>
+    </section>
+
+
+    <section class="card">
+        <h2>Recordings</h2>
+
+        <div id="recordingsList">
+            <div class="empty">Loading recordings...</div>
+        </div>
+    </section>
+
+</main>
+
+
+<script>
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBHa_irkP8QFgCQjUqTKlqdmv5cf8Ec4hg",
+    authDomain: "sti-academy.firebaseapp.com",
+    projectId: "sti-academy",
+    storageBucket: "sti-academy.firebasestorage.app",
+    messagingSenderId: "709840641262",
+    appId: "1:709840641262:web:714b09bf661afa159f27ff",
+    measurementId: "G-7ZRZ3P28YP"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let courses = [];
+let cohorts = [];
+let lessons = [];
+let classes = [];
+
+let editingId = null;
+
+
+/* ---------------- AUTH ---------------- */
+
+auth.onAuthStateChanged(async user => {
+
+    if (!user) {
+        window.location.href = "../index.html";
+        return;
+    }
+
+    try {
+
+        const userDoc = await db
+            .collection("users")
+            .doc(user.uid)
+            .get();
+
+        if (!userDoc.exists || userDoc.data().role !== "admin") {
+            alert("Admin access required.");
+            window.location.href = "../index.html";
+            return;
+        }
+
+        await loadCourses();
+        await loadAllData();
+        await loadRecordings();
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("recordingsList").innerHTML =
+            `<div class="empty">Unable to load recordings.</div>`;
+    }
+});
+
+
+/* ---------------- LOAD COURSES ---------------- */
+
+async function loadCourses() {
+
+    const snapshot = await db
+        .collection("courses")
+        .where("status", "==", "active")
+        .get();
+
+    courses = [];
+
+    snapshot.forEach(doc => {
+
+        courses.push({
+            id: doc.id,
+            ...doc.data()
+        });
+
+    });
+
+    courses.sort((a, b) =>
+        String(a.courseName || "").localeCompare(
+            String(b.courseName || "")
+        )
+    );
+
+    const select = document.getElementById("course");
+
+    select.innerHTML =
+        `<option value="">Select course</option>`;
+
+    courses.forEach(course => {
+
+        const option = document.createElement("option");
+
+        option.value = course.id;
+        option.textContent =
+            course.courseName || course.id;
+
+        select.appendChild(option);
+
+    });
+}
+
+
+/* ---------------- LOAD ALL DATA ---------------- */
+
+async function loadAllData() {
+
+    const [
+        cohortSnapshot,
+        lessonSnapshot,
+        classSnapshot
+    ] = await Promise.all([
+
+        db.collection("cohorts").get(),
+
+        db.collection("lessons").get(),
+
+        db.collection("classes").get()
+
+    ]);
+
+    cohorts = [];
+
+    cohortSnapshot.forEach(doc => {
+
+        cohorts.push({
+            id: doc.id,
+            ...doc.data()
+        });
+
+    });
+
+    lessons = [];
+
+    lessonSnapshot.forEach(doc => {
+
+        lessons.push({
+            id: doc.id,
+            ...doc.data()
+        });
+
+    });
+
+    classes = [];
+
+    classSnapshot.forEach(doc => {
+
+        classes.push({
+            id: doc.id,
+            ...doc.data()
+        });
+
+    });
+
+}
+
+
+/* ---------------- COURSE CHANGE ---------------- */
+
+document.getElementById("course")
+    .addEventListener("change", () => {
+
+        populateCohorts();
+        populateLessons();
+        populateClasses();
+
+    });
+
+
+/* ---------------- COHORT CHANGE ---------------- */
+
+document.getElementById("cohort")
+    .addEventListener("change", () => {
+
+        populateClasses();
+
+    });
+
+
+/* ---------------- POPULATE COHORTS ---------------- */
+
+function populateCohorts(selectedId = "") {
+
+    const courseId =
+        document.getElementById("course").value;
+
+    const select =
+        document.getElementById("cohort");
+
+    select.innerHTML =
+        `<option value="">All cohorts</option>`;
+
+    if (!courseId) return;
+
+    const filtered = cohorts
+        .filter(cohort =>
+            cohort.courseId === courseId
+        )
+        .sort((a, b) =>
+            String(a.cohortName || "")
+                .localeCompare(
+                    String(b.cohortName || "")
+                )
+        );
+
+    filtered.forEach(cohort => {
+
+        const option = document.createElement("option");
+
+        option.value = cohort.id;
+        option.textContent =
+            cohort.cohortName || cohort.id;
+
+        if (cohort.id === selectedId) {
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+
+    });
+}
+
+
+/* ---------------- POPULATE LESSONS ---------------- */
+
+function populateLessons(selectedId = "") {
+
+    const courseId =
+        document.getElementById("course").value;
+
+    const select =
+        document.getElementById("lesson");
+
+    select.innerHTML =
+        `<option value="">No specific lesson</option>`;
+
+    if (!courseId) return;
+
+    const filtered = lessons
+        .filter(lesson =>
+            lesson.courseId === courseId
+        )
+        .sort((a, b) =>
+            Number(a.lessonNumber || 0) -
+            Number(b.lessonNumber || 0)
+        );
+
+    filtered.forEach(lesson => {
+
+        const option = document.createElement("option");
+
+        option.value = lesson.id;
+
+        const number =
+            lesson.lessonNumber
+                ? `Lesson ${lesson.lessonNumber}: `
+                : "";
+
+        option.textContent =
+            number +
+            (lesson.lessonTitle || "Untitled lesson");
+
+        if (lesson.id === selectedId) {
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+
+    });
+}
+
+
+/* ---------------- POPULATE CLASSES ---------------- */
+
+function populateClasses(selectedId = "") {
+
+    const courseId =
+        document.getElementById("course").value;
+
+    const cohortId =
+        document.getElementById("cohort").value;
+
+    const select =
+        document.getElementById("class");
+
+    select.innerHTML =
+        `<option value="">No specific class</option>`;
+
+    if (!courseId) return;
+
+    let filtered = classes.filter(cls =>
+        cls.courseId === courseId
+    );
+
+    if (cohortId) {
+
+        filtered = filtered.filter(cls =>
+            cls.cohortId === cohortId
+        );
+
+    }
+
+    filtered.sort((a, b) => {
+
+        const dateA =
+            `${a.classDate || ""} ${a.startTime || ""}`;
+
+        const dateB =
+            `${b.classDate || ""} ${b.startTime || ""}`;
+
+        return dateB.localeCompare(dateA);
+
+    });
+
+    filtered.forEach(cls => {
+
+        const option = document.createElement("option");
+
+        option.value = cls.id;
+
+        option.textContent =
+            `${cls.classTitle || "Class"} - ${cls.classDate || ""}`;
+
+        if (cls.id === selectedId) {
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+
+    });
+}
+
+
+/* ---------------- FORM SUBMIT ---------------- */
+
+document.getElementById("recordingForm")
+    .addEventListener("submit", async event => {
+
+        event.preventDefault();
+
+        const user = auth.currentUser;
+
+        if (!user) return;
+
+        const courseId =
+            document.getElementById("course").value;
+
+        const cohortId =
+            document.getElementById("cohort").value;
+
+        const lessonId =
+            document.getElementById("lesson").value;
+
+        const classId =
+            document.getElementById("class").value;
+
+        const course =
+            courses.find(item =>
+                item.id === courseId
+            );
+
+        const cohort =
+            cohorts.find(item =>
+                item.id === cohortId
+            );
+
+        const lesson =
+            lessons.find(item =>
+                item.id === lessonId
+            );
+
+        const classItem =
+            classes.find(item =>
+                item.id === classId
+            );
+
+        const title =
+            document.getElementById("recordingTitle")
+                .value.trim();
+
+        const url =
+            document.getElementById("recordingUrl")
+                .value.trim();
+
+        if (!course || !title || !url) {
+
+            showMessage(
+                "Please select a course and enter the recording title and URL."
+            );
+
+            return;
+        }
+
+        const durationRaw =
+            document.getElementById("durationMinutes").value;
+
+        const durationMinutes =
+            durationRaw
+                ? Number(durationRaw)
+                : null;
+
+        if (
+            durationMinutes !== null &&
+            (!Number.isFinite(durationMinutes) ||
+             durationMinutes < 1)
+        ) {
+
+            showMessage(
+                "Duration must be a valid number of minutes."
+            );
+
+            return;
+        }
+
+        const data = {
+
+            courseId: course.id,
+
+            courseName:
+                course.courseName || "",
+
+            department:
+                course.department || "",
+
+            cohortId:
+                cohort ? cohort.id : "",
+
+            cohortName:
+                cohort ? cohort.cohortName || "" : "",
+
+            lessonId:
+                lesson ? lesson.id : "",
+
+            lessonTitle:
+                lesson ? lesson.lessonTitle || "" : "",
+
+            classId:
+                classItem ? classItem.id : "",
+
+            classTitle:
+                classItem ? classItem.classTitle || "" : "",
+
+            recordingTitle: title,
+
+            recordingUrl: url,
+
+            thumbnailUrl:
+                document.getElementById("thumbnailUrl")
+                    .value.trim(),
+
+            durationMinutes,
+
+            recordingDate:
+                document.getElementById("recordingDate")
+                    .value,
+
+            status:
+                document.getElementById("status").value,
+
+            accessType:
+                document.getElementById("accessType").value,
+
+            description:
+                document.getElementById("description")
+                    .value.trim(),
+
+            updatedAt:
+                firebase.firestore.FieldValue.serverTimestamp(),
+
+            updatedBy:
+                user.uid
+
+        };
+
+
+        try {
+
+            document.getElementById("saveButton")
+                .disabled = true;
+
+            if (editingId) {
+
+                await db
+                    .collection("recordings")
+                    .doc(editingId)
+                    .update(data);
+
+                showMessage("Recording updated successfully.");
+
+            } else {
+
+                data.createdAt =
+                    firebase.firestore.FieldValue.serverTimestamp();
+
+                data.createdBy =
+                    user.uid;
+
+                await db
+                    .collection("recordings")
+                    .add(data);
+
+                showMessage("Recording added successfully.");
+
+            }
+
+            resetForm();
+
+            await loadRecordings();
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "Could not save recording: " +
+                error.message
+            );
+
+        } finally {
+
+            document.getElementById("saveButton")
+                .disabled = false;
+
+        }
+
+    });
+
+
+/* ---------------- LOAD RECORDINGS ---------------- */
+
+async function loadRecordings() {
+
+    const container =
+        document.getElementById("recordingsList");
+
+    container.innerHTML =
+        `<div class="empty">Loading recordings...</div>`;
+
+    try {
+
+        const snapshot = await db
+            .collection("recordings")
+            .get();
+
+        const recordings = [];
+
+        snapshot.forEach(doc => {
+
+            recordings.push({
+                id: doc.id,
+                ...doc.data()
+            });
+
+        });
+
+        recordings.sort((a, b) => {
+
+            const dateA =
+                String(a.recordingDate || "");
+
+            const dateB =
+                String(b.recordingDate || "");
+
+            return dateB.localeCompare(dateA);
+
+        });
+
+        if (!recordings.length) {
+
+            container.innerHTML =
+                `<div class="empty">
+                    No recordings have been added yet.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML = "";
+
+        recordings.forEach(recording => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "recording";
+
+            const duration =
+                recording.durationMinutes
+                    ? `${recording.durationMinutes} minutes`
+                    : "Duration not specified";
+
+            const course =
+                recording.courseName ||
+                "No course";
+
+            const cohort =
+                recording.cohortName ||
+                "All cohorts";
+
+            const lesson =
+                recording.lessonTitle ||
+                "No specific lesson";
+
+            const classTitle =
+                recording.classTitle ||
+                "No specific class";
+
+            div.innerHTML = `
+
+                <h3>
+                    ${escapeHtml(
+                        recording.recordingTitle ||
+                        "Untitled recording"
+                    )}
+                </h3>
+
+                <div class="meta">
+
+                    <strong>Course:</strong>
+                    ${escapeHtml(course)}
+                    <br>
+
+                    <strong>Cohort:</strong>
+                    ${escapeHtml(cohort)}
+                    <br>
+
+                    <strong>Lesson:</strong>
+                    ${escapeHtml(lesson)}
+                    <br>
+
+                    <strong>Class:</strong>
+                    ${escapeHtml(classTitle)}
+                    <br>
+
+                    <strong>Date:</strong>
+                    ${escapeHtml(
+                        recording.recordingDate ||
+                        "Not specified"
+                    )}
+                    <br>
+
+                    <strong>Duration:</strong>
+                    ${escapeHtml(duration)}
+                    <br>
+
+                    <strong>Access:</strong>
+                    ${escapeHtml(
+                        recording.accessType ||
+                        "students"
+                    )}
+
+                </div>
+
+                <span class="badge">
+                    ${escapeHtml(
+                        recording.status ||
+                        "draft"
+                    )}
+                </span>
+
+                <div class="actions">
+
+                    <button
+                        class="secondary"
+                        type="button"
+                        onclick="editRecording('${recording.id}')"
+                    >
+                        Edit
+                    </button>
+
+                    ${
+                        recording.status === "published"
+                        ?
+                        `<button
+                            class="secondary"
+                            type="button"
+                            onclick="changeStatus('${recording.id}', 'hidden')"
+                        >
+                            Hide
+                        </button>`
+                        :
+                        `<button
+                            class="primary"
+                            type="button"
+                            onclick="changeStatus('${recording.id}', 'published')"
+                        >
+                            Publish
+                        </button>`
+                    }
+
+                    ${
+                        recording.status !== "draft"
+                        ?
+                        `<button
+                            class="secondary"
+                            type="button"
+                            onclick="changeStatus('${recording.id}', 'draft')"
+                        >
+                            Move to Draft
+                        </button>`
+                        :
+                        ""
+                    }
+
+                </div>
+            `;
+
+            container.appendChild(div);
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        container.innerHTML =
+            `<div class="empty">
+                Could not load recordings.
+            </div>`;
+    }
+}
+
+
+/* ---------------- EDIT RECORDING ---------------- */
+
+window.editRecording = async function(id) {
+
+    try {
+
+        const doc =
+            await db.collection("recordings")
+                .doc(id)
+                .get();
+
+        if (!doc.exists) {
+
+            alert("Recording not found.");
+            return;
+
+        }
+
+        const recording = doc.data();
+
+        editingId = id;
+
+        document.getElementById("formTitle")
+            .textContent = "Edit Recording";
+
+        document.getElementById("saveButton")
+            .textContent = "Save Changes";
+
+        document.getElementById("cancelEdit")
+            .classList.remove("hidden");
+
+        document.getElementById("course").value =
+            recording.courseId || "";
+
+        populateCohorts(
+            recording.cohortId || ""
+        );
+
+        populateLessons(
+            recording.lessonId || ""
+        );
+
+        populateClasses(
+            recording.classId || ""
+        );
+
+        document.getElementById("cohort").value =
+            recording.cohortId || "";
+
+        populateClasses(
+            recording.classId || ""
+        );
+
+        document.getElementById("lesson").value =
+            recording.lessonId || "";
+
+        document.getElementById("class").value =
+            recording.classId || "";
+
+        document.getElementById("recordingTitle").value =
+            recording.recordingTitle || "";
+
+        document.getElementById("recordingUrl").value =
+            recording.recordingUrl || "";
+
+        document.getElementById("thumbnailUrl").value =
+            recording.thumbnailUrl || "";
+
+        document.getElementById("durationMinutes").value =
+            recording.durationMinutes || "";
+
+        document.getElementById("recordingDate").value =
+            recording.recordingDate || "";
+
+        document.getElementById("status").value =
+            recording.status || "draft";
+
+        document.getElementById("accessType").value =
+            recording.accessType || "students";
+
+        document.getElementById("description").value =
+            recording.description || "";
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Could not load recording.");
+
+    }
+};
+
+
+/* ---------------- CHANGE STATUS ---------------- */
+
+window.changeStatus = async function(id, status) {
+
+    try {
+
+        await db
+            .collection("recordings")
+            .doc(id)
+            .update({
+
+                status,
+
+                updatedAt:
+                    firebase.firestore.FieldValue
+                        .serverTimestamp(),
+
+                updatedBy:
+                    auth.currentUser.uid
+
+            });
+
+        await loadRecordings();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Could not update recording status."
+        );
+
+    }
+};
+
+
+/* ---------------- CANCEL EDIT ---------------- */
+
+document.getElementById("cancelEdit")
+    .addEventListener("click", () => {
+
+        resetForm();
+
+    });
+
+
+/* ---------------- RESET FORM ---------------- */
+
+function resetForm() {
+
+    editingId = null;
+
+    document.getElementById("recordingForm")
+        .reset();
+
+    document.getElementById("formTitle")
+        .textContent = "Add Recording";
+
+    document.getElementById("saveButton")
+        .textContent = "Save Recording";
+
+    document.getElementById("cancelEdit")
+        .classList.add("hidden");
+
+    document.getElementById("cohort").innerHTML =
+        `<option value="">All cohorts</option>`;
+
+    document.getElementById("lesson").innerHTML =
+        `<option value="">No specific lesson</option>`;
+
+    document.getElementById("class").innerHTML =
+        `<option value="">No specific class</option>`;
+
+}
+
+
+/* ---------------- MESSAGE ---------------- */
+
+function showMessage(message) {
+
+    const element =
+        document.getElementById("formMessage");
+
+    element.textContent = message;
+
+    setTimeout(() => {
+
+        element.textContent = "";
+
+    }, 4000);
+
+}
+
+
+/* ---------------- ESCAPE HTML ---------------- */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+</script>
+
+</body>
+</html>
